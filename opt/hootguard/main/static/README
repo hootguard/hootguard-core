@@ -1,0 +1,5 @@
+README
+/home/hootguard/pivpn/configs/
+
+In this folder the qr code image files for the VPN clients are stored. If a VPN client is created via the Web UI,
+the qr code image files for each client are stored here. These config are used to display the qr code in the html sites

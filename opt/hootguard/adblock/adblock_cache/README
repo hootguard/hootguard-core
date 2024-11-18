@@ -1,0 +1,17 @@
+Purpose
+This folder is used to store cached versions of ad-blocking lists for the HootGuard system. These lists are fetched from external sources (e.g., GitHub) and saved here to improve performance and reduce reliance on continuous network access.
+
+How It Works
+Caching: When the system fetches a blocking list, it checks if a cached version exists in this directory.
+Expiry: Cached files remain valid for up to one week. After that, they are refreshed by fetching the latest version from the source.
+File Naming: Each cached file is named based on the blocking list profile. For example:
+  enhanced.txt: Cache for the "enhanced" blocking list.
+  social.txt: Cache for the "social" blocking list.
+
+Do Not Delete
+Deleting this folder or its contents will force the system to fetch all blocking lists again, which may cause unnecessary network traffic and delays.
+If the folder must be cleared for any reason, ensure that the system has internet access to re-download the lists.
+
+Maintenance
+The system automatically manages and updates the cache.
+No manual intervention is needed.

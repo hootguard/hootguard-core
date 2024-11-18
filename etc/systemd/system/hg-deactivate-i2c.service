@@ -1,0 +1,12 @@
+[Unit]
+Description=Deactivate I2C Display on Shutdown
+DefaultDependencies=no
+Before=shutdown.target reboot.target halt.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/hootguard/display/deactivate_display.py
+RemainAfterExit=true
+
+[Install]
+WantedBy=halt.target reboot.target shutdown.target

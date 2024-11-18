@@ -1,0 +1,28 @@
+#
+# This file MUST be edited with the 'visudo' command as root.
+#
+# Please consider adding local content in /etc/sudoers.d/ instead of
+# directly modifying this file.
+#
+# See the man page for details on how to write a sudoers file.
+#
+Defaults	env_reset
+Defaults	mail_badpass
+Defaults	secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+# Host alias specification
+
+# User alias specification
+
+# Cmnd alias specification
+
+# User privilege specification
+root	ALL=(ALL:ALL) ALL
+hootguard ALL=(ALL) NOPASSWD: /bin/systemctl reboot, /bin/cp, /usr/bin/tee, /sbin/reboot, /sbin/tc, /bin/echo >> /etc/wireguard/wg0.conf, /bin/echo >> /etc/wireguard/wg1.conf, /usr/bin/sed -i /etc/wireguard/wg0.conf, /usr/bin/sed -i /etc/wireguard/wg1.conf, /usr/bin/wg show all, /usr/bin/truncate -s 0 /var/log/pihole.log, /usr/bin/truncate -s 0 /var/log/pihole-FTL.log
+
+# Allow members of group sudo to execute any command
+%sudo	ALL=(ALL:ALL) ALL
+
+# See sudoers(5) for more information on "@include" directives:
+
+@includedir /etc/sudoers.d

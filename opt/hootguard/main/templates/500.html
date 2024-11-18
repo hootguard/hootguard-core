@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>404 Page Not Found</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">	
+    <style>
+	 .frown-icon {
+            font-size: 100px;
+            color: #ff6f61; 
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+    <div id="navigation-placeholder"></div>
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+    
+    <div class="container">
+
+        <h1>
+		<span style="font-size: 2em;">500</span> 
+		<br>
+		Internal Server Error
+	</h1>
+
+	<i class="fa-solid fa-xmark frown-icon"></i>  <!-- Font Awesome Sad Smile Icon -->
+	
+	<p><strong><p>Oops! Something went wrong on our end. Please try again later.</p></strong></p>
+	<div>
+		
+		<u><a href="{{ url_for('home') }}">Go back to the overview page</a></u>
+	</div>
+    
+	<br>
+        
+     
+        
+    </div>
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+    
+    
+</body>
+</html>

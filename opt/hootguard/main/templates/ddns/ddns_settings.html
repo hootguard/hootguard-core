@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>DDNS Settings</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">
+    <style>
+	.frame{
+	    margin-bottom: -20px;
+	}
+	
+	.checkbox-style {
+	    margin-top: 20px;
+	}
+    
+    </style>
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+    <div id="navigation-placeholder"></div>
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+    
+    <div class="container">
+	
+	<div id="success-message" class="success-message">DDNS settings successfully updated</div>
+	
+        <h1>DDNS Settings</h1>
+        <div class="explain-text">
+            To use the VPN feature on your HootGuard Sentry, you can easily set up your own DDNS through Cloudflare or DuckDNS. HootGuard supports IPv4 and IPv6.
+        </div>
+
+	<br>
+
+	<div class="table-settings">
+	    <table>
+		<thead>
+		    <tr>
+			<th colspan="2">Active DDNS Configuration</th>
+		    </tr>
+		</thead>
+		<tbody>
+		    <tr>
+			<td class="status-highlight">
+			    {{ status_message }}
+			</td>
+		    </tr>
+		</tbody>
+	    </table>
+	</div>	
+
+<!--
+	<form class="frame" id="hootguard-ddns-form" action="/ddns_activate_hootguard_cloudflare" method="post">
+	    <div class="section">
+		Option 1: <strong>HootGuard DDNS</strong>
+		<br><br>
+		The simplest option is to enable our HootGuard DDNS service, which is entirely free. However, by using this service, your public IP address will be shared with our DDNS provider, Cloudflare, and with us. Rest assured, Cloudflare fully complies with GDPR regulations, and we do not share your information with any third parties.
+		<br> <br>
+		<i>In accordance with the General Data Protection Regulation (GDPR), we require your explicit consent to proceed. To provide this consent, simply check the box below. Remember, you have the right to withdraw your consent at any point by deactivating the dynamic DNS service.</i>
+		<div class="checkbox-style">
+		    <input type="checkbox" id="show-passwords" required>
+		    <label for="show-passwords"><i>I consent to share my public IP address with Cloudflare and HootGuard DDNS.</i></label>
+		</div>
+		<div class="btn-group">
+		    <button type="submit" class="btn-save">Activate HootGuard DDNS</button>
+		</div>
+	    </div>
+	</form>       
+-->
+	
+	<div class="frame">
+	    <div class="section">
+		Option 1: <strong>Configure your Own Cloudflare DDNS</strong>
+		<br><br>
+		Cloudflare is an easy to setup an free to use DNS service. Please note that you will need your own domain to fully utilize Cloudflare's services. The Cloudflare DNS service supports both IPv4 and IPv6 DDNS in one convenient setup.
+		<div class="btn-group">
+		    <a href="ddns_settings_user_cloudflare">
+			<button type="submit" class="btn-save">Enter Cloudflare Configuration</button>
+		    </a>
+		</div>
+	    </div>
+	</div>  
+	
+	<div class="frame">
+	    <div class="section">
+		Option 2: <strong>Configure your Own DuckDNS DDNS</strong>
+		<br><br>
+		To enhance data privacy, you have the option to enter your own DuckDNS configuration directly here. This approach allows for a customized level of privacy and control. For DuckDNS you don't need your own Domain, you can simply create a DuckDNS subdomain. The DuckDNS service is free to use.
+		<div class="btn-group">
+		    <a href="ddns_settings_user_duckdns">
+			<button type="submit" class="btn-save">Enter DuckDNS Configuration</button>
+		    </a>
+		</div>
+	    </div>
+	</div> 
+	
+	<div class="frame">
+	    <div class="section">
+		<strong>Deactivate Dynamic DNS</strong>
+		<br><br>
+		If you no longer need your VPN, you can simply deactivate your dynamic DNS by clicking on the button below. This action will disable all DDNS configurations. Note that after deactivation, the VPN function of your HootGuard Sentry will no longer work.
+		<div class="btn-group">
+		    <a href="ddns_deactivate">
+			<button type="submit" class="btn-clear">Deactivate Dynamic DNS</button>
+		    </a>
+		</div>
+	    </div>
+	</div> 
+        
+    </div>
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+    <script>
+	// Check if new_time_set is true and display success message for 3 seconds
+	const newDdnsSet = {{ new_ddns_set | tojson }};
+	if (newDdnsSet) {
+	    const successMessage = document.getElementById('success-message');
+	    successMessage.style.visibility = 'visible';
+	    setTimeout(function () {
+		successMessage.style.visibility = 'hidden';
+	    }, 3000);
+	}
+    </script>
+    
+</body>
+</html>

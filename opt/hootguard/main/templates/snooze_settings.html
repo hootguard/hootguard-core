@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>Snooze Settings</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">	
+    <style>
+        .fa-spinner {
+            display: none;
+            animation: spin 1s linear infinite;
+        }
+        
+	@keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+	
+	.button-size {
+	     width: 200px;
+	}
+	
+    </style>
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+    <div id="navigation-placeholder"></div>
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+    
+    <div class="container">
+
+	<div id="success-message" class="success-message">Snooze time successfully updated</div>
+
+        <h1>Snooze Settings</h1>
+        <div class="explain-text">
+            By pressing the blue snooze button on your HootGuard Sentry, you can temporarily disable the ad blocker for a period of between 10 seconds and one hour (3600 seconds). To set the duration of this deactivation, simply enter a value within this range in the field below.
+        </div>
+
+	<br>
+
+	<div class="table-settings">
+		<table>
+			<thead>
+				<tr>
+					<th colspan="2">Current Snooze Time</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>
+						<span class="status-highlight" id="current-snooze-status">{{snooze_status}} seconds</span>
+						<br>
+						<span class="note" id="converted-snooze-status"></span>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>		
+	
+	<br>
+
+        
+	<form class="frame" id="snooze-settings-form" action="/snooze_change" method="post">
+		<div class="section">
+			<label for="snooze-time">Snooze time in seconds:</label>
+			<input type="number" id="snooze-time" name="snooze_time" placeholder="e.g. 300">
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+			<div class="input-hint-text">Entering 0 deactivates the snooze button.</div>
+			<div class="btn-group">
+				<button type="submit" id="submit-button" class="btn-save button-size">Save Snooze Time <i class="fa-solid fa-spinner"></i></button>
+			</div>
+		</div>
+	</form>       
+        
+    </div>
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentSnoozeStatusElement = document.getElementById('current-snooze-status');
+            const currentSnoozeStatus = parseInt(currentSnoozeStatusElement.textContent, 10);
+            const minutes = Math.floor(currentSnoozeStatus / 60);
+            const seconds = currentSnoozeStatus % 60;
+            currentSnoozeStatusElement.textContent = `${currentSnoozeStatus} seconds`;
+            const convertedSnoozeStatusElement = document.getElementById('converted-snooze-status');
+            convertedSnoozeStatusElement.textContent = `${minutes} minute(s) and ${seconds} second(s))`;
+            
+		const snoozeTimeInput = document.getElementById('snooze-time');
+		const form = document.getElementById('snooze-settings-form');
+		const messageContainer = document.createElement('div');
+		form.appendChild(messageContainer);
+
+		function validateTime(value) {
+			return !isNaN(value) && value >= 0 && value <= 3600;
+		}
+
+		function displayMessage(isValid, value) {
+			const minutes = Math.floor(value / 60);
+			const seconds = value % 60;
+			messageContainer.innerHTML = isValid ?
+				`<p>Snooze time is: ${minutes} minute(s) and ${seconds} second(s).</p>` :
+				'<p style="color: red;">Please enter a number between 0 and 3600.</p>';
+		}
+
+		snoozeTimeInput.addEventListener('input', function() {
+			const value = parseInt(snoozeTimeInput.value, 10);
+			const isValid = validateTime(value);
+			displayMessage(isValid, value);
+		});
+		
+		// Check if new_time_set is true and display success message for 3 seconds
+		const newTimeSet = {{ new_time_set | tojson }};
+		if (newTimeSet) {
+		    const successMessage = document.getElementById('success-message');
+		    successMessage.style.visibility = 'visible';
+		    setTimeout(function () {
+			successMessage.style.visibility = 'hidden';
+		    }, 3000);
+		}
+		
+	    form.addEventListener('submit', function(event) {
+		const value = parseInt(snoozeTimeInput.value, 10);
+		if (!validateTime(value)) {
+		    event.preventDefault(); // Prevent form submission
+		    displayMessage(false, value); // Show error message
+		    alert('Snooze time must be between 10 and 3600 seconds.');
+		    return; // Exit the submit handler
+		}
+		
+		// Spinner for submit button
+		const submitButton = document.getElementById('submit-button');
+		const spinner = submitButton.querySelector('.fa-spinner');
+		// Show spinner and hide Login text
+		spinner.style.display = 'inline-block';
+		submitButton.childNodes[0].nodeValue = ' ';
+		submitButton.disabled = true; // Disable the button
+	    });
+	});
+        
+		
+
+    </script>
+    
+    
+</body>
+</html>

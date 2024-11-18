@@ -1,0 +1,31 @@
+from .password_save_and_reboot import passwort_save_and_reboot_system
+from  network_save_configuration_and_reboot import network_save_config_and_reboot
+from .initial_setup import is_update_env_secret_key
+from .initial_setup import is_update_password_secret_key
+
+def perform_initial_setup(ip_v4_address, subnet_mask, standard_gateway, password):
+    # Update the environment secret key
+    if not is_update_env_secret_key.generate_and_update_secret_key():
+        print("Error: Failed to update the environment secret key.")
+        return False
+
+    # Update the password secret key
+    if not is_update_password_secret_key.generate_and_replace_secret_key():
+        print("Error: Failed to update the password secret key.")
+        return False
+
+    # Save the password and skip reboot since this is the initial setup
+    if not password_save_and_reboot_system(password, True):
+        print("Error: Failed to save password and apply the configuration.")
+        return False
+
+    # Save the ip settings and skip reboot since this is the initial setup
+    if not network_save_config_and_reboot(ip_v4_address, subnet_mask, standard_gateway, True):
+        print("Error: Failed to save ip settings and apply the configuration.")
+        return False
+
+    # Generate private key for 
+    #
+
+    # Return True if everything was successful
+    return True

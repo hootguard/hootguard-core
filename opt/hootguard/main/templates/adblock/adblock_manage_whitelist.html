@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>HootGuard Manage Whitelisting</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">
+    <style>
+/* Hide the default checkbox */
+        .btn-save {
+            width: 180px;
+        }
+        
+        .text-subheading { 
+            font-size: 1.5em;
+        }
+
+        .frame {
+            flex: 0 0 48%;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #333333;
+            padding: 30px;
+            border-radius: 10px;
+            box-sizing: border-box; 
+            margin-top: -20px;
+        }
+
+        .frame > * {
+            position: relative;
+            z-index: 0;
+        }
+
+        .frame-whitelisting::before {
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            left:90%;
+            transform: translate(-50%, -50%) scale(25);
+            color: rgba(255, 255, 255, 0.1);
+        }
+
+        .frame-whitelisting::before {
+            content: "\f058";
+        }
+
+        .fa-spinner {
+            display: none;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .exists-message {
+            display: none;
+            background-color: rgba(255, 255, 255, .2);
+            color: orange;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: -45px;
+        }
+
+        .delete-message {
+            display: none;
+            background-color: rgba(255, 255, 255, .2);
+            color: #007BFF;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: -45px;
+        }
+
+        hr {
+            border: none;         
+            height: 1px;          
+            background-color: grey; 
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .hr-left {
+            margin-right: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div id="navigation-placeholder"></div>
+
+    <div class="container">
+        
+      	<div id="success-message" class="success-message">Lists successfully updated</div>
+        <div id="exists-message" class="exists-message">Entry already exists in the list</div>
+        <div id="error-message" class="error-message">An error occurred, please try again</div>
+	<div id="delete-message" class="delete-message">Entry was successfully deleted</div>
+
+        <h1>HootGuard Manage Whitelisting</h1>
+        <p class="explain-text">In this area, you can manage your settings for allowing websites. To ensure access to specific websites, add them to the whitelist. To do this, simply enter the URL in the input field below and confirm your entry.</p>
+
+        <br><br>
+        
+        <form id="adblock-manage-lists-whitelisting-form" action="/adblock_add_to_whitelist" method="post" onsubmit="return validateForm(event, 'whitelisting')">    
+            <div class="frame frame-whitelisting">
+                <label for="whitelisting" class="text-subheading ">Whitelisting</label>
+                <div class="explain-text" style="margin-bottom: 15px; margin-top: 15px; text-align: left;">
+                    Enter the URL of the website you wish to allow. This site will remain accessible across your network, bypassing any general restrictions. Please enter only one URL at a time.
+                </div>
+                <input type="text" id="whitelisting" name="whitelisting" placeholder="e.g. whateveryouwanttoallow.com" required>
+		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+		<div class="btn-group">
+                    <button type="submit" class="btn-save" id="save-button">Allow Site<i class="fa-solid fa-spinner"></i></button>
+                </div>
+            </div>
+        </form>
+	
+	<div class="frame">
+            <div class="text-subheading">Whitelist entries</div>
+            <div class="explain-text" style="margin-bottom: 15px; margin-top: 15px; text-align: left;">
+		Below are the current entries in the whitelist. To remove one or more entries, check the corresponding boxes and click the "Delete Selected" button.
+	    </div>
+            <form id="adblock-delete-entries-form" action="/adblock_delete_from_whitelist" method="post">
+                <br>
+                <label>
+                    <input type="checkbox" id="select-all">
+                    <span class="custom-checkbox"></span> <span class="checkbox-text">Select All</span>
+                </label>
+                <hr class="hr-left">
+                {% for entry in whitelist_entries %}
+                    <label class="entry-label">
+                        <input type="checkbox" name="entries_to_delete" value="{{ entry }}">
+                        <span class="custom-checkbox"></span> 
+			<span class="checkbox-text">{{ entry }}</span>
+                    </label>
+                    <br>
+                {% endfor %}
+                <br>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+		<div class="btn-group">
+                    <button type="submit" class="btn-save">Delete Selected<i class="fa-solid fa-spinner"></i></button>
+                </div>
+            </form>
+	</div>	
+
+	
+	
+	
+    </div>
+
+    <div id="footer-placeholder"></div>
+    <script src="/hootguard/components/loadComponents.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+	    // Check status of list_update_status and display message accordingly
+	    const listUpdateStatus = {{ list_update_status | tojson }};
+	    if (listUpdateStatus == "added") {
+		const successMessage = document.getElementById('success-message');
+		successMessage.style.visibility = 'visible';
+		setTimeout(function () {
+		    successMessage.style.visibility = 'hidden';
+		}, 3000);
+	    }
+	    if (listUpdateStatus == "exists") {
+		const existsMessage = document.getElementById('exists-message');
+		existsMessage.style.display = 'inline';
+		setTimeout(function () {
+		    existsMessage.style.display = 'none';
+		}, 3000);
+	    }
+	    if (listUpdateStatus == "error") {
+		const errorMessage = document.getElementById('error-message');
+		errorMessage.style.display = 'inline';
+		setTimeout(function () {
+		    errorMessage.style.display = 'none';
+		}, 3000);
+	    }
+	    if (listUpdateStatus == "deleted") {
+		const deleteMessage = document.getElementById('delete-message');
+		deleteMessage.style.display = 'inline';
+		setTimeout(function () {
+		    deleteMessage.style.display = 'none';
+		}, 3000);
+	    }
+	    
+	    const selectAllCheckbox = document.getElementById('select-all');
+            selectAllCheckbox.addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('input[name="entries_to_delete"]');
+                checkboxes.forEach(checkbox => checkbox.checked = selectAllCheckbox.checked);
+            });
+	});
+        
+        
+        function validateForm(event, fieldId) {
+            const urlField = document.getElementById(fieldId);
+            const url = urlField.value;
+            const regex = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[a-zA-Z0-9-._~:?#@!$&'()*+,;=]*)?$/;
+            if (!regex.test(url)) {
+                alert('Please enter a valid URL.');
+                event.preventDefault();
+                return false;
+            }
+            return true;
+        }      
+    </script>
+    
+</body>
+</html>

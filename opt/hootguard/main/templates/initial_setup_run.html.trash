@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>Performing Initial Setup</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">	
+    <style>
+	.fa-spinner {
+		display: inline-block;
+                animation: spin 3s linear infinite;
+            	font-size: 100px;
+	        color: yellow;
+        	margin-top: 40px;
+        	margin-bottom: 40px;
+        }
+        @keyframes spin {
+        	from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Your HootGuard Sentry is currently performing the initial setup...</h1>
+
+	<i class="fa-solid fa-spinner"></i>  <!-- Font Awesome Sad Smile Icon -->
+	
+	<div style="text-align: center;">
+		The system will restart automatically once it's complete. The entire process, including being online with the new IP address, may take up to two minutes.
+	</div>
+    </div>
+    
+    
+</body>
+</html>
