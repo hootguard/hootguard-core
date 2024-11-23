@@ -14,7 +14,7 @@ from scripts.ddns_configure_user_duckdns import ddns_write_and_activate_duckdns
 from scripts.ddns_configure_user_cloudflare import ddns_write_and_activate_cloudflare
 from scripts.ddns_update_status_file import ddns_update_status
 from scripts.ddns_change_crontab import ddns_update_crontab
-
+from scripts.snooze_update_status_file import snooze_update_time
 from scripts.adblock_update_status_file import update_status_file
 from scripts.global_logger import logger
 from scripts.global_config_loader import load_config
@@ -253,6 +253,12 @@ def reset_vpn_configurations(initial_setup=None):
         if not delete_wg_keys_and_configs(): # Delete all wireguard keys and config files (priv + pub key + interface config)
             return False
 
+        # Reset the snooze time back to 5 minues (300 seconds)
+        if not snooze_update_time(300):
+            return False
+
+
+
         # DDNS configurations
         if not ddns_write_and_activate_duckdns('xxxx', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', "ipv4", True): # Delete Duckdns configuration for IPv4
             return False
@@ -273,7 +279,7 @@ def reset_vpn_configurations(initial_setup=None):
             return False
 
         # Adblock update status and gravity DB
-        if not adblock_update_status_file_and_update_gravity_db(): # Set adblock ürofile to normal
+        if not adblock_update_status_file_and_update_gravity_db(): # Set adblock status file to normal and update database
             return False
 
         # Remove traffic control

@@ -1,11 +1,12 @@
 # Standard library imports
 import os
 import threading
+import subprocess
 #import logging  # Standard logging library - Foe develpment only
 
 # Third-party imports
 #from flask import Flask, request, render_template, redirect, url_for, session, flash, jsonify, send_from_directory
-from flask import Flask, request, render_template, redirect, url_for, session
+from flask import Flask, request, render_template, redirect, url_for, session, jsonify
 from werkzeug.security import check_password_hash
 from dotenv import load_dotenv
 from flask_wtf.csrf import CSRFProtect
@@ -146,8 +147,22 @@ def home():
         # Fetch data from Pi-hole API
         data = get_data_from_api_summary(api_params)
 
-        # Pass the fetched data to the template for rendering
-        return render_template('home.html', data=data)
+        # Check if an update is available
+        update_flag_path = "/opt/hootguard/misc/update_available"
+        update_available = os.path.exists(update_flag_path)
+
+        # Pass the fetched data and update status to the template
+        return render_template('home.html', data=data, update_available=update_available)
+
+# Update HootGuard Sentry
+@app.route('/update_hootguard', methods=['POST'])
+def update_hootguard():
+    try:
+        # Run the update script
+        subprocess.run(["python3", "/opt/hootguard/main/scripts/update/update_hootguard.py"], check=True)
+        return jsonify({"status": "success", "message": "Update completed successfully!"})
+    except subprocess.CalledProcessError as e:
+        return jsonify({"status": "error", "message": f"Update failed: {e}"})
 
 # Settings
 @app.route('/settings', methods=['GET', 'POST'])

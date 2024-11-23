@@ -20,3 +20,6 @@ This flag file indicates whether SSH has been activated before:
 Indicates whether the user has completed the initial setup of HootGuard Sentry:
 - If this file exists, the initial setup has already been completed.
 - If this file does not exist, the initial setup needs to be performed for proper use of HootGuard Sentry.
+
+### update_available (optional)
+Indicates that an update is available and triggers a button on the frontend

@@ -25,4 +25,5 @@
 @reboot python3 /opt/hootguard/display/welcome_message.py
 # Update/check the root hints for unbound once a month
 @monthly /usr/bin/python3 /opt/hootguard/main/scripts/unbound_update_root_hints.py
-
+# Check weekly if there is a update available
+0 0 */7 * * python3 /opt/hootguard/scripts/update/update_check_available.py > /dev/null 2>&1

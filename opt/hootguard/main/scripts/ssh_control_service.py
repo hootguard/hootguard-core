@@ -52,6 +52,7 @@ def disable_ssh():
     try:
         # Run systemctl to stop the SSH service
         subprocess.run(['sudo', 'systemctl', 'stop', 'ssh'], check=True)
+        subprocess.run(['sudo', 'systemctl', 'disable', 'ssh'], check=True)
         logger.info("INFO - SSH service disabled successfully.")
         return True
     except Exception as e:

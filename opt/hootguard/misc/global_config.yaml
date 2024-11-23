@@ -6,9 +6,9 @@ adblock:
     max: https://raw.githubusercontent.com/hootguard/blocking-lists/main/max-blocklist.txt
     normal: https://raw.githubusercontent.com/hootguard/blocking-lists/main/normal-blocklist.txt
     social: https://raw.githubusercontent.com/hootguard/blocking-lists/main/social-blocklist.txt
+  cache_path: /opt/hootguard/adblock/adblock_cache
   db_path: /etc/pihole/gravity.db
   status_path: /opt/hootguard/adblock/adblock-active-profile.txt
-  cache_path: /opt/hootguard/adblock/adblock_cache
 ddns:
   consent_file: /opt/hootguard/ddns/ddns-consent.txt
   hootguard_cloudflare_command: /bin/bash /opt/hootguard/ddns/hootguard-cloudflare.sh
@@ -35,11 +35,13 @@ misc:
   iptables_factory_reset_file: /opt/hootguard/misc/iptables_factory_reset_rules.sh
   snooze_time_file: /opt/hootguard/snooze/snooze-time.txt
   version_file: /opt/hootguard/misc/version.txt
+  update_flag: /opt/hootguard/misc/update_available
+  repo_version_url: "https://raw.githubusercontent.com/hootguard/hootguard-core/main/opt/hootguard/misc/version.txt"
 network:
   interface_1: eth0
-  interface_1_v4_ip_address: 192.168.1.170/24
-  interface_1_v6_ip_address: 2a02:8428:47af:e001:9866:f000:f66:41b4/64
-  primary_dns: 192.168.1.170
+  interface_1_v4_ip_address: 192.168.0.250/24
+  interface_1_v6_ip_address: 2a02:abcd:1337:c001:d00d:face:b00c:1234/64
+  primary_dns: 192.168.0.250
   secondary_dns: 1.1.1.1
 passwords:
   encrypted_password_path: /opt/hootguard/password/encrypted_password.txt
@@ -55,14 +57,14 @@ vpn:
   client_db_path: /opt/hootguard/vpn/vpn_clients.db
   client_keys_path: /etc/wireguard/client_keys
   client_qrcode_path: /opt/hootguard/main/static
-  endpoint: ddns_v6.hootguard.com
+  endpoint: dummy.yourdns.com
   iptables_settings_file: /opt/hootguard/vpn/vpn_iptables_rules.sh
   wireguard_interface_1: wg0
-  wireguard_interface_1_v4_ip_addresse: 10.160.211.1
-  wireguard_interface_1_v6_ip_addresse: fd11:5ee:bad:c0b4::1
+  wireguard_interface_1_v4_ip_addresse: 10.0.0.0/24
+  wireguard_interface_1_v6_ip_addresse: fd00:::/64
   wireguard_interface_2: wg1
-  wireguard_interface_2_v4_ip_addresse: 10.160.123.1
-  wireguard_interface_2_v6_ip_addresse: fd11:5ee:bad:c0b2::1
+  wireguard_interface_2_v4_ip_addresse: 10.0.1.0/24
+  wireguard_interface_2_v6_ip_addresse: fd01::/64
   wireguard_main_path: /etc/wireguard
   wireguard_wg0_privatekey_path: /etc/wireguard/privatekey_wg0
   wireguard_wg0_publickey_path: /etc/wireguard/publickey_wg0

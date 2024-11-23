@@ -1,1 +1,1 @@
-UserCloudflare-ipv6
+NoConfiguration

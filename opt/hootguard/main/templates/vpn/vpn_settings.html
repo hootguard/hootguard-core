@@ -132,9 +132,6 @@
 		    {% if client.name in clients.temp_clients_names %}
                         <span class="avatar-time"><i class="fa-solid fa-clock"></i></span>
                     {% endif %}
-<!--
-		    <span class="avatar-time"><i class="fa-regular fa-clock"></i></span>
--->
                     <div>
                         <span class="client-username">{{ client.name }}</span>
                         <div class="client-details">
@@ -185,17 +182,22 @@
 		    {% if client.name in clients.temp_clients_names %}
                         <span class="avatar-time"><i class="fa-solid fa-clock"></i></span>
                     {% endif %}
-<!--
-		    <span class="avatar-time"><i class="fa-regular fa-clock"></i></span>
--->
                     <div>
                         <span class="client-username">{{ client.name }}</span>
                         <div class="client-details">
+                            <span>Received: <strong>N/A</strong></span>
+                            |
+                            <span>Sent: <strong>N/A</strong></span>
+                            <br>
+			    <em>Usage information not available for disabled clients</em>
+
+<!--
                             <span>Received: <strong>{{ client.bytes_received }}</strong></span>
                             |
                             <span>Sent: <strong>{{ client.bytes_sent }}</strong></span>
                             <br>
                             <span>Last Seen: {{ client.last_seen }}</span>
+-->
                         </div>
                     </div>
                 </div>

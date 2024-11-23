@@ -7,17 +7,17 @@
 # @auth_key             - Your API Token or Global API Key
 # @zone_identifier      - Can be found in the "Overview" tab of your domain
 # -------------------------------------------------- #
-auth_email="contact@hootguard.com"
+auth_email="xxx"
 auth_method="global"
-auth_key="3a550d75d2ff7c4d970070ee7b86d285df22c"
-zone_identifier="6da11b46dbaa370c3023196e90cebb47"
+auth_key="xxxxxx"
+zone_identifier="xxxxxx"
 
 #############  DNS RECORD CONFIGURATION  #############
 # @record_name          - Which record you want to be synced
 # @ttl                  - DNS TTL (seconds), can be set between (30 if enterprise) 60 and 86400 seconds, or 1 for Automatic
 # @proxy                - Set the proxy to true or false
 # -------------------------------------------------- #
-record_name="ddns_v6.hootguard.com"
+record_name="xxxxx"
 ttl=3600
 proxy="false"
 
