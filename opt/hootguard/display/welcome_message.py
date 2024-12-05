@@ -1,3 +1,16 @@
+# Script Name: welcome_display.py
+# Version: 0.2
+# Author: HootGuard
+# Date: 25. November 2024
+
+# Description:
+# This script displays a welcome message on an I2C-connected LCD screen for the HootGuard system.
+# - Initializes the LCD display with a backlight enabled.
+# - Centers and displays the text "Welcome to" on the first line and "HootGuard" on the second line.
+# - Keeps the message visible for 10 seconds before clearing the screen and turning off the backlight.
+# Includes a utility function `center_text` to align text for optimal readability.
+# Designed to provide a startup greeting on the HootGuard system's LCD display.
+
 from RPLCD.i2c import CharLCD
 from time import sleep
 

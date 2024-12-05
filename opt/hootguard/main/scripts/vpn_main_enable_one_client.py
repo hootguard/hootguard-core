@@ -11,16 +11,6 @@
 # 3. Updates the SQLite database to mark the client as enabled.
 # 4. Reloads the WireGuard interface to apply the changes.
 
-# Usage:
-# Call the function 'enable_vpn_client(client_name)' to enable a VPN client. The function retrieves the necessary 
-# client information, restores the peer configuration in the WireGuard config file, updates the client status in the 
-# database, and reloads the WireGuard interface. It returns True if the operation is successful and False if any 
-# step fails.
-
-# Change Log:
-# 6. October 2024
-# Initial version for enabling a VPN client by uncommenting the WireGuard config, updating the database, and reloading the interface.
-
 from .vpn import vpn_get_client_info
 from .vpn import vpn_reload_wireguard_config
 from .vpn import vpn_enable_client_in_db

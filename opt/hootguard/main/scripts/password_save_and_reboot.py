@@ -10,6 +10,7 @@
 
 import subprocess
 from werkzeug.security import generate_password_hash
+from cryptography.fernet import Fernet
 from .global_logger import logger
 from .global_config_loader import load_config
 
@@ -18,15 +19,36 @@ config = load_config()
 
 # Access configuration values
 PW_HASHED_PASSWORD_PATH = config['passwords']['hashed_password_path']
+PW_ENCRYPTED_PASSWORD_PATH = config['passwords']['encrypted_password_path']
+PW_SECRET_KEY_PATH = config['passwords']['secret_key_path']
 
 def password_save_and_reboot_system(new_password, initial_setup=None):
     """Hash the new password, save it, and update the Pi-hole admin password."""
     logger.debug(f"INFO - Saving new password and rebooting system.")
 
-    new_hash = generate_password_hash(new_password, method='pbkdf2:sha256')
-    with open(PW_HASHED_PASSWORD_PATH, 'w') as file:
-        file.write(new_hash)
-    logger.debug(f"INFO - New hashed password saved to {PW_HASHED_PASSWORD_PATH}")
+    try:
+        # Hash the password and save it
+        new_hash = generate_password_hash(new_password, method='pbkdf2:sha256')
+        with open(PW_HASHED_PASSWORD_PATH, 'w') as file:
+            file.write(new_hash)
+        logger.debug(f"INFO - New hashed password saved to {PW_HASHED_PASSWORD_PATH}")
+
+        """ Encrypt the password and store it in a file. """
+        # Load the encryption key
+        with open(PW_SECRET_KEY_PATH, 'rb') as key_file:
+            key = key_file.read()
+
+        # Encrypt the password
+        f = Fernet(key)
+        encrypted_password = f.encrypt(new_password.encode())
+
+        # Write the encrypted password to a file
+        with open(PW_ENCRYPTED_PASSWORD_PATH, "wb") as file:
+            file.write(encrypted_password)
+        logger.info("Password encrypted and saved successfully.")
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+        return False
 
     # Update Pi-hole admin password
     try:
@@ -47,6 +69,6 @@ def reboot_system():
     try:
         logger.info("INFO - Rebooting the system.")
         # Execute the reboot command
-        subprocess.call(['sudo', 'reboot'])
+        subprocess.call(['/usr/bin/sudo', 'reboot'])
     except Exception as e:
         logger.error(f"ERROR - Error during reboot: {e}")

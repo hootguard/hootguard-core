@@ -11,7 +11,6 @@
 # This version includes logging for improved traceability during execution.
 
 import re
-#from .global_config import DDNS_USER_DUCKDNS_SCRIPT_PATH, DDNS_USER_DUCKDNS_V6_SCRIPT_PATH
 from .global_logger import logger
 from .global_config_loader import load_config
 

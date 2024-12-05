@@ -1,3 +1,16 @@
+# Script Name: info_show_ip.py
+# Version: 0.3
+# Author: HootGuard
+# Date: 25. November 2024
+
+# Description:
+# This script displays the system's current IP address on an I2C-connected LCD screen.
+# - Retrieves the IP address of the system by connecting to a public DNS server (8.8.8.8).
+# - If unable to fetch the IP, displays "No IP found" on the LCD.
+# - Ensures thread-safe access to the display using `display_lock`.
+# - Clears the screen and writes the IP address along with the label "IP Address."
+# Designed for use in the HootGuard system as part of its display functionality.
+
 import socket
 from RPLCD.i2c import CharLCD
 from display_lock import display_lock

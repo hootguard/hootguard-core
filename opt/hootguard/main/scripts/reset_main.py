@@ -33,6 +33,6 @@ def system_reboot():
     try:
         logger.info("INFO - Rebooting the system.")
         # Execute the reboot command
-        subprocess.call(['sudo', 'reboot'])
+        subprocess.call(['/usr/bin/sudo', 'reboot'])
     except Exception as e:
         logger.error(f"ERROR - Error during reboot: {e}")

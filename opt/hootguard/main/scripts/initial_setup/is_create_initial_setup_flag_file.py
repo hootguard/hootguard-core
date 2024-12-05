@@ -1,3 +1,13 @@
+# Script Name: is_create_initial_setup_flag_file.py
+# Version: 0.1
+# Author: HootGuard
+# Date: 25. November 2024
+
+# Description:
+# This script creates an initialization flag file to indicate the successful completion of the initial setup process.
+# It retrieves the file path from the global configuration and writes a confirmation message to the file.
+# The script logs the success or failure of the file creation operation and returns a status accordingly.
+
 import os
 from scripts.global_logger import logger
 from scripts.global_config_loader import load_config

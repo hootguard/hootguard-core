@@ -1,3 +1,15 @@
+# Script Name: is_generate_wireguard_ip_addresses.py
+# Version: 0.4
+# Author: HootGuard
+# Date: 25. November 2024
+
+# Description:
+# This script generates unique IPv4 and IPv6 addresses for WireGuard interfaces in the HootGuard system.
+# - IPv4 addresses follow the pattern `10.160.X.1`, where `X` is randomly selected between 100 and 250.
+# - IPv6 addresses follow the pattern `fd11:5ee:bad:c0XX::1`, where `XX` is a random value in the range `c0aa` to `c0ff`.
+# The generated IP addresses conform to /24 (IPv4) and /64 (IPv6) subnet specifications. 
+# The script ensures dynamic address allocation for secure and isolated VPN configurations.
+
 import random
 import ipaddress
 from scripts.global_logger import logger

@@ -12,6 +12,13 @@
 
 import subprocess
 from .global_logger import logger
+from scripts.global_config_loader import load_config
+
+# Load the global config
+config = load_config()
+
+# Paths from the config
+SECURE_RUN_FILE = config['misc']['secure_run_file']
 
 # Function to check if SSH is active
 def check_ssh_status():
@@ -19,7 +26,7 @@ def check_ssh_status():
     logger.debug("INFO - Checking SSH service status.")
     try:
         # Execute the systemctl command to check the status of the ssh service
-        result = subprocess.run(['sudo', 'systemctl', 'status', 'ssh'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        result = subprocess.run(['/usr/bin/sudo', '/usr/bin/systemctl', 'status', 'ssh'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         # Check if the service is active (including the "active (exited)" state)
         if "Active: active (running)" in result.stdout or "Active: active (exited)" in result.stdout:
@@ -37,8 +44,8 @@ def enable_ssh():
     """Enable the SSH service."""
     logger.debug("INFO - Enabling SSH service.")
     try:
-        # Run systemctl to start the SSH service
-        subprocess.run(['sudo', 'systemctl', 'start', 'ssh'], check=True)
+        # Use the hootguard script to start the SSH service
+        subprocess.run(['/usr/bin/sudo', SECURE_RUN_FILE, 'start-service', 'ssh'], check=True)
         logger.info("INFO - SSH service enabled successfully.")
         return True
     except Exception as e:
@@ -50,9 +57,8 @@ def disable_ssh():
     """Disable the SSH service."""
     logger.debug("INFO - Disabling SSH service.")
     try:
-        # Run systemctl to stop the SSH service
-        subprocess.run(['sudo', 'systemctl', 'stop', 'ssh'], check=True)
-        subprocess.run(['sudo', 'systemctl', 'disable', 'ssh'], check=True)
+        # Use the hootguard script to stop the SSH service
+        subprocess.run(['/usr/bin/sudo', SECURE_RUN_FILE, 'stop-service', 'ssh'], check=True)
         logger.info("INFO - SSH service disabled successfully.")
         return True
     except Exception as e:

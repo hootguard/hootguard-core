@@ -1,3 +1,21 @@
+# Script Name: initial_setup_main.py
+# Version: 0.3
+# Author: HootGuard
+# Date: 25. November 2024
+
+# Description:
+# This script performs the initial setup for the HootGuard system, ensuring essential configurations 
+# are applied and validated. It includes functionalities for:
+# - Updating environment and password secret keys.
+# - Saving network configurations (IP, subnet, gateway).
+# - Generating unique IPv4 and IPv6 addresses for WireGuard interfaces.
+# - Generating private keys for WireGuard interfaces.
+# - Creating WireGuard configuration files (wg0.conf, wg1.conf).
+# - Updating the global configuration file with WireGuard IP settings.
+# - Configuring and restarting the production firewall.
+# If errors occur during setup, the system resets the VPN configuration to factory defaults.
+# A successful setup concludes with a system reboot.
+
 import yaml
 import subprocess
 from .password_save_and_reboot import password_save_and_reboot_system
@@ -135,17 +153,32 @@ def perform_initial_setup(ip_v4_address, subnet_mask, standard_gateway, password
         error_occurred = True
 
 
+    # --- START - Enable Pi-hole blocking ---
+    # Measure to make sure that pihole blocking is enabled
+    try:
+        # Run the command to enable Pi-hole blocking
+        subprocess.run(['pihole', 'enable'], check=True)
+        print("Pi-hole blocking has been enabled.")
+        error_occurred = False
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to enable Pi-hole blocking: {e}")
+        error_occurred = True
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        error_occurred = True
+    # --- END - Enable Pi-hole blocking ---
+
     # --- START - Firewall configuration and restart
     # Activate production firewall and restart the netfilter to activate the rules
     try:
         # Use subprocess to run the shell script
-        result = subprocess.run(['sudo', 'bash', config['vpn']['iptables_settings_file']], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        result = subprocess.run(['/usr/bin/sudo', 'bash', config['vpn']['iptables_settings_file']], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         # Output the result (optional)
         # print("Script output:", result.stdout)
 
         # Restart the netfilter-persistent service to make the rules persistent
-        subprocess.run(['sudo', 'systemctl', 'restart', 'netfilter-persistent'], check=True)
+        subprocess.run(['/usr/bin/sudo', 'systemctl', 'restart', 'netfilter-persistent'], check=True)
 
         logger.info("Production firewall rules were successfully set and service restarted")
         error_occurred = False
@@ -177,6 +210,6 @@ def system_reboot():
     try:
         logger.info("INFO - Rebooting the system.")
         # Execute the reboot command
-        subprocess.call(['sudo', 'reboot'])
+        subprocess.call(['/usr/bin/sudo', 'reboot'])
     except Exception as e:
         logger.error(f"ERROR - Error during reboot: {e}")

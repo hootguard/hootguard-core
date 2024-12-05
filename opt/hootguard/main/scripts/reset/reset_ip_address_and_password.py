@@ -1,3 +1,16 @@
+# Script Name: reset_ip_address_and_password.py
+# Version: 0.1
+# Author: HootGuard
+# Date: 25. November 2024
+
+# Description:
+# This script resets the IP address and passwords for the HootGuard system to their default settings.
+# - Resets the IP configuration to DHCP by replacing the current `dhcpcd.conf` with its original backup.
+# - Resets the web password by replacing it with the default hashed password file.
+# - Decrypts and applies the default Pi-hole password using the secret key and encrypted password file.
+# Logs the success or failure of each operation, ensuring a secure and functional reset process.
+# Returns `True` if both IP and passwords are successfully reset, `False` otherwise.
+
 import shutil
 import subprocess
 from cryptography.fernet import Fernet
@@ -19,15 +32,22 @@ PW_SECRET_KEY_PATH = config['passwords']['secret_key_path']
 def reset_ip_and_password():
     if not reset_ip_address():
         logger.info("ERROR - Failed to reset the ip address")
+        return False
     if not reset_passwords():
         logger.info("ERROR - Failed to reset web and pi-hole password")
+        return False
 
     logger.info("IP address and password successfully reset")
     return True
 
 def reset_ip_address():
+    """Reset the IP address configuration to DHCP."""
     try:
-        subprocess.run(['sudo', 'cp', NW_DHCPCD_ORIGINAL_PATH, NW_DHCPCD_PATH], check=True)
+        # Use hootguard to replace the dhcpcd.conf file
+        subprocess.run(
+            ['/usr/bin/sudo', '/usr/local/bin/hootguard', 'reset-ip', NW_DHCPCD_ORIGINAL_PATH, NW_DHCPCD_PATH],
+            check=True
+        )        
         logger.info("IP address reset to DHCP successfully.")
         return True
     except subprocess.CalledProcessError as e:
@@ -36,6 +56,8 @@ def reset_ip_address():
 
 
 def reset_passwords():
+    default_password = "HootGuardSentry"
+
     try:
         # Reset web password
         shutil.copy(PW_HASHED_DEFAULT_PASSWORD_PATH, PW_HASHED_PASSWORD_PATH)
@@ -47,13 +69,17 @@ def reset_passwords():
         with open(PW_SECRET_KEY_PATH, 'rb') as file:
             key = file.read()
 
-        # Decrypt the password
-        fernet = Fernet(key)
-        decrypted_password = fernet.decrypt(encrypted_password).decode()
+        # Encrypt the password
+        f = Fernet(key)
+        encrypted_password = f.encrypt(default_password.encode())
+
+       # Write the encrypted password to a file
+        with open(PW_ENCRYPTED_PASSWORD_PATH, "wb") as file:
+            file.write(encrypted_password)
 
         # Run the pihole command and capture both stdout and stderr
         result = subprocess.run(
-            ['pihole', '-a', '-p', decrypted_password], 
+            ['pihole', '-a', '-p', default_password], 
             stdout=subprocess.PIPE, 
             stderr=subprocess.PIPE, 
             text=True

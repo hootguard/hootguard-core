@@ -81,18 +81,11 @@ def network_save_config_and_reboot(ip_address, subnet_mask, standard_gateway, in
     # Check for existing IPv6 configuration
     ipv6_config = network_check_if_ipv6_already_exists()
 
-    try:
-        # Overwrite existing configuration with backup file using sudo
-        subprocess.run(['sudo', 'cp', NW_DHCPCD_BACKUP_PATH, NW_DHCPCD_PATH], check=True)
-        logger.debug("INFO - Network - Backup file successfully restored")
-    except subprocess.CalledProcessError as e:
-        logger.debug(f"ERROR - Network - Error restoring backup file: {e}")
+    # Restore backup using hootguard
+    subprocess.run(['/usr/bin/sudo', '/usr/local/bin/hootguard', 'restore-backup', NW_DHCPCD_BACKUP_PATH, NW_DHCPCD_PATH], check=True)
 
     # Convert subnet mask to CIDR notation
     cidr = subnet_mask_to_cidr(subnet_mask)
-
-    # Modify pivpn setupVars.conf file to adapt to new ip address settings
-    # network_change_pivpn_ipaddress(ip_address, cidr, standard_gateway)
 
     # Prepare the configuration string for static IP
     static_config = f"""
@@ -103,15 +96,12 @@ static routers={standard_gateway}
 static domain_name_servers={ip_address}
 {ipv6_config}
 """
-    # Write the new configuration to a temporary file and use sudo tee to append it
+    # Write the new configuration to a temporary file
     with open('/tmp/dhcpcd_temp.conf', 'w') as file:
         file.write(static_config)
 
-    try:
-        subprocess.run(['sudo', 'tee', '-a', NW_DHCPCD_PATH], stdin=open('/tmp/dhcpcd_temp.conf'), check=True)
-        logger.debug("SUCCESS - Network - Configuration successfully updated")
-    except subprocess.CalledProcessError as e:
-        logger.debug(f"ERROR - Network - Error updating configuration: {e}")
+    # Update network configuration using hootguard
+    subprocess.run(['/usr/bin/sudo', '/usr/local/bin/hootguard', 'update-network-config', '/tmp/dhcpcd_temp.conf', NW_DHCPCD_PATH], check=True)
 
     # Replace ip address and the primary dns in global_config.yaml file
     ipv4_address = f"{ip_address}/{cidr}"
@@ -135,13 +125,9 @@ def network_save_config_and_reboot_v6(ip_address_v6):
     # Check for existing IPv4 configuration
     ipv4_config = network_check_if_ipv4_already_exists()
 
-    try:
-        # Overwrite existing configuration with backup file using sudo
-        subprocess.run(['sudo', 'cp', NW_DHCPCD_BACKUP_PATH, NW_DHCPCD_PATH], check=True)
-        logger.debug("INFO - Network - Backup file successfully restored")
-    except subprocess.CalledProcessError as e:
-        logger.debug(f"ERROR - Network - Error restoring backup file: {e}")
-
+    # Restore backup using hootguard
+    subprocess.run(['/usr/bin/sudo', '/usr/local/bin/hootguard', 'restore-backup', NW_DHCPCD_BACKUP_PATH, NW_DHCPCD_PATH], check=True)
+    
     # Calculate ipv6 subnet prefix
     ipv6_prefix = calculate_ipv6_subnet_prefix(ip_address_v6)
     #print("PREFIX:", ipv6_prefix)
@@ -153,22 +139,17 @@ interface eth0
 static ip6_address={ip_address_v6}/{ipv6_prefix}
 {ipv4_config}
 """
-    # Write the new configuration to a temporary file and use sudo tee to append it
+    # Write the new configuration to a temporary file
     with open('/tmp/dhcpcd_temp_v6.conf', 'w') as file:
         file.write(static_config_v6)
 
-    try:
-        subprocess.run(['sudo', 'tee', '-a', NW_DHCPCD_PATH], stdin=open('/tmp/dhcpcd_temp_v6.conf'), check=True)
-        logger.debug("INFO - Network - IPv6 Configuration successfully updated")
-    except subprocess.CalledProcessError as e:
-        logger.debug(f"ERROR - Network - Error updating IPv6 configuration: {e}")
+    # Update network configuration using hootguard
+    subprocess.run(['/usr/bin/sudo', '/usr/local/bin/hootguard', 'update-network-config', '/tmp/dhcpcd_temp_v6.conf', NW_DHCPCD_PATH], check=True)
 
     # Replace ip address in global_config.yaml file
     ipv6_address = f"{ip_address_v6}/{ipv6_prefix}"
     if not replace_network_ip_address("ipv6", ipv6_address):
         logger.debug(f"ERROR - Network - Error updating ip v6 address in global config")
-
-
 
     # Call reboot_system() function after all other operations
     reboot_system()
@@ -205,25 +186,18 @@ def calculate_ipv6_subnet_prefix(ipv6_address):
 def reboot_system():
     """1. Restart the firewall with the new parameters (ip-address)"""
     # Activate production firewall and restart the netfilter to activate the rules
+    logger.info("Network - Rebooting the system")
     try:
-        # Use subprocess to run the shell script
-        result = subprocess.run(['sudo', 'bash', config['vpn']['iptables_settings_file']], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-        # Output the result (optional)
-        print("Script output:", result.stdout)
-
-        # Restart the netfilter-persistent service to make the rules persistent
-        subprocess.run(['sudo', 'systemctl', 'restart', 'netfilter-persistent'], check=True)
-
-        print("Production firewall rules were successfully set and service restarted")
-        #return True  # Return True if the script ran successfully
-        error_occurred = False
-
+        # Restart the firewall
+        logger.info("Restarting firewall with updated iptables settings.")
+        subprocess.run(
+            ['/usr/bin/sudo', '/usr/local/bin/hootguard', 'restart-firewall', config['vpn']['iptables_settings_file']],
+            check=True
+        )
+        logger.info("Firewall restarted successfully.")
     except subprocess.CalledProcessError as e:
-        # Handle errors if the script execution fails
-        print("Error activating production firewall rules occurred while running the script:")
-        print(e.stderr)
-        #return False  # Return False if an error occurred
+        logger.error(f"ERROR - Failed to restart the firewall: {e}")
+        # return False
         error_occurred = True
 
     """2. Reboot the system to apply the new network configuration."""
@@ -234,3 +208,16 @@ def reboot_system():
         subprocess.run(['sudo', 'reboot'], check=True)
     except subprocess.CalledProcessError as e:
         logger.error(f"ERROR - Error during reboot: {e}")
+
+    try:
+        # Reboot the system
+        logger.info("Rebooting the system.")
+        subprocess.run(['/usr/bin/sudo', '/usr/local/bin/hootguard', 'reboot-system'], check=True)
+        logger.info("System rebooted successfully.")
+    except subprocess.CalledProcessError as e:
+        logger.error(f"ERROR - Failed to reboot the system: {e}")
+        #return False
+        error_occurred = True
+
+    #return True
+    error_occurred = False

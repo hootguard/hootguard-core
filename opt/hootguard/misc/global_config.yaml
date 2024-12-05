@@ -7,6 +7,11 @@ adblock:
     normal: https://raw.githubusercontent.com/hootguard/blocking-lists/main/normal-blocklist.txt
     social: https://raw.githubusercontent.com/hootguard/blocking-lists/main/social-blocklist.txt
   cache_path: /opt/hootguard/adblock/adblock_cache
+  conversion_profiles:
+  - normal
+  - enhanced
+  - gambling
+  - max
   db_path: /etc/pihole/gravity.db
   status_path: /opt/hootguard/adblock/adblock-active-profile.txt
 ddns:
@@ -33,10 +38,10 @@ misc:
   global_config_file: /opt/hootguard/misc/global_config.yaml
   init_flag: /opt/hootguard/misc/init_flag
   iptables_factory_reset_file: /opt/hootguard/misc/iptables_factory_reset_rules.sh
+  secure_run_file: /usr/local/bin/hootguard
+  snooze_status_file: /opt/hootguard/snooze/snooze-status.txt
   snooze_time_file: /opt/hootguard/snooze/snooze-time.txt
   version_file: /opt/hootguard/misc/version.txt
-  update_flag: /opt/hootguard/misc/update_available
-  repo_version_url: "https://raw.githubusercontent.com/hootguard/hootguard-core/main/opt/hootguard/misc/version.txt"
 network:
   interface_1: eth0
   interface_1_v4_ip_address: 192.168.0.250/24
@@ -52,6 +57,11 @@ pihole:
   setup_vars_path: /etc/pihole/setupVars.conf
 ssh:
   first_time_flag_path: /opt/hootguard/misc/ssh_first_time_flag
+update:
+  local_repo_path: /tmp/hootguard_update
+  repo_url: https://github.com/hootguard/hootguard-core.git
+  repo_version_url: https://raw.githubusercontent.com/hootguard/hootguard-core/main/opt/hootguard/misc/version.txt
+  update_flag: /opt/hootguard/misc/update_available
 vpn:
   client_configs_path: /opt/hootguard/vpn/configs
   client_db_path: /opt/hootguard/vpn/vpn_clients.db

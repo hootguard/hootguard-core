@@ -17,7 +17,6 @@ from .vpn import vpn_get_public_server_key
 from .vpn import vpn_append_peer_to_wg_config
 from .vpn import vpn_reload_wireguard_config
 from .vpn import vpn_get_vpn_endpoint_and_secondary_dns_from_global_config
-#from .global_config import VPN_ENDPOINT, VPN_SECONDARY_DNS
 from .global_logger import logger
 from .global_config_loader import load_config
 

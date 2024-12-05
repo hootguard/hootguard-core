@@ -24,8 +24,15 @@ def remove_peer_from_wg_config(client_name, interface):
 
     # Use sed to remove the lines between '### begin <client_name> ###' and '### end <client_name> ###'
     try:
-        remove_command = f"sudo sed -i '/### begin {client_name} ###/,/### end {client_name} ###/d' {config_file}"
-        subprocess.run(remove_command, shell=True, check=True)
+        result = subprocess.run(
+            [
+                '/usr/bin/sudo', '/usr/local/bin/hootguard', 'remove-peer',
+                config_file, client_name
+            ],
+            capture_output=True,
+            text=True,
+            check=True
+        )
         logger.debug(f"SUCCESS - Peer configuration for {client_name} removed from {config_file}")
         return True
     except subprocess.CalledProcessError as e:

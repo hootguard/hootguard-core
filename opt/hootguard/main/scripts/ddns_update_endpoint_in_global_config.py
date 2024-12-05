@@ -10,7 +10,6 @@
 
 import yaml
 from .global_logger import logger
-#from .global_config import GLOBAL_CONFIG_FILE_PATH
 from .global_config_loader import load_config
 
 # Load the global config

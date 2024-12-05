@@ -23,11 +23,13 @@ VPN_CLIENTS_DB_PATH = config['vpn']['client_db_path']
 
 def set_client_bandwidth_limitation(client_name, wg_interface, download_speed, upload_speed):
     """
-    Apply bandwidth limits to a VPN client using tc (traffic control) on wg1.
+    Apply bandwidth limits to a VPN client using /usr/local/bin/hootguard.
 
     :param client_name: The VPN client's name.
+    :param wg_interface: The WireGuard interface (e.g., 'wg1').
     :param download_speed: The maximum download speed in Mbits/s.
     :param upload_speed: The maximum upload speed in Mbits/s.
+    :return: True if successful, False otherwise.
     """
 
     # Get IP address of the VPN client (we only need ipv4 - client_ip)
@@ -39,7 +41,6 @@ def set_client_bandwidth_limitation(client_name, wg_interface, download_speed, u
     # Convert rates to kbit for tc
     download_rate = f"{int(download_speed) * 1000}kbit"
     upload_rate = f"{int(upload_speed) * 1000}kbit"
-    burst_size = '100k'  # Increase burst size for upload control
 
     # Use the last octet of the client's IP for a deterministic classid
     last_octet = client_ip.split('.')[-1]
@@ -48,40 +49,16 @@ def set_client_bandwidth_limitation(client_name, wg_interface, download_speed, u
 
     try:
 
-        # Step 1.1: Check if the root qdisc already exists, if it exists, do nothing, if it does not exits, add it.
-        root_qdisc_exists = subprocess.run(['sudo', 'tc', 'qdisc', 'show', 'dev', wg_interface], capture_output=True, text=True)
-        if 'fq_codel' not in root_qdisc_exists.stdout:
-            # If root qdisc does not exist, add it
-            subprocess.run(['sudo', 'tc', 'qdisc', 'add', 'dev', wg_interface, 'root', 'handle', '1:', 'fq_codel'], check=True)
+        # Call /usr/local/bin/hootguard to set bandwidth limits
+        result = subprocess.run(
+            [
+                '/usr/bin/sudo', '/usr/local/bin/hootguard', 'set-bandwidth',
+                wg_interface, client_ip, download_rate, upload_rate, flowid_download, flowid_upload
+            ],
+            capture_output=True, text=True, check=True
+        )
 
-        # Step 1.2: Apply policing to limit download traffic (egress)
-        # Policing based on destination IP (client's IP)
-        egress_commands = [
-            ['sudo', 'tc', 'filter', 'add', 'dev', wg_interface, 'protocol', 'ip', 'parent', '1:', 'prio', '1', 'u32',
-             'match', 'ip', 'dst', client_ip, 'police', 'rate', download_rate, 'burst', burst_size, 'drop', 'flowid', flowid_download]
-        ]
-
-        # Step 2.1: Check if the ingress qdisc exists
-        ingress_qdisc_exists = subprocess.run(['sudo', 'tc', 'qdisc', 'show', 'dev', wg_interface], capture_output=True, text=True)
-        if 'ingress' not in ingress_qdisc_exists.stdout:
-            # If ingress qdisc does not exist, add it
-            subprocess.run(['sudo', 'tc', 'qdisc', 'add', 'dev', wg_interface, 'handle', 'ffff:', 'ingress'])
-
-        # Step 2.2: Apply policing to limit upload traffic (ingress)
-        ingress_commands = [
-            # Policing based on source IP (client's IP)
-            ['sudo', 'tc', 'filter', 'add', 'dev', wg_interface, 'parent', 'ffff:', 'protocol', 'ip', 'prio', '1', 'u32',
-             'match', 'ip', 'src', client_ip, 'police', 'rate', upload_rate, 'burst', burst_size, 'drop', 'flowid', flowid_upload]
-        ]
-
-        # Execute the commands for download limiting (egress)
-        for cmd in egress_commands:
-            subprocess.run(cmd, check=True)
-
-        # Execute the commands for upload limiting (egress) and ingress policing
-        for cmd in ingress_commands:
-            subprocess.run(cmd, check=True)
-
+        # Log success
         logger.debug(f"SUCCESS - Bandwidth limits applied for {client_name}: {download_speed} Mbit/s download, {upload_speed} Mbit/s upload on wireguard interface {wg_interface}.")
 
         # Update the database with the bandwidth limits
@@ -91,10 +68,11 @@ def set_client_bandwidth_limitation(client_name, wg_interface, download_speed, u
             return False  # Bandwidth limits applied, but database update failed
 
     except subprocess.CalledProcessError as e:
-        logger.debug(f"ERROR - Failed to apply bandwidth limits: {e}")
+        logger.debug(f"ERROR - Failed to apply bandwidth limits: {e.stderr}")
         return False
-    return True
-
+    except Exception as e:
+        logger.debug(f"ERROR - Unexpected error while setting bandwidth limits: {e}")
+        return False
 
 def update_client_bandwidth_limits(client_name, download_speed, upload_speed):
     """

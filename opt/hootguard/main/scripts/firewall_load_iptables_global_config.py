@@ -1,4 +1,14 @@
 #!/usr/bin/python3
+# Script Name: export_network_config.py
+# Version: 0.1
+# Author: HootGuard
+# Date: 25. November 2024
+
+# Description:
+# This script reads the global YAML configuration file and extracts network and VPN settings.
+# It calculates IPv4/IPv6 subnets for WireGuard interfaces and outputs settings as Bash export variables.
+# Key exports include interface names, IP addresses, subnets, and primary DNS, formatted for shell usage.
+
 import yaml
 import os
 

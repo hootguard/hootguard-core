@@ -1,3 +1,16 @@
+# Script Name: snooze_deactivate.py
+# Version: 0.3
+# Author: HootGuard
+# Date: 25. November 2024
+
+# Description:
+# This script deactivates the snooze mode in the HootGuard system and updates the LCD display and LED status.
+# - Displays the message "Snooze deactive" on an I2C-connected LCD screen.
+# - Turns off an LED connected to a specified GPIO pin to indicate snooze deactivation.
+# - Ensures thread-safe access to the display using `display_lock`.
+# - Cleans up GPIO resources after turning off the LED.
+# Designed to provide visual and hardware feedback for snooze deactivation in the HootGuard system.
+
 from RPLCD.i2c import CharLCD
 from display_lock import display_lock
 import RPi.GPIO as GPIO

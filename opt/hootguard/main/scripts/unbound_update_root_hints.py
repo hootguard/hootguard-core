@@ -1,3 +1,16 @@
+# Script Name: unbound_update_root_hints.py
+# Version: 0.3
+# Author: HootGuard
+# Date: 02. December 2024
+
+# Description:
+# This script updates the `root.hints` file used by the Unbound DNS resolver. 
+# It checks if today is the first day of the month and, if so, downloads the latest 
+# `named.root` file from the Internet Assigned Numbers Authority (IANA) website. 
+# The file is saved to the `/var/lib/unbound/root.hints` location.
+# The script logs the success or failure of the update process and skips the update 
+# on any other day.
+
 import subprocess
 import logging
 from datetime import datetime
@@ -9,14 +22,16 @@ def update_root_hints():
     # Check if today is the first day of the month
     if datetime.now().day == 1:
         try:
-            # Command to update the root.hints file
-            command = "wget https://www.internic.net/domain/named.root -qO- | sudo tee /var/lib/unbound/root.hints"
-            subprocess.run(command, shell=True, check=True)
-            logging.info("root.hints updated successfully.")
+            # Delegate the update to /usr/local/bin/hootguard
+            result = subprocess.run(
+                ['/usr/bin/sudo', '/usr/local/bin/hootguard', 'update-root-hints'],
+                capture_output=True, text=True, check=True
+            )
+            logging.info(f"root.hints updated successfully. Output: {result.stdout}")
         except subprocess.CalledProcessError as e:
-            logging.error("An error occurred while updating root.hints:", e)
+            logging.error(f"An error occurred while updating root.hints: {e.stderr}")
     else:
-        logging.info("No roots.hints update required today.")
+        logging.info("No root.hints update required today.")
 
-# Run the update function once and exit
+# Run the update function
 update_root_hints()

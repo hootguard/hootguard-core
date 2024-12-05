@@ -10,17 +10,6 @@
 # available. Once the QR code is successfully created, it sets the file permissions so that it can be 
 # displayed on the HootGuard website. If the QR code generation fails after all retries, it returns False.
 
-# Usage:
-# Call the function 'generate_qr_code(client_name)' with the client's name as a string parameter. 
-# Ensure that the global configuration paths 'VPN_CONFIGS_PATH' and 'VPN_QRCODE_PATH' are set correctly.
-# The script will look for the configuration file in the VPN_CONFIGS_PATH and generate a QR code that will 
-# be saved in the VPN_QRCODE_PATH directory. The function returns True if successful and False if it fails.
-
-# Change Log:
-# 6. October 2024
-# Initial version for generating QR codes based on the client's VPN configuration file, with retry logic
-# and permission settings for displaying the QR code on the website.
-
 import os
 import time
 import qrcode

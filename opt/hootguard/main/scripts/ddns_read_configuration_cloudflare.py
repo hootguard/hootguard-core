@@ -10,7 +10,6 @@
 # track the process of reading and extracting configuration values.
 
 import re
-#from .global_config import DDNS_USER_CLOUDFLARE_SCRIPT_PATH, DDNS_USER_CLOUDFLARE_V6_SCRIPT_PATH
 from .global_logger import logger
 from .global_config_loader import load_config
 

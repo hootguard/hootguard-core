@@ -1,8 +1,26 @@
+# Script Name: snooze_main.py
+# Version: 0.2
+# Author: HootGuard
+# Date: 25. November 2024
+
+# Description:
+# This script manages the snooze functionality, including toggling Pi-hole snooze, updating LED status,
+# and handling button presses to activate or deactivate snooze.
+
 import RPi.GPIO as GPIO
 import subprocess
 import threading
 import time
 import logging
+
+# Add the path to global_config_loader.py
+sys.path.append('/opt/hootguard/main/scripts')
+from global_config_loader import load_config  # Import load_config function
+
+# Load the global configuration
+config = load_config()
+SNOOZE_STATUS_FILE_PATH = config['misc']['snooze_status_file']
+SNOOZE_TIME_FILE_PATH = config['misc']['snooze_time_file']
 
 # Configure logging
 logging.basicConfig(filename='/var/log/hootguard_system.log', level=logging.INFO,
@@ -19,20 +37,20 @@ GPIO.setup(LED_PIN, GPIO.OUT)
 # Global variables
 last_press_time = 0
 debounce_time = 0.25  # 250 milliseconds
-status_file = '/opt/hootguard/snooze/snooze-status.txt'
+#status_file = '/opt/hootguard/snooze/snooze-status.txt'
 toggle_lock = threading.Lock()
 stop_event = threading.Event()
 snooze_thread = None
 
 def initialize_snooze_status():
     """Initialize the snooze status to inactive on startup."""
-    with open(status_file, 'w') as file:
+    with open(SNOOZE_STATUS_FILE_PATH, 'w') as file:
         file.write('inactive')
 
 def read_snooze_status():
     """Read the current snooze status from a file."""
     try:
-        with open(status_file, 'r') as file:
+        with open(SNOOZE_STATUS_FILE_PATH, 'r') as file:
             status = file.read().strip()
             return status == 'active'
     except FileNotFoundError:
@@ -53,7 +71,7 @@ def toggle_snooze():
                 snooze_thread.join()  # Wait for the snooze thread to finish
             try:
                 stop_event.clear()
-                subprocess.run(["python3", "/opt/hootguard/display/snooze_deactivate.py"])
+                subprocess.run(["/usr/bin/python3", "/opt/hootguard/display/snooze_deactivate.py"])
             except Exception as e:
                 logging.error(f"Error deactivating snooze: {e}")
         else:
@@ -62,14 +80,14 @@ def toggle_snooze():
             snooze_thread = threading.Thread(target=manage_led)
             snooze_thread.start()
             try:
-                subprocess.run(["python3", "/opt/hootguard/display/snooze_activate.py"])
+                subprocess.run(["/usr/bin/python3", "/opt/hootguard/display/snooze_activate.py"])
                 write_snooze_status(True)
             except Exception as e:
                 logging.error(f"Error activating snooze: {e}")
 
 def deactivate_display():
     """Deactivate the display."""
-    subprocess.run(["python3", "/opt/hootguard/display/deactivate_display.py"])
+    subprocess.run(["/usr/bin/python3", "/opt/hootguard/display/deactivate_display.py"])
 
 def handle_display():
     """Handle the display deactivation after a period of inactivity."""
@@ -108,7 +126,7 @@ def manage_led():
 def get_snooze_time():
     """Read the snooze time setting from a file."""
     try:
-        with open('/opt/hootguard/snooze/snooze-time.txt', 'r') as file:
+        with open(SNOOZE_TIME_FILE_PATH, 'r') as file:
             return file.read().strip()  # Read and return the snooze time
     except FileNotFoundError:
         return "300"  # Return default value if file not found
@@ -116,7 +134,7 @@ def get_snooze_time():
 def update_snooze_status(status):
     """Update the snooze status file."""
     try:
-        with open(status_file, 'w') as file:
+        with open(SNOOZE_STATUS_FILE_PATH, 'w') as file:
             file.write(status)
     except Exception as e:
         logging.error(f"Error updating snooze status: {e}")

@@ -22,10 +22,17 @@ def uncomment_peer_in_wg_config(client_name, interface):
     """Uncomment the peer configuration for the client in the WireGuard config file."""
     config_file = f"{VPN_WIREGUARD_PATH}/{interface}.conf"
 
-    # Use sed to uncomment the lines between '### begin <client_name> ###' and '### end <client_name> ###'
+    # Use the hootguard script to uncomment the client configuration
     try:
-        uncomment_command = f"sudo sed -i '/### begin {client_name} ###/,/### end {client_name} ###/s/^#//' {config_file}"
-        subprocess.run(uncomment_command, shell=True, check=True)
+        result = subprocess.run(
+            [
+                '/usr/bin/sudo', '/usr/local/bin/hootguard', 'uncomment-peer',
+                config_file, client_name
+            ],
+            capture_output=True,
+            text=True,
+            check=True
+        )
         logger.debug(f"SUCCESS - Peer configuration for VPN client {client_name} uncommented in {config_file}.")
         return True
     except subprocess.CalledProcessError as e:

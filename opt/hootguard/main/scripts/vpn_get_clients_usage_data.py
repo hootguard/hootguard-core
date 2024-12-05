@@ -79,7 +79,7 @@ def get_vpn_data(client_mapping):
     logger.debug("Fetching real-time VPN data using 'wg' command.")
     vpn_data = {}
     try:
-        wg_output = subprocess.check_output(['sudo', 'wg', 'show', 'all'], text=True)
+        wg_output = subprocess.check_output(['/usr/bin/sudo', '/usr/local/bin/hootguard', 'wg-show'], text=True)
         
         current_peer = None
 

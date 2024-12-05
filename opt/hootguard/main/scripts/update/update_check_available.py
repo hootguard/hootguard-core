@@ -16,9 +16,9 @@ config = load_config()
 logging.basicConfig(filename='/var/log/hootguard_system.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(filename)s - %(message)s')
 
 # Define the remote version file URL and local version file path
-REPO_VERSION_URL = config['misc']['repo_version_url']
 LOCAL_VERSION_FILE = config['misc']['version_file']
-UPDATE_FLAG_FILE = config['misc']['update_flag']
+REPO_VERSION_URL = config['update']['repo_version_url']
+UPDATE_FLAG_FILE = config['update']['update_flag']
 
 def get_remote_version():
     """Fetch the remote version from GitHub."""

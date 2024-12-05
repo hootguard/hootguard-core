@@ -9,10 +9,7 @@
 # It allows updating either IPv4 (A-Record), IPv6 (AAAA-Record), or both based on user choice.
 
 import subprocess
-#from .global_config import DDNS_USER_CLOUDFLARE_SCRIPT_PATH, DDNS_USER_CLOUDFLARE_V6_SCRIPT_PATH, VPN_ENDPOINT
-#from .ddns_update_pivpnHOST_in_setupVars import update_pivpn_host
 from .ddns_update_endpoint_in_global_config import replace_vpn_endpoint
-#from .system_reload_global_config import reload_global_config
 from .global_logger import logger
 from .global_config_loader import load_config
 

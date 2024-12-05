@@ -1,6 +1,8 @@
 from flask import Blueprint, request, render_template, redirect, url_for, session
+from werkzeug.security import check_password_hash
 import os
-import subprocess
+import subprocess # nosec
+
 from scripts.ssh_control_service import check_ssh_status, enable_ssh, disable_ssh
 #from scripts.global_config import SSH_FIRST_TIME_FLAG_PATH
 from scripts.global_config_loader import load_config
@@ -10,6 +12,15 @@ config = load_config()
 
 # Access configuration values
 SSH_FIRST_TIME_FLAG_PATH = config['ssh']['first_time_flag_path']
+PW_HASHED_PASSWORD_PATH = config['passwords']['hashed_password_path']
+
+# Function to read the hashed password from the file
+def read_hashed_password():
+    with open(PW_HASHED_PASSWORD_PATH, 'r') as file:
+        return file.read().strip()
+
+# Use the hash read from the file
+password_hash = read_hashed_password()
 
 # Create the SSH Blueprint
 ssh_bp = Blueprint('ssh', __name__)
@@ -46,28 +57,41 @@ def ssh_settings():
 
         return redirect(url_for('ssh.ssh_settings', new_rem_acc_set=new_rem_acc_set))
 
-    # Handle GET requests and retrieve the 'new_rem_acc_set' from the URL
+    # Handle GET requests and retrieve the 'new_rem_acc_set' and 'new_ssh_password' from the URL
     new_rem_acc_set = request.args.get('new_rem_acc_set')
+    new_ssh_password = request.args.get('new_ssh_password')
 
     # Convert 'new_rem_acc_set' from string to boolean if it exists
     if new_rem_acc_set is not None:
         new_rem_acc_set = new_rem_acc_set.lower() == 'true'
 
     # Render the template with SSH status and success/error indicator
-    return render_template('ssh/ssh_settings.html', ssh_status_message=ssh_status, new_rem_acc_set=new_rem_acc_set)
+    return render_template('ssh/ssh_settings.html', ssh_status_message=ssh_status, new_rem_acc_set=new_rem_acc_set, new_ssh_password=new_ssh_password)
 
 
 # SSH Set Password Route
 @ssh_bp.route('/ssh_set_password', methods=['GET', 'POST'])
 def ssh_set_password():
     if request.method == 'POST':
+        login_password = request.form['login_password']
         new_password = request.form['new_password']
         confirm_password = request.form['confirm_password']
+
+        # Validate HootGuard login password
+        if not check_password_hash(password_hash, login_password):
+            print("Incorrect HootGuard login Password")
+            return redirect('ssh_set_password?login_pwd=False')
+
+        # Initialize `new_rem_acc_set` and `new_ssh_password`
+        new_rem_acc_set = False
 
         # Update the SSH password (for the default user 'hootguard')
         try:
             user = 'hootguard'
-            subprocess.run(['sudo', 'passwd', user], input=f'{new_password}\n{new_password}\n', text=True)
+            result = subprocess.run(
+                ['/usr/bin/sudo', '/usr/local/bin/hootguard', 'set-password', user, new_password],
+                capture_output=True, text=True, check=True
+            )
 
             # Create the flag file to mark SSH as activated
             with open(SSH_FIRST_TIME_FLAG_PATH, 'w') as f:
@@ -75,17 +99,20 @@ def ssh_set_password():
 
             # Now enable SSH after setting the password
             if enable_ssh():
-                # flash('SSH has been activated and password has been set', 'success')
+                print('SSH has been activated and password has been set', 'success')
                 new_rem_acc_set = True
             else:
-                # flash('Failed to activate SSH', 'danger')
-                new_rem_acc_set = False
+                print('Failed to activate SSH', 'danger')
 
-            #return redirect(url_for('ssh_settings'))
-            return redirect(url_for('ssh.ssh_settings', new_rem_acc_set=new_rem_acc_set))
-
+        except subprocess.CalledProcessError as e:
+            print(f'Failed to set password: {e}')
         except Exception as e:
-            flash(f'Failed to set SSH password: {e}', 'danger')
-            return redirect(url_for('ssh.ssh_set_password'))
+            print(f'Failed to set SSH password: {e}', 'danger')
 
-    return render_template('ssh/ssh_set_password.html')
+        # Redirect to settings with new_rem_acc_set
+        return redirect(url_for('ssh.ssh_settings', new_rem_acc_set=new_rem_acc_set))
+
+    #If the password is wrong, call the same login page again with the message wrong password
+    login_pwd = request.args.get('login_pwd')
+    return render_template('ssh/ssh_set_password.html', login_password=login_pwd)
+    #return render_template('ssh/ssh_set_password.html')

@@ -1,4 +1,3 @@
-#
 # Version:      1.1
 # Date:         21 Jan 2024
 # Author:       HootGuard
@@ -67,13 +66,13 @@ def generate_hash_and_save_to_file():
     """
     #password = generate_random_password(6)  # 6 characters long
     password = "HootGuardSentry"  # Standard Password
-    print(f"Generated Password: {password}")
+    # print(f"Generated Password: {password}")
 
     # Set the password for Pi-hole
     set_pihole_password(password)
 
     hashed_password = generate_password_hash(password)
-    print(f"Hashed Password: {hashed_password}")
+    # print(f"Hashed Password: {hashed_password}")
 
     # Encrypt the password
     key = load_or_create_key()

@@ -9,7 +9,11 @@
 # based on the outcome of the update.
 
 import subprocess
-from .global_logger import logger
+import logging
+#from .global_logger import logger
+
+# Configure logging
+logging.basicConfig(filename='/var/log/hootguard_system.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(filename)s - %(message)s')
 
 def update_gravity_db():
     """Update Pi-hole gravity."""
@@ -17,8 +21,11 @@ def update_gravity_db():
     
     try:
         subprocess.run(['pihole', '-g'], check=True)
-        logger.debug("INFO - Pi-hole gravity updated successfully.")
+        logging.info("INFO - Pi-hole gravity updated successfully.")
         return True
     except subprocess.SubprocessError as e:
-        logger.debug(f"ERROR - Error updating Pi-hole gravity: {str(e)}")
+        logging.info(f"ERROR - Error updating Pi-hole gravity: {str(e)}")
         return False
+
+# Run the update function
+update_gravity_db()

@@ -26,8 +26,17 @@ def comment_out_peer_in_wg_config(client_name, interface):
 
     # Use sed to comment out the lines between '### begin <client_name> ###' and '### end <client_name> ###'
     try:
-        comment_command = f"sudo sed -i '/### begin {client_name} ###/,/### end {client_name} ###/s/^/#/' {config_file}"
-        subprocess.run(comment_command, shell=True, check=True)
+        # Call the 'hootguard' command to comment out the peer configuration
+        subprocess.run(
+            [
+                '/usr/bin/sudo',
+                '/usr/local/bin/hootguard',
+                'comment-peer',
+                config_file,
+                client_name,
+            ],
+            check=True,
+        )
         logger.debug(f"Peer configuration for VPN client {client_name} commented out in {config_file}.")
         return True
     except subprocess.CalledProcessError as e:

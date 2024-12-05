@@ -1,3 +1,16 @@
+# Script Name: is_generate_wireguard_interface_conf.py
+# Version: 0.2
+# Author: HootGuard
+# Date: 02. December 2024
+
+# Description:
+# This script generates a WireGuard configuration file for a specified interface (e.g., wg0, wg1).
+# It retrieves the WireGuard configuration directory path from the global configuration and:
+# - Creates the configuration file with interface-specific settings, including the private key, IP addresses, MTU, and port.
+# - Sets the file ownership to `root:root` and permissions to `600` for security.
+# - Logs the success or failure of the operation and clears the private key from memory upon completion.
+# Returns True if successful, False otherwise.
+
 import os
 import sys
 import subprocess
@@ -32,16 +45,32 @@ ListenPort = {listen_port}
         with open(wg_conf_file, 'w') as conf_file:
             conf_file.write(conf_content)
 
+        # Use the hootguard script to set ownership and permissions
         # Change the ownership to root:root
-        subprocess.check_call(['sudo', 'chown', 'root:root', wg_conf_file])
-
+        ownership_command = [
+            '/usr/bin/sudo',
+            '/usr/local/bin/hootguard',
+            'set-file-ownership',
+            wg_conf_file,
+            'root',
+            'root'
+        ]
         # Set the permissions to 600 (rw for owner only)
-        subprocess.check_call(['sudo', 'chmod', '600', wg_conf_file])
+        permissions_command = [
+            '/usr/bin/sudo',
+            '/usr/local/bin/hootguard',
+            'set-file-permissions',
+            wg_conf_file,
+            '600'
+        ]
+
+        subprocess.check_call(ownership_command)
+        subprocess.check_call(permissions_command)
 
         logger.info(f"WireGuard configuration file created: {wg_conf_file}")
         return True
     except Exception as e:
-        logger.info(f"Error creating WireGuard configuration: {e}")
+        logger.debug(f"Error creating WireGuard configuration: {e}")
         return False
     finally:
         # Clear the private key from memory by setting it to None

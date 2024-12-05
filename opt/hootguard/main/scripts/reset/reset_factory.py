@@ -1,3 +1,20 @@
+# Script Name: reset_factory.py
+# Version: 0.7
+# Author: HootGuard
+# Date: 25. November 2024
+
+# Description:
+# This script performs a factory reset for the HootGuard system, clearing all VPN configurations, keys, and logs, 
+# while resetting system settings to defaults. Key actions include:
+# - Deleting VPN client configurations, QR codes, and client keys.
+# - Clearing VPN client database tables and WireGuard keys/configurations.
+# - Resetting IP, password, and DDNS settings to default or dummy values.
+# - Removing traffic control rules and activating factory firewall rules.
+# - Updating the global configuration file with dummy data.
+# - Clearing Pi-hole logs and updating Adblock status.
+# The script ensures the system is fully reset to its factory state, ready for reconfiguration.
+# Returns `True` on success, `False` on failure.
+
 import os
 import shutil
 import sqlite3
@@ -38,7 +55,8 @@ GLOBAL_CONFIG_PATH = config['misc']['global_config_file']
 WG_CONF_WG0_PATH = os.path.join(WG_MAIN_PATH, f"{WG_INT_1}.conf")
 WG_CONF_WG1_PATH = os.path.join(WG_MAIN_PATH, f"{WG_INT_2}.conf")
 GLOBAL_LOGGING_PATH = config['logging']['global_logging_file_path']
-# IPTABLES_FACTORY_RESET_SCRIPT = config['misc']['iptables_factory_reset_file']
+SECURE_RUN_FILE = config['misc']['secure_run_file']
+IPTABLES_FACTORY_RESET_FILE = config['misc']['iptables_factory_reset_file']
 
 
 #def clear_secret_file(file_path):
@@ -119,27 +137,13 @@ def adblock_update_status_file_and_update_gravity_db():
 
 # Remove traffic control from wg1 interface
 def remove_traffic_control():
+    """Clear traffic control rules for wg1 interface."""
     try:
-        # Show current qdisc on wg1 and log it for troubleshooting
-        result_root = subprocess.run(['tc', 'qdisc', 'show', 'dev', 'wg1'], stdout=subprocess.PIPE, text=True)
-        logger.info(f"Current qdisc on wg1: {result_root.stdout}")
-
-        # Check if root qdisc exists and is not 'noqueue' before deleting
-        if 'noqueue' in result_root.stdout:
-            logger.info("Noqueue qdisc found on wg1 interface. No traffic control to remove.")
-        elif 'root' in result_root.stdout:
-            subprocess.run(['sudo', 'tc', 'qdisc', 'del', 'dev', 'wg1', 'root'], check=True)
-            logger.info("Root qdisc removed from wg1 interface.")
-        else:
-            logger.info("No root qdisc found on wg1 interface.")
-
-        # Check if ingress qdisc exists before deleting
-        if 'ingress' in result_root.stdout:
-            subprocess.run(['sudo', 'tc', 'qdisc', 'del', 'dev', 'wg1', 'ingress'], check=True)
-            logger.info("Ingress qdisc removed from wg1 interface.")
-        else:
-            logger.info("No ingress qdisc found on wg1 interface.")
-
+        result = subprocess.run(
+            ['/usr/bin/sudo', SECURE_RUN_FILE, 'clear-traffic-control', 'wg1'],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+        )
+        logger.info(f"Traffic control removed: {result.stdout}")
         return True
     except subprocess.CalledProcessError as e:
         logger.error(f"Failed to remove traffic control from wg1: {e}")
@@ -186,25 +190,37 @@ def delete_flag_file(file_path):
         print(f"Error occurred while deleting the file: {e}")
         return False
 
+# Reset the ssh password back to the defaul password
+# NOTE: The default password is public and intended for initial setup only.
+def reset_ssh_password_to_default():
+    """Reset the ssh password to the default password"""
+    user = 'hootguard'
+    default_password = 'HootGuard'
+    try:
+        result = subprocess.run(
+            ['/usr/bin/sudo', SECURE_RUN_FILE, 'set-password', user, default_password],
+            capture_output=True, text=True, check=True
+        )
+        logger.info(f"SSH password reset to default for user {user}: {result.stdout.strip()}")
+        return True
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Error resetting SSH password for user {user}: {e.stderr.strip()}")
+        return False
+
+
 # Clear existing firewall rules and configure factory reset iptable rules
 def activate_factory_reset_firewall():
+    """Reset firewall rules to factory defaults."""
     try:
-        # Use subprocess to run the shell script
-        result = subprocess.run(['sudo', 'bash', config['misc']['iptables_factory_reset_file']], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-        # Output the result (optional)
-        print("Script output:", result.stdout)
-
-        # Restart the netfilter-persistent service to make the rules persistent
-        subprocess.run(['sudo', 'systemctl', 'restart', 'netfilter-persistent'], check=True)
-        
-        print("Basic firewall rules were successfully set and service restarted")
+        result = subprocess.run(
+            ['/usr/bin/sudo', SECURE_RUN_FILE, 'reset-firewall', IPTABLES_FACTORY_RESET_FILE],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+        )
+        logger.info(f"Firewall successfully reset: {result.stdout}")
         return True  # Return True if the script ran successfully
 
     except subprocess.CalledProcessError as e:
-        # Handle errors if the script execution fails
-        print("Error activating the basic firewall rules occurred while running the script:")
-        print(e.stderr)
+        print(f"Failed to reset firewall: {e.stderr}")
         return False  # Return False if an error occurred
 
 # Empty the hootguard log file
@@ -257,8 +273,6 @@ def reset_vpn_configurations(initial_setup=None):
         if not snooze_update_time(300):
             return False
 
-
-
         # DDNS configurations
         if not ddns_write_and_activate_duckdns('xxxx', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', "ipv4", True): # Delete Duckdns configuration for IPv4
             return False
@@ -292,6 +306,10 @@ def reset_vpn_configurations(initial_setup=None):
 
         # Delete initial setup flag
         if not delete_flag_file(config['misc']['init_flag']): # /opt/hootguard/misc/init_flag
+            return False
+
+        # Reset ssh password to default
+        if not reset_ssh_password_to_default():
             return False
 
         # Disable SSH

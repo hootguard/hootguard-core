@@ -10,10 +10,7 @@
 
 import re
 import subprocess
-#from .global_config import DDNS_USER_DUCKDNS_SCRIPT_PATH, DDNS_USER_DUCKDNS_V6_SCRIPT_PATH
-#from .ddns_update_pivpnHOST_in_setupVars import update_pivpn_host
 from .ddns_update_endpoint_in_global_config import replace_vpn_endpoint
-#from .system_reload_global_config import reload_global_config
 from .global_logger import logger
 from .global_config_loader import load_config
 

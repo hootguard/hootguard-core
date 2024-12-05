@@ -23,7 +23,14 @@
 	.button-size {
 	     width: 200px;
 	}
-	
+	.error-message {
+           display: none;
+           background-color: rgba(255, 255, 255, .2);
+           color: red;
+           padding: 10px;
+           border-radius: 5px;
+           margin-top: -45px;
+        }
     </style>
 </head>
 <body>
@@ -35,8 +42,8 @@
     
     <div class="container">
 
-	<div id="success-message" class="success-message">Status successfully updated</div>
-	<div id="error-message" class="error-message">Error: Failed to update status</div>
+	<div id="success-message" class="success-message">SSH status successfully updated</div>
+	<div id="error-message" class="error-message">Error: Failed to update SSH status</div>
 
         <h1>Remote Access Management</h1>
         <div class="explain-text">
@@ -68,12 +75,16 @@
 	<br>
 
         <!-- Buttons to enable or disable SSH -->
-        <form method="POST">
+        <form method="POST" id="ssh-form">
 	    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             {% if ssh_status_message == 'Active' %}
-                <button class="btn-save" type="submit" name="disable">Deactivate SSH</button>
+                <button class="btn-save" type="submit" name="disable" id="submit-button">
+                    <i class="fa-solid fa-spinner"></i> Deactivate SSH
+                </button>
             {% else %}
-                <button class="btn-save" type="submit" name="enable">Activate SSH</button>
+                <button class="btn-save" type="submit" name="enable" id="submit-button">
+                    <i class="fa-solid fa-spinner"></i> Activate SSH
+                </button>
             {% endif %}
         </form>
 		
@@ -90,7 +101,7 @@
 
     <script src="/hootguard/components/loadComponents.js"></script>
     <script>
-    // Check if remote access success is true and display success message for 3 seconds
+        // Check if remote access success is true and display success message for 3 seconds
     	const newRemAccSet = {{ new_rem_acc_set | tojson }};
         if (newRemAccSet === true) {
         	const successMessage = document.getElementById('success-message');
@@ -105,6 +116,15 @@
                     errorMessage.style.display = 'none';
                 }, 3000);
        }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const submitButton = document.getElementById('submit-button');
+    submitButton.addEventListener('click', function () {
+        const spinner = this.querySelector('.fa-spinner');
+        spinner.style.display = 'inline-block'; // Show the spinner
+        this.childNodes[0].nodeValue = ''; // Clear the button text
+    });
+});
     </script>
 </body>
 </html>

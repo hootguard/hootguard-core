@@ -11,17 +11,6 @@
 # 3. Updates the SQLite database to mark the client as deactivated.
 # 4. Reloads the WireGuard interface to apply the changes.
 
-# Usage:
-# Call the function 'disable_vpn_client(client_name)' to disable a VPN client. The function follows a sequential 
-# process to retrieve client information, comment out the peer configuration in the appropriate WireGuard config file, 
-# deactivate the client in the database, and reload the WireGuard interface to apply the changes. The function 
-# returns True if successful and False if any step fails.
-
-# Change Log:
-# 3. October 2024
-# Initial version for disabling a VPN client by updating the WireGuard config, database, and reloading the interface.
-
-
 from .vpn import vpn_get_client_info
 from .vpn import vpn_reload_wireguard_config
 from .vpn import vpn_deactivate_client_in_db

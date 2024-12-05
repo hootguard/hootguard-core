@@ -8,22 +8,6 @@
 # It provides functions to fetch a temporary client's download and upload speeds, automatic deletion status, 
 # and start and end times. The data retrieved is formatted for easy display, particularly in the case of time values.
 
-# Usage:
-# The script includes the following functions:
-# - 'vpn_get_temp_speeds(username)': Retrieves the download and upload speeds for the specified client from 
-#   the 'temp_vpn_clients' table. Returns a tuple with the speeds or (None, None) if no data is found.
-# - 'vpn_get_automatic_deletion(username)': Retrieves the automatic deletion status for the specified client. 
-#   Returns 'On' if automatic deletion is enabled (1), 'Off' if disabled (0), or None if the client is not found.
-# - 'vpn_get_temp_start_end_time(username)': Retrieves the start and end times for the specified client. 
-#   Formats the times into a human-readable string. Returns a tuple with the formatted start and end times or 
-#   (None, None) if no data is found.
-
-# Change Log:
-# 4. October 2024
-# Initial version that queries the SQLite database for temporary VPN client details, including speeds, 
-# automatic deletion status, and formatted start and end times.
-
-
 import sqlite3
 from datetime import datetime
 #from .global_config import VPN_CLIENTS_DB_PATH

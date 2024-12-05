@@ -18,8 +18,8 @@ Defaults	secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/b
 
 # User privilege specification
 root	ALL=(ALL:ALL) ALL
-hootguard ALL=(ALL) NOPASSWD: /bin/systemctl reboot, /bin/cp, /usr/bin/tee, /sbin/reboot, /sbin/tc, /bin/echo >> /etc/wireguard/wg0.conf, /bin/echo >> /etc/wireguard/wg1.conf, /usr/bin/sed -i /etc/wireguard/wg0.conf, /usr/bin/sed -i /etc/wireguard/wg1.conf, /usr/bin/wg show all, /usr/bin/truncate -s 0 /var/log/pihole.log, /usr/bin/truncate -s 0 /var/log/pihole-FTL.log
-
+hootguard ALL=(ALL) NOPASSWD: /bin/systemctl reboot, /sbin/reboot, /usr/local/bin/hootguard
+	
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
 

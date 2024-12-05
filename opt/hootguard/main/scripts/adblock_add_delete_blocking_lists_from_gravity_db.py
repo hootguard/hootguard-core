@@ -14,7 +14,6 @@ import subprocess
 from .adblock_update_gravity_db import update_gravity_db
 from .global_logger import logger
 from .global_config_loader import load_config
-from .adblock_blocking_lists_cache_handler import fetch_with_cache  # Import the caching function
 
 # Load the global config 
 config = load_config()
@@ -38,12 +37,6 @@ def adblock_add_blocking_list(profiles):
             for profile in profiles:
                 url = ADBLOCK_BLOCKLIST_URLS.get(profile)
                 if url:
-                    # Fetch the blocklist content with caching
-                    blocklist_content = fetch_with_cache(profile, url)
-                    if blocklist_content is None:
-                        logger.debug(f"ERROR - Skipping profile '{profile}' due to fetch error.")
-                        continue
-                    # Insert the URL into the adlist table (content is fetched, but only the URL is stored)
                     cur.execute("INSERT OR IGNORE INTO adlist (address) VALUES (?);", (url,))
                 else:
                     logger.debug(f"ERROR - No URL defined for '{profile}'. Skipping.")

@@ -2,10 +2,8 @@
 import os
 import threading
 import subprocess
-#import logging  # Standard logging library - Foe develpment only
 
 # Third-party imports
-#from flask import Flask, request, render_template, redirect, url_for, session, flash, jsonify, send_from_directory
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify
 from werkzeug.security import check_password_hash
 from dotenv import load_dotenv
@@ -16,7 +14,7 @@ from datetime import timedelta
 #logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Load environment variables from .env file
-load_dotenv(dotenv_path='/opt/hootguard/.env')
+# load_dotenv(dotenv_path='/opt/hootguard/.env')
 
 # --- API SCRIPTS ---
 from scripts.pihole_get_data_from_api_summary import get_data_from_api_summary
@@ -44,6 +42,8 @@ config = load_config()
 PW_HASHED_PASSWORD_PATH = config['passwords']['hashed_password_path']
 # Flag which, if the file does not exist, indicates the first start of HootGuard.
 INITIALIZATION_FLAG = config['misc']['init_flag']
+# Load environment variables from .env file
+load_dotenv(dotenv_path=config['misc']['env_file_path'])
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -206,4 +206,4 @@ def handle_exception(e):
 
 # Run the application
 if __name__ == '__main__':
-    app.run(debug=False, host='0.0.0.0')
+    app.run(debug=False, host='127.0.0.1')

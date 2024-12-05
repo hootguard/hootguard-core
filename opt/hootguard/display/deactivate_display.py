@@ -1,3 +1,16 @@
+# Script Name: deactivate_display.py
+# Version: 0.2
+# Author: HootGuard
+# Date: 25. November 2024
+
+# Description:
+# This script deactivates an I2C-connected LCD display by clearing the screen and turning off the backlight.
+# - Uses the RPLCD library to interface with the LCD.
+# - Locks the display using `display_lock` to ensure thread-safe access.
+# - Clears the display content and disables the backlight.
+# Intended for use in the HootGuard system to power down the display when not needed.
+
+
 from RPLCD.i2c import CharLCD
 from display_lock import display_lock
 

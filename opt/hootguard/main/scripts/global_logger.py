@@ -1,7 +1,7 @@
 # Script Name: global_logger.py
-# Version: 0.2
+# Version: 0.3
 # Author: HootGuard
-# Date: 7. October 2024
+# Date: 24. November 2024
 
 # Description:
 # This script configures the global logging system for the HootGuard project. It sets up a logger named 'HGLog'
@@ -11,38 +11,43 @@
 
 import logging
 import os
-#from .global_config import HOOTGUARD_GLOBAL_LOGGING_FILE_PATH
+from logging.handlers import RotatingFileHandler
 from .global_config_loader import load_config
 
 # Load the global config
 config = load_config()
 
 # Access configuration values
-log_level = config['logging']['level'].upper()
+log_level = config['logging'].get('level', 'INFO').upper()
 HOOTGUARD_GLOBAL_LOGGING_FILE_PATH = config['logging']['global_logging_file_path']
 
 # Configure logging
 logger = logging.getLogger('HGLog')
-logger.setLevel(getattr(logging, log_level, logging.INFO))
+logger.setLevel(log_level)
+logger.propagate = False  # Prevent logs from propagating to the root logger
 
-# Ensure the logger does not propagate to the root logger
-logger.propagate = False
+# Ensure the log directory exists
+log_dir = os.path.dirname(HOOTGUARD_GLOBAL_LOGGING_FILE_PATH)
+os.makedirs(log_dir, exist_ok=True)
 
-# Create a file handler
-file_handler = logging.FileHandler(HOOTGUARD_GLOBAL_LOGGING_FILE_PATH)
-file_handler.setLevel(getattr(logging, log_level, logging.INFO))
+# Add a RotatingFileHandler
+try:
+    file_handler = RotatingFileHandler(
+        HOOTGUARD_GLOBAL_LOGGING_FILE_PATH,
+        maxBytes=10 * 1024 * 1024,  # 10 MB max
+        backupCount=5  # Keep up to 5 backups
+    )
+    file_handler.setLevel(log_level)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s [%(name)s - %(module)s]: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    file_handler.setFormatter(formatter)
+    if not logger.handlers:
+        logger.addHandler(file_handler)
+except (IOError, PermissionError) as e:
+    print(f"Warning: Unable to write to log file {HOOTGUARD_GLOBAL_LOGGING_FILE_PATH}. Falling back to console logging.")
 
-# Create a logging format that includes the script/module name
-formatter = logging.Formatter('%(asctime)s %(levelname)s [%(name)s - %(module)s]: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-file_handler.setFormatter(formatter)
-
-# Add the file handler to the logger
-logger.addHandler(file_handler)
-
-# Optionally, add a console handler to also output logs to the console (for development/debugging)
+# Add a console handler (for development/debugging)
 console_handler = logging.StreamHandler()
-console_handler.setLevel(getattr(logging, log_level, logging.INFO))  # Set console handler log level dynamically
+console_handler.setLevel(log_level)
 console_handler.setFormatter(formatter)
-
-# Add the console handler to the logger
-logger.addHandler(console_handler)
+if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
+    logger.addHandler(console_handler)

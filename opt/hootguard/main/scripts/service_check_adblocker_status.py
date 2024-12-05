@@ -16,7 +16,7 @@ def check_adblocker_status():
     logger.debug("INFO - Checking Pi-hole adblocker status.")
 
     try:
-        result = subprocess.run(['sudo', 'systemctl', 'is-active', 'pihole-FTL'], stdout=subprocess.PIPE, text=True)
+        result = subprocess.run(['/usr/bin/sudo', 'systemctl', 'is-active', 'pihole-FTL'], stdout=subprocess.PIPE, text=True)
         if result.stdout.strip() == 'active':
             logger.debug("INFO - Pi-hole adblocker is active.")
             return 'Active'

@@ -93,6 +93,14 @@
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
+.error-message {
+    display: block;
+    background-color: rgba(255, 255, 255, .2);
+    color: red;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: -45px;
+}
     </style>
 </head>
 <body>
@@ -103,6 +111,19 @@
 <!-- MAIN CONTENT - START -->
 
     <div class="container">
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flashes">
+        {% for category, message in messages %}
+            {% if category == 'error' %}
+                <div class="error-message">{{ message }}</div>
+            {% endif %}
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
         <h1>VPN User Management</h1>
         <div class="explain-text">
 	    Add a VPN user or temporary client by entering a username and clicking "Add" (+). A QR code for setup in the WireGuard app will be generated. View or delete users by clicking the QR or "Delete" button next to their name.

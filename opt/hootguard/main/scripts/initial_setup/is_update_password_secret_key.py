@@ -1,3 +1,15 @@
+# Script Name: is_update_password_secret_key.py
+# Version: 0.1
+# Author: HootGuard
+# Date: 25. November 2024
+
+# Description:
+# This script generates a new Fernet secret key and replaces the existing password secret key file in the HootGuard system.
+# - If the secret key file does not exist, it creates the necessary directory and an empty file.
+# - Replaces the content of the key file with a newly generated Fernet key.
+# Logs the success or failure of the operation to ensure secure handling of password encryption keys.
+# Returns `True` if successful, `False` otherwise.
+
 import os
 from cryptography.fernet import Fernet
 from scripts.global_logger import logger

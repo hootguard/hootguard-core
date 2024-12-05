@@ -1,3 +1,15 @@
+# Script Name: is_update_env_secret_key.py
+# Version: 0.1
+# Author: HootGuard
+# Date: 25. November 2024
+
+# Description:
+# This script generates a new secret key and updates the `.env` file in the HootGuard system. 
+# - If the `.env` file exists, the script updates the `SECRET_KEY` entry or appends it if missing.
+# - If the `.env` file does not exist, it creates the file and adds the `SECRET_KEY`.
+# Logs the success or failure of the operation and ensures secure management of the secret key.
+# Returns `True` if successful, `False` otherwise.
+
 import os
 import secrets
 from scripts.global_logger import logger

@@ -10,19 +10,6 @@
 # represented by their name. The script processes data for different client types and returns the lists 
 # accordingly.
 
-# Usage:
-# Call the function 'get_vpn_clients_data()' to retrieve the lists of active, disabled, and temporary 
-# VPN clients. The function connects to the SQLite database specified by 'VPN_CLIENTS_DB_PATH', queries 
-# for the client data based on their VPN status and type, and returns the data in four lists:
-# - active_clients: List of active clients (vpn_status = 1)
-# - disabled_clients: List of disabled clients (vpn_status = 0)
-# - temp_clients: List of temporary clients ('time_limited' or 'full_limited')
-# - temp_clients_names: List of names for temporary clients
-
-# Change Log:
-# 6. October 2024
-# Initial version for retrieving active, disabled, and temporary VPN client data from the SQLite database.
-
 import sqlite3
 #from .global_config import VPN_CLIENTS_DB_PATH
 from .global_logger import logger

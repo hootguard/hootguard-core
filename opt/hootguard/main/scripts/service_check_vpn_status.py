@@ -21,12 +21,12 @@ def check_vpn_status():
     
     try:
         # Check the status of wg-quick@wg0
-        wg0_result = subprocess.run(['sudo', 'systemctl', 'status', 'wg-quick@wg0'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        wg0_result = subprocess.run(['/usr/bin/sudo', '/usr/bin/systemctl', 'status', 'wg-quick@wg0'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         wg0_active = "Active: active (running)" in wg0_result.stdout or "Active: active (exited)" in wg0_result.stdout
         print(wg0_active)
         
         # Check the status of wg-quick@wg1
-        wg1_result = subprocess.run(['sudo', 'systemctl', 'status', 'wg-quick@wg1'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        wg1_result = subprocess.run(['/usr/bin/sudo', '/usr/bin/systemctl', 'status', 'wg-quick@wg1'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         wg1_active = "Active: active (running)" in wg1_result.stdout or "Active: active (exited)" in wg1_result.stdout
         print(wg1_active)
 

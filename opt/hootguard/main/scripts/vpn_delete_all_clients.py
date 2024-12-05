@@ -1,3 +1,17 @@
+# Script Name: vpn_delete_all_clients.py
+# Version: 0.1
+# Author: HootGuard
+# Date: 25. November 2024
+
+# Description:
+# This script removes all VPN clients and their associated QR code files in the HootGuard system.
+# It performs the following actions:
+# - Deletes all VPN client configurations using the `pivpn -r` command with automatic confirmation.
+# - Deletes all QR code PNG files located in the specified directory from the global configuration.
+# - Logs success or failure for each deletion operation.
+# If any error occurs during the process, the script logs the issue and exits with a failure status.
+
+
 import subprocess
 import os
 import glob

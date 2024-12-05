@@ -38,12 +38,17 @@ def append_peer_to_wg_config(client_name, client_pub_key, client_psk, ipv4_addre
         f"### end {client_name} ###"
     )
 
-    # Use sudo with tee to append the peer config to the WireGuard config file
     try:
-        append_command = f"echo '{peer_config}' | sudo tee -a {config_file} > /dev/null"
-        subprocess.run(append_command, shell=True, check=True)
-        logger.debug(f"Peer configuration for {client_name} added to {config_file}")
+        # Delegate the append operation to the centralized /usr/local/bin/hootguard script
+        result = subprocess.run(
+            [
+                '/usr/bin/sudo', '/usr/local/bin/hootguard', 'append-peer',
+                interface, peer_config
+            ],
+            capture_output=True, text=True, check=True
+        )
+        logger.debug(f"Peer configuration for {client_name} added to {config_file}. Output: {result.stdout}")
         return True
     except subprocess.CalledProcessError as e:
-        logger.debug(f"Failed to append peer configuration for {client_name} to {config_file}: {str(e)}")
+        logger.debug(f"Failed to append peer configuration for {client_name} to {config_file}: {e.stderr}")
         return False

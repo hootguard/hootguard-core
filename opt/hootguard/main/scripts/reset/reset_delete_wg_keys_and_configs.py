@@ -1,3 +1,16 @@
+# Script Name: reset_delete_wg_keys_and_configs.py
+# Version: 0.1
+# Author: HootGuard
+# Date: 25. November 2024
+
+# Description:
+# This script deletes WireGuard private keys, public keys, and configuration files in the HootGuard system.
+# - Identifies files to delete based on paths from the global configuration.
+# - Deletes private keys, public keys, and WireGuard configuration files for interfaces (e.g., wg0, wg1).
+# - Logs or prints the status of each deletion, marking success or failure.
+# Ensures secure cleanup of WireGuard credentials and configurations during system reset or reconfiguration.
+# Returns `True` if all files are successfully deleted, `False` otherwise.
+
 import os
 import pwd
 import grp
