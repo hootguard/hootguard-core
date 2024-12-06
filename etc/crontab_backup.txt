@@ -27,6 +27,6 @@
 0 0 1 */2 * /usr/bin/python3 /opt/hootguard/main/scripts/unbound_update_root_hints.py
 # Update/check the active blocking lists every two weeks at a random time within 24 hours to reduce load
 0 0 */14 * * sleep $((RANDOM % 86400)) && /usr/bin/python3 /opt/hootguard/main/scripts/adblock_update_gravity_db.py
-
 # Check weekly if there is a update available
 0 0 */7 * * python3 /opt/hootguard/scripts/update/update_check_available.py > /dev/null 2>&1
+

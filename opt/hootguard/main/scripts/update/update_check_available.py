@@ -1,3 +1,19 @@
+# Script Name: update_check_available.py
+# Version: 0.2
+# Author: HootGuard
+# Date: 6. December 2024
+
+# Description:
+# This script checks if a new version of the HootGuard system is available by comparing the local version
+# with the remote version stored in the configured GitHub repository. The script performs the following tasks:
+# 1. Fetches the remote version from a specified URL using the `requests` library.
+# 2. Reads the local version from a version file located in the HootGuard system.
+# 3. Compares the remote and local versions using semantic version parsing (via the `packaging.version` module).
+# 4. If the remote version is newer, it logs the availability of an update and creates an update flag file.
+# 5. If the local version is newer or matches the remote version, it removes any existing update flag file.
+#
+# The script ensures robust error handling, logging, and semantic version comparison for reliable update checks.
+
 import requests
 import os
 import sys
