@@ -37,7 +37,17 @@ Detailed installation instructions and documentation will be available at [hootg
 
 HootGuard's repository is organized as follows:
 - ***/etc/*** # Configuration files and system-level settings
-  - ├── main/ # Main scripts and Flask application │ ├── scripts/ # Python scripts for managing VPN, DNS, and system │ ├── static/ # Static files for the web interface (e.g., images, QR codes) │ └── templates/ # HTML templates for the Flask application ├── vpn/ # VPN configuration and keys ├── misc/ # Miscellaneous files (e.g., version tracking, flags)
-- ***/opt/hootguard/*** # Core components of HootGuard 
+- ***/opt/hootguard/*** # Core components of HootGuard
+- - ├── main/ # Main scripts and Flask application
+    - └── blueprints/ # Blueprints for the flask application
+    - └── scripts/ # Python scripts for managing VPN, DNS, and system
+    - └── static/ # Static files for the web interface (e.g., images, QR codes)
+    - └── templates/ # HTML templates for the Flask application
+  - ├── adblock/ # Adblock active profile status
+  - ├── ddns/ # DDNS profiles and profile status
+  - ├── display/ # Optional display management
+  - ├── password/ # Password management
+  - ├── snooze/ # Snooze time and status managment
+  - ├── misc/ # Miscellaneous files (e.g., version tracking, flags)
 - ***/var/www/html/*** # Web interface and navigation files 
 - ***README.md*** # Project overview and usage instructions
