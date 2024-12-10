@@ -36,15 +36,7 @@ Detailed installation instructions and documentation will be available at [hootg
 ## Directory Structure
 
 HootGuard's repository is organized as follows:
-/etc/ # Configuration files and system-level settings 
-/opt/hootguard/ # Core components of HootGuard 
-├── main/ # Main scripts and Flask application 
-│ ├── scripts/ # Python scripts for managing VPN, DNS, and system 
-│ ├── static/ # Static files for the web interface (e.g., images, QR codes) 
-│ └── templates/ # HTML templates for the Flask application 
-├── vpn/ # VPN configuration and keys 
-├── misc/ # Miscellaneous files (e.g., version tracking, flags) 
-/var/www/html/ # Web interface and navigation files 
-├── index.html # Main entry point for the web interface 
-├── navigation/ # Navigation structure and CSS files 
-README.md # Project overview and usage instructions
+- /etc/ # Configuration files and system-level settings 
+- /opt/hootguard/ # Core components of HootGuard 
+- /var/www/html/ # Web interface and navigation files 
+- README.md # Project overview and usage instructions
