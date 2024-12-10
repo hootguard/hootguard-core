@@ -18,7 +18,7 @@ HootGuard is an all-in-one VPN, DNS, and network security solution designed spec
 
 This is a **beta version** currently under testing. Once testing is completed, the beta version will be available for download as a preconfigured SD card image from [hootguard.com](https://hootguard.com), where detailed documentation will also be provided.
 
-HootGuard is actively working on a version optimized for Raspberry Pi 4 for enhanced performance and scalability.
+HootGuard is actively working on a version optimized for Raspberry Pi 3B+. We are currently working on a Version for Raspberry Pi 4 (coming soon).
 
 ---
 
