@@ -20,6 +20,10 @@ import subprocess
 import threading
 import time
 from display_lock import display_lock
+import logging
+
+# Configure logging
+logging.basicConfig(filename='/var/log/hootguard_system.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(filename)s - %(message)s')
 
 # Pin Setup
 BUTTON_PIN = 7  # GPIO 7 (Pin 26)
@@ -35,20 +39,29 @@ display_thread = None
 stop_event = threading.Event()
 
 def display_ip_address():
+    logging.info("Displaying IP address.")
     subprocess.run(["/usr/bin/python3", "/opt/hootguard/display/info_show_ip.py"])
+    logging.debug("IP address displayed successfully.")
 
 def display_snooze_time():
+    logging.info("Displaying snooze time.")
     subprocess.run(["/usr/bin/python3", "/opt/hootguard/display/info_show_snooze.py"])
+    logging.debug("Snooze time displayed successfully.")
 
 def display_version():
+    logging.info("Displaying version information.")
     subprocess.run(["/usr/bin/python3", "/opt/hootguard/display/info_show_version.py"])
+    logging.debug("Version information displayed successfully.")
 
 def deactivate_display():
+    logging.info("Deactivating display.")
     subprocess.run(["/usr/bin/python3", "/opt/hootguard/display/deactivate_display.py"])
+    logging.debug("Display deactivated successfully.")
 
 def handle_display():
     global press_count
     start_time = time.time()
+    logging.debug(f"Handling display for press count: {press_count}")
     with display_lock:
         if press_count == 1:
             display_ip_address()
@@ -62,31 +75,39 @@ def handle_display():
         with display_lock:
             elapsed_time = time.time() - last_press_time
             if elapsed_time > 10:
+                logging.debug("10 seconds of inactivity detected. Resetting press count and deactivating display.")
                 press_count = 0  # Reset press count to 0 to restart from 0 next time
                 deactivate_display()
                 break
         time.sleep(0.1)
 
 def run_show_ip_address(channel):
+    logging.debug("Button press detected.")
     global last_press_time, press_count, display_thread, stop_event
     current_time = time.time()
     if current_time - last_press_time >= debounce_time:
+        logging.debug(f"Debounced button press detected at {current_time}. Incrementing press count.")
         last_press_time = current_time
         with display_lock:
             press_count += 1
+            logging.debug(f"Press count incremented to {press_count}.")
 
         if display_thread and display_thread.is_alive():
+            logging.debug("Stopping the existing display thread.")
             stop_event.set()
             display_thread.join()
 
         stop_event.clear()
+        logging.debug("Starting a new display thread.")
         display_thread = threading.Thread(target=handle_display)
         display_thread.start()
 
 GPIO.add_event_detect(BUTTON_PIN, GPIO.FALLING, callback=run_show_ip_address, bouncetime=200)
+logging.info("GPIO event detection setup complete. Listening for button presses.")
 
 try:
     while True:
         time.sleep(0.1)  # Small sleep to prevent busy waiting
 finally:
     GPIO.cleanup()
+    logging.debug("GPIO cleanup complete. Exiting script.")

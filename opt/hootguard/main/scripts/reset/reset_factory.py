@@ -274,16 +274,16 @@ def reset_vpn_configurations(initial_setup=None):
             return False
 
         # DDNS configurations
-        if not ddns_write_and_activate_duckdns('xxxx', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', "ipv4", True): # Delete Duckdns configuration for IPv4
+        if not ddns_write_and_activate_duckdns('xxxx', 'xxx', "ipv4", True): # Delete Duckdns configuration for IPv4
             return False
 
-        if not ddns_write_and_activate_duckdns('xxxx', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', "ipv6", True): # Delete Duckdns configuration for IPv6
+        if not ddns_write_and_activate_duckdns('xxxx', 'xxx', "ipv6", True): # Delete Duckdns configuration for IPv6
             return False
 
-        if not ddns_write_and_activate_cloudflare('xxx', 'xxxxxx', 'xxxxxx', 'xxxxx', "ipv4", True): # Delete Cloudflare configuration for IPv4
+        if not ddns_write_and_activate_cloudflare('xxx', 'xxx', 'xxx', 'xxx', "ipv4", True): # Delete Cloudflare configuration for IPv4
             return False
 
-        if not ddns_write_and_activate_cloudflare('xxx', 'xxxxxx', 'xxxxxx', 'xxxxx', "ipv6", True): # Delete Cloudflare configuration for IPv6
+        if not ddns_write_and_activate_cloudflare('xxx', 'xxx', 'xxx', 'xxx', "ipv6", True): # Delete Cloudflare configuration for IPv6
             return False
 
         if not ddns_update_status("no-config"): # Reset ddns status

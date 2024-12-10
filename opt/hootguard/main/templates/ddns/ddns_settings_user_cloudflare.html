@@ -34,6 +34,18 @@
 	        align-items: center;
         	justify-content: center;
 	}
+        .fa-spinner {
+            display: none;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .button-size {
+             width: 310px;
+        }
   </style>
 
 </head>
@@ -75,35 +87,16 @@
 			    <span class="small-text">Authentication email</span> 
 			    <br> 
     			    <span class="status-highlight">{{current_auth_email_ipv6}}</span>
-			
 			    <hr>
 			
 			    <span class="small-text">Authentication key</span>
 			    <br> 
-                            <!-- <span class="status-highlight">{{current_auth_key_v6}}</span> -->
-			    <span class="status-highlight" id="auth-key-ipv6"></span>
-      			    <script>
-                            	var currentAuthKeyIPv6 = "{{current_auth_key_ipv6}}";
-				if (currentAuthKeyIPv6 && currentAuthKeyIPv6.length > 8) {
-					var maskedKeyIPv6 = currentAuthKeyIPv6.slice(0, 4) + " •••••••••• " + currentAuthKeyIPv6.slice(-4);
-  					document.getElementById("auth-key-ipv6").textContent = maskedKeyIPv6;
-				}
-			   </script>
-			
+                            <span class="status-highlight">{{current_auth_key_ipv6}}</span>
 			    <hr>
 			
 			    <span class="small-text">Zone identifier</span> 
 			    <br> 
-			    <!-- <span class="status-highlight">{{current_zone_identifier_v6}}</span> -->
-			    <span class="status-highlight" id="zone-identifier-ipv6"></span>
-                            <script>
-                                var currentZoneIdentIPv6 = "{{current_zone_identifier_ipv6}}"; 
-			    	if (currentZoneIdentIPv6 && currentZoneIdentIPv6.length > 8) {
-                                	var maskedZoneIdentIPv6 = currentZoneIdentIPv6.slice(0, 4) + " •••••••••• " + currentZoneIdentIPv6.slice(-4);			    
-                                	document.getElementById("zone-identifier-ipv6").textContent = maskedZoneIdentIPv6;
-			    	}
-                           </script>
-			
+			    <span class="status-highlight">{{current_zone_identifier_ipv6}}</span>
 			    <hr>
 			
 			    <span class="small-text">Record name</span> 
@@ -115,7 +108,7 @@
 	    </table>
 	</div>	
 
-	<form class="frame" id="ip-settings-form-ipv6" action="/ddns_activate_user_cloudflare_ipv6" method="post">
+	<form class="frame" id="ip-settings-form-ipv6" action="/ddns_activate_user_cloudflare_ipv6" method="post" onsubmit="showSpinners(event)">
 		<div class="section">
 		
 			<label for="auth-e-mail-ipv6">Authentication E-mail:</label>
@@ -134,7 +127,7 @@
 			
 			<div class="btn-group">
 				<button type="button" class="btn-clear" onclick="document.getElementById('auth-e-mail-ipv6').value='';document.getElementById('auth-key-ipv6').value='';document.getElementById('zone-identifier-ipv6').value='';document.getElementById('record-name-ipv6').value=''">Clear IPv6 Configuration</button>
-				<button type="submit" class="btn-save">Save & Activate IPv6 Configuration</button>
+				<button type="submit" class="btn-save button-size" id="submit-button">Save & Activate IPv6 Configuration <i class="fa-solid fa-spinner"></i></button>
 			</div>	
 		</div>
 	</form>
@@ -176,35 +169,16 @@
                              <span class="small-text">Authentication email</span>
                              <br>
                              <span class="status-highlight">{{current_auth_email}}</span>
-
                              <hr>
 
                              <span class="small-text">Authentication key</span>
                              <br>
-			     <!--	<span class="status-highlight">{{current_auth_key}}</span> -->
-                             <span class="status-highlight" id="auth-key"></span>
-                             <script>
-                                var currentAuthKey = "{{current_auth_key}}";
-			    	if (currentAuthKey && currentAuthKey.length > 8) {
-	                                var maskedKey = currentAuthKey.slice(0, 4) + " •••••••••• " + currentAuthKey.slice(-4);
-        	                        document.getElementById("auth-key").textContent = maskedKey;
-				}
-                            </script>
-
-                            <hr>
+			     <span class="status-highlight">{{current_auth_key}}</span>
+                             <hr>
 
                             <span class="small-text">Zone identifier</span>
                             <br>
-                            <!-- <span class="status-highlight">{{current_zone_identifier}}</span> -->
-                            <span class="status-highlight" id="zone-identifier"></span>
-                            <script>
-                                var currentZoneIdent = "{{current_zone_identifier}}";
-			    	if (currentZoneIdent && currentZoneIdent.length > 8) {
-	                                var maskedZoneIdent = currentZoneIdent.slice(0, 4) + " •••••••••• " + currentZoneIdent.slice(-4);
-	                                document.getElementById("zone-identifier").textContent = maskedZoneIdent;
-				}
-                            </script>
-
+                            <span class="status-highlight">{{current_zone_identifier}}</span>
                             <hr>
 
                             <span class="small-text">Record name</span>
@@ -216,7 +190,7 @@
             </table>
         </div>
 
-        <form class="frame" id="ip-settings-form" action="/ddns_activate_user_cloudflare_ipv4" method="post">
+        <form class="frame" id="ip-settings-form" action="/ddns_activate_user_cloudflare_ipv4" method="post" onsubmit="showSpinners(event)">
                 <div class="section">
 
                         <label for="auth-e-mail">Authentication E-mail:</label>
@@ -235,7 +209,7 @@
 
                         <div class="btn-group">
                                 <button type="button" class="btn-clear" onclick="document.getElementById('auth-e-mail').value='';document.getElementById('auth-key').value='';document.getElementById('zone-identifier').value='';document.getElementById('record-name').value=''">Clear IPv4 Configuration</button>
-                                <button type="submit" class="btn-save">Save & Activate IPv4 Configuration</button>
+                                <button type="submit" class="btn-save button-size" id="submit-button button-size">Save & Activate IPv4 Configuration <i class="fa-solid fa-spinner"></i></button>
                         </div>
                 </div>
         </form>
@@ -286,8 +260,7 @@
                 });
             });
         });
-    </script>
-    <script>
+
         // Get all the details elements
         const detailsElements = document.querySelectorAll('details');
 
@@ -303,6 +276,24 @@
                 }
             });
         });
+
+    function showSpinners(event) {
+        event.preventDefault(); // Prevent default form submission temporarily
+
+        // Get all submit buttons
+        const submitButtons = document.querySelectorAll('.btn-save');
+
+        // Loop through each button, activate its spinner and disable it
+        submitButtons.forEach((button) => {
+            const spinner = button.querySelector('.fa-spinner');
+            spinner.style.display = 'inline-block'; // Show the spinner
+            button.childNodes[0].nodeValue = ''; // Clear button text
+            button.disabled = true; // Disable the button
+        });
+
+        // Submit the form that triggered the event after showing spinners
+        event.target.submit();
+    }
     </script>
     
     

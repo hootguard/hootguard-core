@@ -158,15 +158,40 @@ def perform_initial_setup(ip_v4_address, subnet_mask, standard_gateway, password
     try:
         # Run the command to enable Pi-hole blocking
         subprocess.run(['pihole', 'enable'], check=True)
-        print("Pi-hole blocking has been enabled.")
+        logger.info("Pi-hole blocking has been enabled.")
         error_occurred = False
     except subprocess.CalledProcessError as e:
-        print(f"Failed to enable Pi-hole blocking: {e}")
+        logg.error(f"Failed to enable Pi-hole blocking: {e}")
         error_occurred = True
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        logger.error(f"An unexpected error occurred: {e}")
         error_occurred = True
     # --- END - Enable Pi-hole blocking ---
+
+    
+    # --- START - Restart PiHole DNS Server to make sure that the DNS works properly ---
+    # Restart the Pi-hole DNS resolver to apply configuration changes.
+    try:
+        # Run the command to restart Pi-hole DNS
+        result = subprocess.run(
+            ["pihole", "restartdns"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True
+        )
+        # Log or print the output if needed
+        logger.info("Pi-hole DNS restart successful.")
+        logger.debug(result.stdout)
+        error_occurred = False
+    except subprocess.CalledProcessError as e:
+        # Handle errors if the command fails
+        logger.error("Failed to restart Pi-hole DNS.")
+        logger.debug(e.stderr)
+        error_occurred = True
+    # --- END - Restart PiHole DNS Server ---
+
+
 
     # --- START - Firewall configuration and restart
     # Activate production firewall and restart the netfilter to activate the rules

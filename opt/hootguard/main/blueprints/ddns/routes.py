@@ -38,28 +38,43 @@ def ddns_activate_hootguard_cloudflare():
 
 @ddns_bp.route('/ddns_settings_user_cloudflare', methods=['GET', 'POST'])
 def ddns_settings_user_cloudflare():
-        # Call the ddns_read_config_cloudflare function to get auth_email, auth_key, zone_identifier and record_name
-        auth_email, auth_key, zone_identifier, record_name, auth_email_ipv6, auth_key_ipv6, zone_identifier_ipv6, record_name_ipv6 = ddns_read_config_cloudflare()
+    # Call the ddns_read_config_cloudflare function to get auth_email, auth_key, zone_identifier, and record_name
+    auth_email, auth_key, zone_identifier, record_name, auth_email_ipv6, auth_key_ipv6, zone_identifier_ipv6, record_name_ipv6 = ddns_read_config_cloudflare()
 
-        # Check if any configuration item is empty.
-        if auth_email == "":
-            auth_email = None
-        if auth_key == "":
-            auth_key = None
-        if zone_identifier == "":
-            zone_identifier = None
-        if record_name == "":
-            record_name = None
-        if auth_email_ipv6 == "":
-            auth_email_ipv6 = None
-        if auth_key_ipv6 == "":
-            auth_key_ipv6 = None
-        if zone_identifier_ipv6 == "":
-            zone_identifier_ipv6 = None
-        if record_name_ipv6 == "":
-            record_name_ipv6 = None
+    # Helper function to mask and shorten sensitive data
+    def mask_and_shorten_data(data, max_length=15):
+        if data and len(data) > 4:  # Check if data is not empty and longer than 4 characters
+            visible_suffix = data[-4:]  # Keep the last 4 characters visible
+            mask_length = max_length - len(visible_suffix)  # Calculate how many characters to mask
+            masked = '*' * mask_length + visible_suffix  # Combine masking and visible characters
+            return masked
+        return data  # Return original data if empty or shorter than 4 characters
 
-        return render_template('ddns/ddns_settings_user_cloudflare.html', current_auth_email=auth_email, current_auth_key=auth_key, current_zone_identifier=zone_identifier, current_record_name=record_name, current_auth_email_ipv6=auth_email_ipv6, current_auth_key_ipv6=auth_key_ipv6, current_zone_identifier_ipv6=zone_identifier_ipv6, current_record_name_ipv6=record_name_ipv6)
+    # Mask and shorten sensitive fields
+    auth_key = mask_and_shorten_data(auth_key)
+    zone_identifier = mask_and_shorten_data(zone_identifier)
+    auth_key_ipv6 = mask_and_shorten_data(auth_key_ipv6)
+    zone_identifier_ipv6 = mask_and_shorten_data(zone_identifier_ipv6)
+
+    # Replace empty strings with None for optional fields
+    auth_email = auth_email or None
+    record_name = record_name or None
+    auth_email_ipv6 = auth_email_ipv6 or None
+    record_name_ipv6 = record_name_ipv6 or None
+
+    # Render the template with the masked and shortened data
+    return render_template(
+        'ddns/ddns_settings_user_cloudflare.html',
+        current_auth_email=auth_email,
+        current_auth_key=auth_key,
+        current_zone_identifier=zone_identifier,
+        current_record_name=record_name,
+        current_auth_email_ipv6=auth_email_ipv6,
+        current_auth_key_ipv6=auth_key_ipv6,
+        current_zone_identifier_ipv6=zone_identifier_ipv6,
+        current_record_name_ipv6=record_name_ipv6
+    )
+
 
 
 @ddns_bp.route('/ddns_activate_user_cloudflare_ipv6', methods=['GET', 'POST'])
@@ -105,10 +120,30 @@ def ddns_activate_user_cloudflare_ipv4():
 
 @ddns_bp.route('/ddns_settings_user_duckdns', methods=['GET', 'POST'])
 def dns_settings_user_duckdns():
-        # Call the ddns_read_config_duckdns function to get domain and token
-        domain, token , ipv6_domain, ipv6_token = ddns_read_config_duckdns()
-        # Render the template with current_domain and current_token values
-        return render_template('ddns/ddns_settings_user_duckdns.html', current_domain=domain, current_token=token, current_domain_ipv6=ipv6_domain, current_token_ipv6=ipv6_token)
+    # Call the ddns_read_config_duckdns function to get domain and token
+    domain, token, ipv6_domain, ipv6_token = ddns_read_config_duckdns()
+
+    # Helper function to mask and shorten sensitive data
+    def mask_and_shorten_data(data, max_length=15):
+        if data and len(data) > 4:  # Check if data is not empty and longer than 4 characters
+            visible_suffix = data[-4:]  # Keep the last 4 characters visible
+            mask_length = max_length - len(visible_suffix)  # Calculate how many characters to mask
+            masked = '*' * mask_length + visible_suffix  # Combine masking and visible characters
+            return masked
+        return data  # Return original data if empty or shorter than 4 characters
+
+    # Mask and shorten token fields
+    token = mask_and_shorten_data(token)
+    ipv6_token = mask_and_shorten_data(ipv6_token)
+
+    # Render the template with the masked and shortened tokens
+    return render_template(
+        'ddns/ddns_settings_user_duckdns.html',
+        current_domain=domain,
+        current_token=token,
+        current_domain_ipv6=ipv6_domain,
+        current_token_ipv6=ipv6_token
+    )
 
 
 @ddns_bp.route('/ddns_activate_user_duckdns_ipv6', methods=['GET', 'POST'])

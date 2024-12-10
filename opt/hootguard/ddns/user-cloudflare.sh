@@ -3,9 +3,9 @@
 
 auth_email="xxx"
 auth_method="global"
-auth_key="xxxxxx"
-zone_identifier="xxxxxx"
-record_name="xxxxx"
+auth_key="xxx"
+zone_identifier="xxx"
+record_name="xxx"
 ttl=3600                                            # Set the DNS TTL (seconds)
 proxy="false"                                       # Set the proxy to true or false
 sitename=""                                         # Title of site "Example Site"

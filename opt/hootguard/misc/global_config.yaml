@@ -44,10 +44,18 @@ misc:
   version_file: /opt/hootguard/misc/version.txt
 network:
   interface_1: eth0
-  interface_1_v4_ip_address: 192.168.0.250/24
+  interface_1_v4_ip_address: 192.168.1.170/24
   interface_1_v6_ip_address: 2a02:abcd:1337:c001:d00d:face:b00c:1234/64
-  primary_dns: 192.168.0.250
+  primary_dns: 192.168.1.170
   secondary_dns: 1.1.1.1
+ntp:
+  servers:
+  - 129.6.15.30
+  - 129.6.15.29
+  - 216.239.35.0
+  - 216.239.35.1
+  - 51.255.39.10
+  - 138.236.128.36
 passwords:
   encrypted_password_path: /opt/hootguard/password/encrypted_password.txt
   hashed_default_password_path: /opt/hootguard/password/hashed_password.txt.default
@@ -70,11 +78,11 @@ vpn:
   endpoint: dummy.yourdns.com
   iptables_settings_file: /opt/hootguard/vpn/vpn_iptables_rules.sh
   wireguard_interface_1: wg0
-  wireguard_interface_1_v4_ip_addresse: 10.0.0.0/24
-  wireguard_interface_1_v6_ip_addresse: fd00:::/64
+  wireguard_interface_1_v4_ip_addresse: 10.160.127.1
+  wireguard_interface_1_v6_ip_addresse: fd11:5ee:bad:c0eb::1
   wireguard_interface_2: wg1
-  wireguard_interface_2_v4_ip_addresse: 10.0.1.0/24
-  wireguard_interface_2_v6_ip_addresse: fd01::/64
+  wireguard_interface_2_v4_ip_addresse: 10.160.100.1
+  wireguard_interface_2_v6_ip_addresse: fd11:5ee:bad:c0e6::1
   wireguard_main_path: /etc/wireguard
   wireguard_wg0_privatekey_path: /etc/wireguard/privatekey_wg0
   wireguard_wg0_publickey_path: /etc/wireguard/publickey_wg0

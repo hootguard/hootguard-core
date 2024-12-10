@@ -21,8 +21,7 @@
 # For more information see the manual pages of crontab(5) and cron(8)
 #
 # m h  dom mon dow   command
-# @reboot python3 /home/hootguard/status/cpustatus.py &
-@reboot python3 /opt/hootguard/display/welcome_message.py
+@reboot /usr/bin/python3 /opt/hootguard/display/welcome_message.py
 # Update/check the root hints for unbound once every two months
 0 0 1 */2 * /usr/bin/python3 /opt/hootguard/main/scripts/unbound_update_root_hints.py
 # Update/check the active blocking lists every two weeks at a random time within 24 hours to reduce load

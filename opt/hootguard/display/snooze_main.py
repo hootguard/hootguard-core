@@ -12,6 +12,7 @@ import subprocess
 import threading
 import time
 import logging
+import sys
 
 # Add the path to global_config_loader.py
 sys.path.append('/opt/hootguard/main/scripts')
@@ -23,8 +24,7 @@ SNOOZE_STATUS_FILE_PATH = config['misc']['snooze_status_file']
 SNOOZE_TIME_FILE_PATH = config['misc']['snooze_time_file']
 
 # Configure logging
-logging.basicConfig(filename='/var/log/hootguard_system.log', level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename='/var/log/hootguard_system.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(filename)s - %(message)s')
 
 # Pin Setup
 BUTTON_PIN = 17  # GPIO 17 (Pin 11)
@@ -58,7 +58,7 @@ def read_snooze_status():
 
 def write_snooze_status(active):
     """Write the current snooze status to a file."""
-    with open(status_file, 'w') as file:
+    with open(SNOOZE_STATUS_FILE_PATH, 'w') as file:
         file.write('active' if active else 'inactive')
 
 def toggle_snooze():

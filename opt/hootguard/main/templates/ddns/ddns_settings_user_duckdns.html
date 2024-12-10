@@ -34,6 +34,18 @@
                 align-items: center;
                 justify-content: center;
         }
+        .fa-spinner {
+            display: none;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .button-size {
+             width: 310px;
+        }
     </style>
 </head>
 <body>
@@ -78,26 +90,18 @@
 			    <span class="small-text">Domain</span> 
 			    <br>
 			    <span class="status-highlight">{{current_domain_ipv6}}</span>
-			    
 			    <hr>
 			    
 			    <span class="small-text">Token</span> 
 			    <br>
-                            <span class="status-highlight" id="token-duck-ipv6"></span>
-                            <script>
-                                var currentTokenIPv6 = "{{current_token_ipv6}}";
-                                if (currentTokenIPv6 && currentTokenIPv6.length > 8) {
-                                        var maskedTokenIPv6 = currentTokenIPv6.slice(0, 4) + " •••••••••• " + currentTokenIPv6.slice(-4);
-                                        document.getElementById("token-duck-ipv6").textContent = maskedTokenIPv6;
-                                }
-                           </script>
+			    <span class="status-highlight">{{current_token_ipv6}}</span>
 			</td>
 		    </tr>
 		</tbody>
 	    </table>
 	</div>	
 
-	<form class="frame" id="ip-settings-form-ipv6" action="/ddns_activate_user_duckdns_ipv6" method="post">
+	<form class="frame" id="ip-settings-form-ipv6" action="/ddns_activate_user_duckdns_ipv6" method="post" onsubmit="showSpinners(event)">
 		<div class="section">
 		
 			<label for="domain-ipv6">Domain(s):</label>
@@ -110,7 +114,7 @@
 
 			<div class="btn-group">
 				<button type="button" class="btn-clear" onclick="document.getElementById('domain-ipv6').value='';document.getElementById('token-ipv6').value=''">Clear IPv6 Configuration</button>
-				<button type="submit" class="btn-save">Save & Activate IPv6 Configuration</button>
+				<button type="submit" class="btn-save button-size">Save & Activate IPv6 Configuration <i class="fa-solid fa-spinner"></i></button>
 			</div>	
 		</div>
 	</form>
@@ -144,26 +148,18 @@
                             <span class="small-text">Domain</span>
                             <br>
                             <span class="status-highlight">{{current_domain}}</span>
-
                             <hr>
 
                             <span class="small-text">Token</span>
                             <br>
-                            <span class="status-highlight" id="token-ipv4"></span>
-                            <script>
-                                var currentToken = "{{current_token}}";
-                                if (currentToken && currentToken.length > 8) {
-                                        var maskedToken = currentToken.slice(0, 4) + " •••••••••• " + currentToken.slice(-4);
-                                        document.getElementById("token-ipv4").textContent = maskedToken;
-                                }
-                           </script>
+                            <span class="status-highlight">{{current_token}}</span>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <form class="frame" id="ip-settings-form" action="/ddns_activate_user_duckdns_ipv4" method="post">
+        <form class="frame" id="ip-settings-form" action="/ddns_activate_user_duckdns_ipv4" method="post" onsubmit="showSpinners(event)">
                 <div class="section">
 
                         <label for="domain">Domain(s):</label>
@@ -176,7 +172,7 @@
 
                         <div class="btn-group">
                                 <button type="button" class="btn-clear" onclick="document.getElementById('domain').value='';document.getElementById('token').value=''">Clear IPv4 Configuration</button>
-                                <button type="submit" class="btn-save">Save & Activate IPv4 Configuration</button>
+                                <button type="submit" class="btn-save button-size">Save & Activate IPv4 Configuration <i class="fa-solid fa-spinner"></i></button>
                         </div>
                 </div>
         </form>
@@ -214,8 +210,7 @@
             });
         });
     });
-    </script>
-    <script>
+
         // Get all the details elements
         const detailsElements = document.querySelectorAll('details');
 
@@ -231,6 +226,24 @@
                 }
             });
         });
+
+    function showSpinners(event) {
+        event.preventDefault(); // Prevent default form submission temporarily
+
+        // Get all submit buttons
+        const submitButtons = document.querySelectorAll('.btn-save');
+
+        // Loop through each button, activate its spinner and disable it
+        submitButtons.forEach((button) => {
+            const spinner = button.querySelector('.fa-spinner');
+            spinner.style.display = 'inline-block'; // Show the spinner
+            button.childNodes[0].nodeValue = ''; // Clear button text
+            button.disabled = true; // Disable the button
+        });
+
+        // Submit the form that triggered the event after showing spinners
+        event.target.submit();
+    }
     </script>
     
 </body>

@@ -2,9 +2,6 @@
 
 This folder can contain the following files:
 
-### adblock_active_profile.txt
-Stores the currently active profiles for the adblocker.
-
 ### global_config.yaml
 Contains all the configuration settings for HootGuard Sentry.
 

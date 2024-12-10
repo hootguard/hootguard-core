@@ -1,0 +1,14 @@
+[Unit]
+Description=Synchronize System Time with NTP Servers
+After=network.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/hootguard/main/
+ExecStart=/usr/bin/python3 -m scripts.ntp_update
+#ExecStart=/usr/bin/python3 /opt/hootguard/main/scripts/ntp_update.py
+User=hootguard
+Group=hootguard
+
+[Install]
+WantedBy=multi-user.target

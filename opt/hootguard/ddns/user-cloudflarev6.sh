@@ -9,15 +9,15 @@
 # -------------------------------------------------- #
 auth_email="xxx"
 auth_method="global"
-auth_key="xxxxxx"
-zone_identifier="xxxxxx"
+auth_key="xxx"
+zone_identifier="xxx"
 
 #############  DNS RECORD CONFIGURATION  #############
 # @record_name          - Which record you want to be synced
 # @ttl                  - DNS TTL (seconds), can be set between (30 if enterprise) 60 and 86400 seconds, or 1 for Automatic
 # @proxy                - Set the proxy to true or false
 # -------------------------------------------------- #
-record_name="xxxxx"
+record_name="xxx"
 ttl=3600
 proxy="false"
 
