@@ -221,16 +221,15 @@
             <div class="heading-text">DDNS Connection: <span class="status-highlight"><span id="ddns-configuration-status">Checking...</span></span></div>
         </div>
 
-    <!-- Update Button -->
-{% if update_available %}
-<div id="update-notification">
-    <!-- Form with hidden CSRF token and button -->
-    <form id="update-form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="button" class="btn-clear" id="update-btn" onclick="triggerUpdate()">Update Available! Click to Install</button>
-    </form>
-</div>
-{% endif %}
+
+        {% if update_available %}
+	<!-- Update Button -->
+        <div id="update-notification" style="margin-top: 40px;">
+            <a href="/system_update">
+                <button type="button" class="btn-clear">Update Available! Click to Install</button>
+            </a>
+        </div>
+        {% endif %}
 
 
     </div>
@@ -321,32 +320,6 @@
         })
         .catch(() => {
             document.getElementById('ddns-configuration-status').innerText = 'Status Check Failed';
-        });
-    }
-
-    function triggerUpdate() {
-        // Get the CSRF token from the hidden input field
-        const csrfToken = document.querySelector('#update-form input[name="csrf_token"]').value;
-
-        fetch('/update_hootguard', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            alert(data.message);
-            location.reload(); // Reload the page after the update
-        })
-        .catch(error => {
-            alert(`Failed to trigger update: ${error.message}`);
         });
     }
     </script>

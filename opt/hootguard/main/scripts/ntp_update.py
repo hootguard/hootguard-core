@@ -49,3 +49,6 @@ def update_ntp_server():
     else:
         logger.error("Failed to sync time with all NTP servers.")
         return False
+
+if __name__ == "__main__":
+    update_ntp_server()

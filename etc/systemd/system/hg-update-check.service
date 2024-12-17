@@ -1,0 +1,12 @@
+[Unit]
+Description=HootGuard Update Check Service
+After=network.target
+
+[Service]
+Type=oneshot
+#ExecStart=/usr/bin/bash -c "/usr/bin/test -f /opt/hootguard/misc/update_pending && sudo /usr/bin/python3 /opt/hootguard/main/scripts/update/update_hootguard_test_2.py"
+ExecStart=/usr/bin/bash -c "/usr/bin/test -f /opt/hootguard/misc/update_pending && sudo /usr/bin/python3 /opt/hootguard/main/scripts/update/update_hootguard.py"
+RemainAfterExit=false
+
+[Install]
+WantedBy=multi-user.target

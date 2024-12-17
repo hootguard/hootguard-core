@@ -2,6 +2,7 @@
 import os
 import threading
 import subprocess
+import time
 
 # Third-party imports
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify
@@ -20,11 +21,14 @@ from datetime import timedelta
 from scripts.pihole_get_data_from_api_summary import get_data_from_api_summary
 # --- INITIAL_SETUP ---
 from scripts.initial_setup_main import perform_initial_setup
+# --- UPDATE ---
+from scripts.update.update_prepare import set_update_pending_flag
 # --- RESET ---
 from scripts.reset_main import perform_reset
 # --- OTHER SCRIPTS ---
 from scripts.global_logger import logger
 from scripts.global_config_loader import load_config
+from scripts.system_reboot import reboot
 # --- BLUEPRINTS ---
 from blueprints.adblock.routes import adblock_bp # Import Adblock blueprint
 from blueprints.ssh.routes import ssh_bp  # Import SSH blueprint
@@ -155,24 +159,34 @@ def home():
         return render_template('home.html', data=data, update_available=update_available)
 
 # Update HootGuard Sentry
-@app.route('/update_hootguard', methods=['POST'])
-def update_hootguard():
-    try:
-        # Run the update script
-        subprocess.run(["python3", "/opt/hootguard/main/scripts/update/update_hootguard.py"], check=True)
-        return jsonify({"status": "success", "message": "Update completed successfully!"})
-    except subprocess.CalledProcessError as e:
-        return jsonify({"status": "error", "message": f"Update failed: {e}"})
+#@app.route('/update_hootguard', methods=['POST'])
+#def update_hootguard():
+#    try:
+#        # Run the update script
+#        subprocess.run(["python3", "/opt/hootguard/main/scripts/update/update_hootguard.py"], check=True)
+#        return jsonify({"status": "success", "message": "Update completed successfully!"})
+#    except subprocess.CalledProcessError as e:
+#        return jsonify({"status": "error", "message": f"Update failed: {e}"})
 
 # Settings
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
         return render_template('settings.html')
 
+# System Update
+@app.route('/system_update')
+def system_update():
+    status = request.args.get('status')
+    if status == "start_update":
+        if set_update_pending_flag():
+            reboot()
+    
+    return render_template('system_update.html')
+
 # System Reset
 @app.route('/system_reset')
 def system_reset():
-        return render_template('system_reset.html')
+    return render_template('system_reset.html')
 
 # Run System Reset
 @app.route('/system_reset_perform')
