@@ -1,4 +1,4 @@
-![HootGuard Dashboard](images/screenshot.png)
+![HootGuard Dashboard](Black_WhiteBackgroud_JPG_500x500.jpg)
 
 # HootGuard
 
