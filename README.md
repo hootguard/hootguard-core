@@ -1,3 +1,5 @@
+![HootGuard Logo](var/www/html/hootguard/White_PNG_385x385.png )
+
 # HootGuard
 
 **Simplify and enhance your home network security, privacy, and ad-blocking—all with an intuitive web interface.**
