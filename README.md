@@ -1,3 +1,5 @@
+![HootGuard Dashboard](images/screenshot.png)
+
 # HootGuard
 
 **Simplify and enhance your home network security, privacy, and ad-blocking—all with an intuitive web interface.**
