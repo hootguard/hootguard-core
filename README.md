@@ -1,9 +1,7 @@
 <p>
   <img src="Black_WhiteBackgroud_JPG_500x500.jpg" alt="HootGuard Logo" width="150" style="float:left; margin-right:20px;" />
-  This text will wrap around the image on the right. You can continue typing here and the text should flow next to the image, rather than below it.
 </p>
 
-# HootGuard
 
 **Simplify and enhance your home network security, privacy, and ad-blocking—all with an intuitive web interface.**
 
