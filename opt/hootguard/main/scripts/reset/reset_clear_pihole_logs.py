@@ -34,7 +34,7 @@ def clear_pihole_logs():
             logger.info(f"DNS query log {PIHOLE_LOG_PATH} cleared successfully.")
         else:
             logger.warning(f"DNS query log {PIHOLE_LOG_PATH} does not exist, skipping.")
-        
+
         # Clear FTL log
         if os.path.exists(FTL_LOG_PATH):
             subprocess.run(['/usr/bin/sudo', SECURE_RUN_FILE, 'clear-log', FTL_LOG_PATH], check=True)
@@ -46,7 +46,7 @@ def clear_pihole_logs():
         subprocess.run(['/usr/bin/sudo', SECURE_RUN_FILE, 'stop-service', 'pihole-FTL'], check=True)
         logger.info("Pi-hole FTL service stopped successfully.")
 
-        # Remove the Pi-hole FTL database        
+        # Remove the Pi-hole FTL database
         if os.path.exists(FTL_DB_PATH):
             subprocess.run(['/usr/bin/sudo', SECURE_RUN_FILE, 'remove-file', FTL_DB_PATH], check=True)
             logger.info(f"FTL database {FTL_DB_PATH} removed successfully.")

@@ -57,7 +57,9 @@ WG_CONF_WG1_PATH = os.path.join(WG_MAIN_PATH, f"{WG_INT_2}.conf")
 GLOBAL_LOGGING_PATH = config['logging']['global_logging_file_path']
 SECURE_RUN_FILE = config['misc']['secure_run_file']
 IPTABLES_FACTORY_RESET_FILE = config['misc']['iptables_factory_reset_file']
-
+ADBLOCK_STATUS_PATH = config['adblock']['status_path']
+ADBLOCK_DB_PATH = config['adblock']['db_path']
+ADBLOCK_BLOCKLIST_URLS = config['adblock']['blocklist_urls']
 
 #def clear_secret_file(file_path):
 #    """Erases the content of the file (.env and secret.key) but keeps the file itself."""
@@ -120,20 +122,49 @@ def delete_client_keys():
         logger.error(f"Failed to delete client key files: {e}")
         return False
 
-# Update adblock statusfile to normal and update gravity database
+# Update adblock status file to "normal" and update the gravity database
 def adblock_update_status_file_and_update_gravity_db():
     try:
-        # Run update_status_file in a separate thread
-        update_status_thread = threading.Thread(target=update_status_file, args=(['normal'],))
-        update_status_thread.start()
-        logger.info("Adblock to update_status_file is running in a separate thread.")
+        # 1. Write "normal" into the status file
+        logger.info("INFO - Writing 'normal' to Adblock status file.")
+        with open(ADBLOCK_STATUS_PATH, "w") as file:
+            file.write("normal\n")
+        logger.info("SUCCESS - Adblock status file updated with 'normal'.")
 
-        time.sleep(5)  # Adding a delay to ensure all background processes complete
-        update_status_thread.join()  # Ensure the update_status_file thread has finished
+        # 2. Connect to the gravity database
+        with sqlite3.connect(ADBLOCK_DB_PATH) as conn:
+            cur = conn.cursor()
+            # Clear all existing entries from adlist before adding the "normal" blocklist
+            logger.info("INFO - Deleting all existing entries from adlist table.")
+            cur.execute("DELETE FROM adlist;")
+
+            # Insert the "normal" blocklist URL
+            normal_url = ADBLOCK_BLOCKLIST_URLS.get("normal")
+            if normal_url:
+                cur.execute("INSERT OR IGNORE INTO adlist (address) VALUES (?);", (normal_url,))
+                logger.info("SUCCESS - 'normal' blocklist URL added to adlist.")
+            else:
+                logger.info("ERROR - No URL defined for 'normal' blocklist. Cannot proceed.")
+                return False
+
+            # Commit the changes to the database
+            conn.commit()
+
+        # 3. Update Pi-hole Gravity database
+        logger.info("INFO - Running 'pihole -g' to update gravity database.")
+        subprocess.run(['pihole', '-g'], check=True)
+        logger.info("SUCCESS - Pi-hole gravity updated successfully.")
+
         return True
+    except sqlite3.DatabaseError as e:
+        logger.error(f"ERROR - Database error while updating blocking lists: {str(e)}")
+        return False
+    except subprocess.CalledProcessError as e:
+        logger.error(f"ERROR - Failed to update Pi-hole gravity database: {str(e)}")
+        return False
     except Exception as e:
-        logger.error(f"Error while updating Adblock status and gravity DB: {e}")
-        return False  # Return False if any error occurs
+        logger.error(f"ERROR - Unexpected error: {str(e)}")
+        return False
 
 # Remove traffic control from wg1 interface
 def remove_traffic_control():

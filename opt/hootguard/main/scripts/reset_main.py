@@ -18,21 +18,12 @@ import subprocess
 from .global_logger import logger
 from .reset import reset_ip_address_and_password
 from .reset import reset_factory
+from .system_reboot import reboot
 
 def perform_reset(reset_option):
     if reset_option == "reset_button":
         if reset_ip_address_and_password.reset_ip_and_password():
-            system_reboot()
+            reboot()
     elif reset_option == "factory_reset":
         if reset_factory.reset_vpn_configurations():
-            system_reboot()
-
-
-def system_reboot():
-    """Reboot the system to apply the new configuration."""
-    try:
-        logger.info("INFO - Rebooting the system.")
-        # Execute the reboot command
-        subprocess.call(['/usr/bin/sudo', 'reboot'])
-    except Exception as e:
-        logger.error(f"ERROR - Error during reboot: {e}")
+            reboot()

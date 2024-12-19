@@ -18,6 +18,7 @@
 
 import yaml
 import subprocess
+import time
 from .password_save_and_reboot import password_save_and_reboot_system
 from .network_save_configuration_and_reboot import network_save_config_and_reboot
 from .initial_setup import is_generate_wireguard_ip_addresses
@@ -26,6 +27,8 @@ from .initial_setup import is_update_password_secret_key
 from .initial_setup import is_generate_wireguard_keys
 from .initial_setup import is_generate_wireguard_interface_conf
 from .initial_setup import is_create_initial_setup_flag_file
+#from .adblock_update_status_file import adblock_profile_change
+#from .adblock_update_gravity_db import update_gravity_db
 from .reset import reset_factory
 from .global_logger import logger
 from scripts.global_config_loader import load_config
@@ -36,6 +39,20 @@ config = load_config()
 def perform_initial_setup(ip_v4_address, subnet_mask, standard_gateway, password):
     # If any error occured, this variable will be set to true
     error_occurred = False
+
+    # --- START - Update Pi-hole gravity database
+    try:
+        logger.debug("INFO - Running 'pihole -g' to update gravity database.")
+        subprocess.run(['pihole', '-g'], check=True)
+        logger.debug("SUCCESS - Pi-hole gravity updated successfully.")
+        error_occurred = False
+    except subprocess.CalledProcessError as e:
+        logger.debug(f"ERROR - Failed to update Pi-hole gravity database: {str(e)}")
+        error_occurred = True
+    except Exception as e:
+        logger.debug(f"ERROR - Unexpected error during Pi-hole gravity update: {str(e)}")
+        error_occurred = True
+    # --- END - Update Pi-hole gravity database ---
 
     # Update the environment secret key (.env)
     if not is_update_env_secret_key.generate_and_update_secret_key():
@@ -152,46 +169,19 @@ def perform_initial_setup(ip_v4_address, subnet_mask, standard_gateway, password
         logger.error(f"Failed to update global config: {e}")
         error_occurred = True
 
-
-    # --- START - Enable Pi-hole blocking ---
-    # Measure to make sure that pihole blocking is enabled
-    try:
-        # Run the command to enable Pi-hole blocking
-        subprocess.run(['pihole', 'enable'], check=True)
-        logger.info("Pi-hole blocking has been enabled.")
-        error_occurred = False
-    except subprocess.CalledProcessError as e:
-        logg.error(f"Failed to enable Pi-hole blocking: {e}")
-        error_occurred = True
-    except Exception as e:
-        logger.error(f"An unexpected error occurred: {e}")
-        error_occurred = True
-    # --- END - Enable Pi-hole blocking ---
-
-    
-    # --- START - Restart PiHole DNS Server to make sure that the DNS works properly ---
-    # Restart the Pi-hole DNS resolver to apply configuration changes.
-    try:
-        # Run the command to restart Pi-hole DNS
-        result = subprocess.run(
-            ["pihole", "restartdns"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            check=True
-        )
-        # Log or print the output if needed
-        logger.info("Pi-hole DNS restart successful.")
-        logger.debug(result.stdout)
-        error_occurred = False
-    except subprocess.CalledProcessError as e:
-        # Handle errors if the command fails
-        logger.error("Failed to restart Pi-hole DNS.")
-        logger.debug(e.stderr)
-        error_occurred = True
-    # --- END - Restart PiHole DNS Server ---
-
-
+    # --- START - Update Pi-hole gravity database
+#    try:
+#        logger.debug("INFO - Running 'pihole -g' to update gravity database.")
+#        subprocess.run(['pihole', '-g'], check=True)
+#        logger.debug("SUCCESS - Pi-hole gravity updated successfully.")
+#        error_occurred = False
+#    except subprocess.CalledProcessError as e:
+#        logger.debug(f"ERROR - Failed to update Pi-hole gravity database: {str(e)}")
+#        error_occurred = True
+#    except Exception as e:
+#        logger.debug(f"ERROR - Unexpected error during Pi-hole gravity update: {str(e)}")
+#        error_occurred = True
+    # --- END - Update Pi-hole gravity database ---
 
     # --- START - Firewall configuration and restart
     # Activate production firewall and restart the netfilter to activate the rules

@@ -57,7 +57,7 @@
 		<span style="font-size: 1.1m;">Initial Setup</span> 
 	</h1>
 
-	<p>Follow the steps below to easily set up you HootGuard Sentry.</p>
+	<p>Follow the steps below to easily set up your HootGuard Sentry.</p>
 
 	<form id="initial-settings-form" action="/initial_setup_run" method="post">	
 
@@ -153,6 +153,11 @@
                 });
 
 		document.getElementById("initial-settings-form").addEventListener("submit", function(event) {
+                        // Validate passwords
+                        if (!validateAndConfirmPasswords()) {
+                            event.preventDefault(); // Prevent form submission if passwords do not match
+                            return;
+                        }
                         const ipInput = document.getElementById("ip-address");
                         const subnetInput = document.getElementById("subnet-mask");
                         const gatewayInput = document.getElementById("standard-gateway");

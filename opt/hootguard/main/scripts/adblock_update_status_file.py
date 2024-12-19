@@ -57,8 +57,7 @@ def adblock_profile_change(form_data):
     """Handle Adblock profile changes based on form data."""
     profiles = ["normal", "enhanced", "max", "adult", "gambling", "social"]
     active_profiles = []
-
-    # Handling the radio selection
+    
     radio_selection = form_data.get('adblock_profile')
     if radio_selection in ["normal", "enhanced", "max"]:
         active_profiles.append(radio_selection)
