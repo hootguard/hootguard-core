@@ -4,7 +4,7 @@
 
 [![License](https://img.shields.io/badge/License-See%20LICENSE-blue.svg)](./LICENSE)
 [![Built with Python](https://img.shields.io/badge/Built%20with-Python%203.x-blue.svg)](#)
-[![Status](https://img.shields.io/badge/Status-Alpha-orange.svg)](#)
+[![Status](https://img.shields.io/badge/Status-Beta-blue.svg)](#)
 
 ## Overview
 
