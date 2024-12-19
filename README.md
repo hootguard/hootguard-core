@@ -1,7 +1,4 @@
-<p>
-  <img src="Black_WhiteBackgroud_JPG_500x500.jpg" alt="HootGuard Logo" width="150" style="float:left; margin-right:20px;" />
-</p>
-
+<img src="Black_WhiteBackgroud_JPG_500x500.jpg" alt="HootGuard Logo" width="200" />
 
 **Simplify and enhance your home network security, privacy, and ad-blocking—all with an intuitive web interface.**
 
