@@ -21,8 +21,6 @@ from datetime import timedelta
 from scripts.pihole_get_data_from_api_summary import get_data_from_api_summary
 # --- INITIAL_SETUP ---
 from scripts.initial_setup_main import perform_initial_setup
-# --- UPDATE ---
-from scripts.update.update_prepare import set_update_pending_flag
 # --- RESET ---
 from scripts.reset_main import perform_reset
 # --- OTHER SCRIPTS ---
@@ -158,15 +156,6 @@ def home():
         # Pass the fetched data and update status to the template
         return render_template('home.html', data=data, update_available=update_available)
 
-# Update HootGuard Sentry
-#@app.route('/update_hootguard', methods=['POST'])
-#def update_hootguard():
-#    try:
-#        # Run the update script
-#        subprocess.run(["python3", "/opt/hootguard/main/scripts/update/update_hootguard.py"], check=True)
-#        return jsonify({"status": "success", "message": "Update completed successfully!"})
-#    except subprocess.CalledProcessError as e:
-#        return jsonify({"status": "error", "message": f"Update failed: {e}"})
 
 # Settings
 @app.route('/settings', methods=['GET', 'POST'])
@@ -178,9 +167,7 @@ def settings():
 def system_update():
     status = request.args.get('status')
     if status == "start_update":
-        if set_update_pending_flag():
-            reboot()
-    
+        subprocess.run(["sudo", "/usr/bin/python3", "/opt/hootguard/main/scripts/update/update_hootguard.py"], check=True)
     return render_template('system_update.html')
 
 # System Reset

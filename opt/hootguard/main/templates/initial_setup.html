@@ -8,16 +8,16 @@
     <link rel="stylesheet" href="hootguard/css/hg-styles.css">
     <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
     <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
-    <link rel="stylesheet" href="hootguard/css/all.css">	
+    <link rel="stylesheet" href="hootguard/css/all.css">
     <style>
-	    .fa-spinner {
-	        display: none;
-        	animation: spin 1s linear infinite;
-	    }	
-	    @keyframes spin {
-	        from { transform: rotate(0deg); }
-        	to { transform: rotate(360deg); }
-    	}
+            .fa-spinner {
+                display: none;
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+        }
         .hrsep {
                 border: none;
                 height: 1px;
@@ -26,20 +26,20 @@
                 margin-bottom: 30px;
                 width: 100%;
         }
-	.section-text {
-		text-align: left;
-		margin-top: 15px;
-		margin-bottom: 15px;
-	}
+        .section-text {
+                text-align: left;
+                margin-top: 15px;
+                margin-bottom: 15px;
+        }
         .form-group {
             margin-bottom: 1.0em;
         }
-    	.checkbox-style {
-       		margin-top: -1.8em;
-	}
-	input[type="checkbox"] {
-        	display: inline-block !important;
-	}
+        .checkbox-style {
+                margin-top: -1.8em;
+        }
+        input[type="checkbox"] {
+                display: inline-block !important;
+        }
     </style>
 </head>
 <body>
@@ -48,70 +48,70 @@
 <!-- NAVIGATION PLACEHOLDER - END -->
 
 <!-- MAIN CONTENT - START -->
-    
+
     <div class="container">
 
         <h1>
-		<span style="font-size: 1.4em;">Welcome to HootGuard</span> 
-		<br>
-		<span style="font-size: 1.1m;">Initial Setup</span> 
-	</h1>
+                <span style="font-size: 1.4em;">Welcome to HootGuard</span>
+                <br>
+                <span style="font-size: 1.1m;">Initial Setup</span>
+        </h1>
 
-	<p>Follow the steps below to easily set up your HootGuard Sentry.</p>
+        <p>Follow the steps below to easily set up your HootGuard Sentry.</p>
 
-	<form id="initial-settings-form" action="/initial_setup_run" method="post">	
+        <form id="initial-settings-form" action="/initial_setup_run" method="post">
 
-		<hr class="hrsep">
-		<div>
-			<u>1. Network Settings</u>
-		</div>
-		<div class="explain-text section-text">
-			To ensure HootGuard Sentry runs smoothly on your home network, it needs a static IP address that matches your network settings. Please provide an appropriate IP address, subnet mask, and standard gateway below. If you're unsure, you can find these details in your router's configuration.
-		</div>
-			<div class="form-group">
-                		<label for="ip-address">IP Address:</label>
-                        	<input type="text" id="ip-address" name="ip_address" placeholder="e.g. 192.168.0.100" required>
-	
-        	                <label for="subnet-mask">Subnet Mask:</label>
-        	                <input type="text" id="subnet-mask" name="subnet_mask" placeholder="e.g. 255.255.255.0" required>
-		
-                	        <label for="standard-gateway">Standard Gateway:</label>
-                        	<input type="text" id="standard-gateway" name="standard_gateway" placeholder="e.g. 192.168.0.1" required>
-	
-        	                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-			</div>
-			
-		<hr class="hrsep">
-		<div>
-			<u>2. Password</u>
-		</div>
-		<div class="explain-text section-text">
-			To keep your HootGuard Sentry secure, please set a password below. This password will also be used for accessing the Pi-hole interface, in case you want to have a closer look at the DNS blocker.
-		</div>
+                <hr class="hrsep">
+                <div>
+                        <u>1. Network Settings</u>
+                </div>
+                <div class="explain-text section-text">
+                        To ensure HootGuard Sentry runs smoothly on your home network, it needs a static IP address that matches your network settings. Please provide an appropriate IP address, subnet mask, and standard gateway below. If you're unsure, you can find these details in your router's configuration.
+                </div>
+                        <div class="form-group">
+                                <label for="ip-address">IP Address:</label>
+                                <input type="text" id="ip-address" name="ip_address" placeholder="e.g. 192.168.0.100" required>
 
-		<div class="form-group" style="margin-bottom: 20px;">
-	                <label for="new-password">New Password:</label>
-                	<input type="password" id="new-password" name="new_password" maxlength="30" placeholder="Enter new password" required>
+                                <label for="subnet-mask">Subnet Mask:</label>
+                                <input type="text" id="subnet-mask" name="subnet_mask" placeholder="e.g. 255.255.255.0" required>
 
-	                <label for="confirm-password">Confirm New Password:</label>
-                	<input type="password" id="confirm-password" name="confirm_password" maxlength="30" placeholder="Confirm new password" required>
-		</div>
+                                <label for="standard-gateway">Standard Gateway:</label>
+                                <input type="text" id="standard-gateway" name="standard_gateway" placeholder="e.g. 192.168.0.1" required>
 
-	            <div class="checkbox-style">
-                	<input type="checkbox" id="show-passwords" onclick="togglePasswords()">
-        	        <label for="show-passwords">Show Password</label>
-	            </div>
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        </div>
 
-		<hr class="hrsep">
-		<div>
-			<u>3. Save Settings and Reboot</u>
-		</div>
-		<div class="explain-text section-text">
-			Review your settings, and if everything looks good, click the button below to apply them.
-		</div>
-		<button type="submit" id="submit-button" class="btn-save">Save Settings & Reboot <i class="fa-solid fa-spinner"></i></button>
-	</form>
-        
+                <hr class="hrsep">
+                <div>
+                        <u>2. Password</u>
+                </div>
+                <div class="explain-text section-text">
+                        To keep your HootGuard Sentry secure, please set a password below. This password will also be used for accessing the Pi-hole interface, in case you want to have a closer look at the DNS blocker.
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                        <label for="new-password">New Password:</label>
+                        <input type="password" id="new-password" name="new_password" maxlength="30" placeholder="Enter new password" required>
+
+                        <label for="confirm-password">Confirm New Password:</label>
+                        <input type="password" id="confirm-password" name="confirm_password" maxlength="30" placeholder="Confirm new password" required>
+                </div>
+
+                    <div class="checkbox-style">
+                        <input type="checkbox" id="show-passwords" onclick="togglePasswords()">
+                        <label for="show-passwords">Show Password</label>
+                    </div>
+
+                <hr class="hrsep">
+                <div>
+                        <u>3. Save Settings and Reboot</u>
+                </div>
+                <div class="explain-text section-text">
+                        Review your settings, and if everything looks good, click the button below to apply them.
+                </div>
+                <button type="submit" id="submit-button" class="btn-save">Save Settings & Reboot <i class="fa-solid fa-spinner"></i></button>
+        </form>
+
     </div>
 
 <!-- FOOTER PLACEHOLDER - START -->
@@ -123,7 +123,7 @@
         <script>
 /* --- IP ADDRESS PART BELOW --- */
 
-		function isValidFormat(str) {
+                function isValidFormat(str) {
                         const blockRegExp = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
                         return blockRegExp.test(str);
                 }
@@ -152,7 +152,7 @@
                         }
                 });
 
-		document.getElementById("initial-settings-form").addEventListener("submit", function(event) {
+                document.getElementById("initial-settings-form").addEventListener("submit", function(event) {
                         // Validate passwords
                         if (!validateAndConfirmPasswords()) {
                             event.preventDefault(); // Prevent form submission if passwords do not match
@@ -176,51 +176,45 @@
 
 /* --- PASSWORD PART BELOW --- */
 
-		function validateAndConfirmPasswords() {
-        		var newPassword = document.getElementById("new-password").value;
-			var confirmPassword = document.getElementById("confirm-password").value;
+                function validateAndConfirmPasswords() {
+                        var newPassword = document.getElementById("new-password").value;
+                        var confirmPassword = document.getElementById("confirm-password").value;
 
-			if (newPassword !== confirmPassword) {
-				alert("Passwords do not match. The passwords you entered are not identical, please check your passwords, they must be identical to move on.");
-				return false;
-			}
-		
-			var confirmReboot = confirm("Please confirm that all your entries are correct. Once confirmed, the changes will be applied, and the system will reboot. Please confirm your entries to proceed.");
-			if (confirmReboot) {
-				showLoadingSpinner();
-				return true;
-			} else {
-				return false;
-			}
-		}
+                        if (newPassword !== confirmPassword) {
+                                alert("Passwords do not match. The passwords you entered are not identical, please check your passwords, they must be identical to move on.");
+                                return false;
+                        }
 
-		function showLoadingSpinner() {
-        		document.querySelector('form').addEventListener('submit', function() {
-            			const submitButton = document.getElementById('submit-button');
-			        const cancelButton = document.getElementById('cancel-button');
-			        const spinner = submitButton.querySelector('.fa-spinner');
-			        // Show spinner and hide Login text
-			        spinner.style.display = 'inline-block';
-		        	submitButton.childNodes[0].nodeValue = ' ';
-			        submitButton.disabled = true; // Disable submit button
-			        cancelButton.disabled = true; // Disable cancel button
-	        	});
-    		}
+                        return true // No confirmation here, just validate and return true if passwords match
+                }
 
-		function togglePasswords() {
-		        var newPassword = document.getElementById("new-password");
-		        var confirmPassword = document.getElementById("confirm-password");
-		        var checkbox = document.getElementById("show-passwords");
+                function showLoadingSpinner() {
+                        document.querySelector('form').addEventListener('submit', function() {
+                                const submitButton = document.getElementById('submit-button');
+                                const cancelButton = document.getElementById('cancel-button');
+                                const spinner = submitButton.querySelector('.fa-spinner');
+                                // Show spinner and hide Login text
+                                spinner.style.display = 'inline-block';
+                                submitButton.childNodes[0].nodeValue = ' ';
+                                submitButton.disabled = true; // Disable submit button
+                                cancelButton.disabled = true; // Disable cancel button
+                        });
+                }
 
-			if (checkbox.checked) {
-			        newPassword.type = "text";
-				confirmPassword.type = "text";
-		        } else {
-			        newPassword.type = "password";
-		                confirmPassword.type = "password";
-		        }
-    		}
+                function togglePasswords() {
+                        var newPassword = document.getElementById("new-password");
+                        var confirmPassword = document.getElementById("confirm-password");
+                        var checkbox = document.getElementById("show-passwords");
+
+                        if (checkbox.checked) {
+                                newPassword.type = "text";
+                                confirmPassword.type = "text";
+                        } else {
+                                newPassword.type = "password";
+                                confirmPassword.type = "password";
+                        }
+                }
     </script>
-    
+
 </body>
 </html>

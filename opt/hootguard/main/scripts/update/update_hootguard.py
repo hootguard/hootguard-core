@@ -1,217 +1,339 @@
+hootguard@HGSentry3:/opt/hootguard/main/scripts/update $ more update_hootguard.py
 # Script Name: update_hootguard.py
-# Version: 0.4
+# Version: 0.6
 # Author: HootGuard
-# Date: 12. December 2024
+# Date: 5. January 2025
 
 # Description:
-# This script automates the update process for the HootGuard system. It performs the following tasks:
-# 1. Backs up critical system directories and files to ensure recovery in case of an update failure.
-# 2. Pulls or clones the latest version of the HootGuard repository from the configured GitHub URL.
-# 3. Synchronizes updated files from the repository to their respective system locations using rsync.
-# 4. Applies correct permissions and ownership to critical files for system security.
-# 5. Validates configurations like sudoers and web server settings to prevent errors post-update.
-# 6. Restarts all necessary services to apply changes.
-# 7. Restarts the system after a successful update.
-# 8. Cleans up temporary files and validates that services are running correctly post-update.
+# This script automates the simplified update process for the HootGuard system by performing the following steps:
+# 1. Creates a tarball backup of critical system paths to facilitate rollback if needed.
+# 2. Clones or pulls the HootGuard Git repository into a temporary directory to fetch the latest updates.
+# 3. Uses rsync to synchronize new files from the repository to the corresponding system directories.
+# 4. Applies appropriate permissions and ownership to ensure proper access control.
+# 5. Reboots the system to finalize the changes.
+#
+# The script includes robust logging, error handling, and shell command execution for a reliable update process.
 
 import os
 import subprocess
 import sys
 import logging
-import yaml
+import shlex
 
-# Add the project root directory to the module search path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../")))
+# ------------------------------------------------------------------------------
+# CONFIGURATION SECTION - adapt paths / repos / services to your environment
+# ------------------------------------------------------------------------------
 
-from main.scripts.global_config_loader import load_config
-from scripts.system_reboot import reboot
+BACKUP_TARBALL_PATH = "/home/hootguard/backup/hootguard_backup.tar.gz"
+# Directories that we want to back up in one go (tar):
+CRITICAL_PATHS = [
+    "/opt/hootguard",
+    "/var/www/html/hootguard",
+    "/etc/unbound/unbound.conf.d",
+    "/etc/pihole/setupVars.conf",
+    "/var/www/html/index.html",
+    "/etc/lighttpd/lighttpd.conf",
+    "/etc/systemd/system/hg-deactivate-i2c.service",
+    "/etc/systemd/system/hg-info-display.service",
+    "/etc/systemd/system/hg-main.service",
+    "/etc/systemd/system/hg-ntp-update.service",
+    "/etc/systemd/system/hg-reset.service",
+    "/etc/systemd/system/hg-snooze.service",
+    "/etc/resolvconf.conf",
+    "/boot/config.txt",
+    "/usr/local/bin/hootguard",
+    #"/etc/dhcpcd.conf.bkp",
+    #"/etc/dhcpcd.conf.original",
+    #"/etc/hostname",
+    #"/etc/hosts",
+]
 
-# Load the global config
-config = load_config()
+# Path to clone or pull the repository:
+LOCAL_REPO_PATH = "/tmp/hootguard_update"
 
-# Configure logging
-logging.basicConfig(filename='/var/log/hootguard_system.log', level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(filename)s - %(message)s')
+# The GitHub repo containing the latest HootGuard code:
+REPO_URL = "https://github.com/hootguard/hootguard-core.git"
 
-# Define the remote version file URL and local version file path
-REPO_URL = config['update']['repo_url']
-LOCAL_REPO_PATH = config['update']['local_repo_path']
-UPDATE_FLAG_FILE = config['update']['update_available_flag']
-UPDATE_PENGING_FLAG_FILE = config['update']['update_pending_flag']
-BACKUP_PATH = os.path.expanduser("~/home/hootguard/backup")
-ROLLBACK_FLAG_FILE = os.path.join(BACKUP_PATH, "rollback_pending")
-CONFIG_PATH = "/opt/hootguard/main/scripts/update/update_hootguard_config.yaml"
+# The top-level directories inside the cloned repo that map to your system dirs.
+# We simply keep it minimal here. You can expand if your repo has more structure.
+# Key = local repo subdirectory, Value = system directory to receive updates
+REPO_TO_SYSTEM_MAP = {
+    "opt/hootguard": "/opt/hootguard",
+    "var/www/html/hootguard": "/var/www/html/hootguard",
+    "etc/unbound/unbound.conf.d": "/etc/unbound/unbound.conf.d",
+    "etc/pihole/setupVars.conf": "/etc/pihole/setupVars.conf",
+    "var/www/html/index.html": "/var/www/html/index.html",
+    "etc/lighttpd/lighttpd.conf": "/etc/lighttpd/lighttpd.conf",
+    "etc/systemd/system/hg-deactivate-i2c.service": "/etc/systemd/system/hg-deactivate-i2c.service",
+    "etc/systemd/system/hg-info-display.service": "/etc/systemd/system/hg-info-display.service",
+    "etc/systemd/system/hg-main.service": "/etc/systemd/system/hg-main.service",
+    "etc/systemd/system/hg-ntp-update.service": "/etc/systemd/system/hg-ntp-update.service",
+    "etc/systemd/system/hg-reset.service": "/etc/systemd/system/hg-reset.service",
+    "etc/systemd/system/hg-snooze.service": "/etc/systemd/system/hg-snooze.service",
+    "etc/resolvconf.conf": "/etc/resolvconf.conf",
+    "boot/config.txt": "/boot/config.txt",
+    "usr/local/bin/hootguard": "/usr/local/bin/hootguard",
+    #"etc/dhcpcd.conf.bkp": "/etc/dhcpcd.conf.bkp",
+    #"etc/dhcpcd.conf.original": "/etc/dhcpcd.conf.original",
+    #"etc/hostname": "/etc/hostname",
+    #"etc/hosts": "/etc/hosts"
+}
 
-# Load YAML configuration
-try:
-    def load_yaml_config(path):
-        with open(path, "r") as file:
-            return yaml.safe_load(file)
+# Optional: A list of chmod or chown commands to ensure correct permissions
+# after the update. Example structure: (command, path).
+# In practice, you might read this from a config, or keep it inline here.
+PERMISSIONS_COMMANDS = [
+#    ("chmod 0644" "/opt/hootguard"),
+#    ("chown hootguard:hootguard", "/opt/hootguard"),
+#    ("chmod 0644", "/opt/hootguard/adblock"),
+#    ("chown hootguard:hootguard", "/opt/hootguard/adblock"),
+#    ("chmod 0644", "/opt/hootguard/ddns"),
+#    ("chown hootguard:hootguard", "/opt/hootguard/ddns"),
+#    ("chmod 0644", "/opt/hootguard/display"),
+#    ("chown hootguard:hootguard", "/opt/hootguard/display"),
+#    ("chmod 0644", "/opt/hootguard/main"),
+#    ("chown hootguard:hootguard", "/opt/hootguard/main"),
+#    ("chmod 0644", "/opt/hootguard/misc"),
+#    ("chown hootguard:hootguard", "/opt/hootguard/misc"),
+#    ("chmod 0644", "/opt/hootguard/password"),
+#    ("chown hootguard:hootguard", "/opt/hootguard/password"),
+#    ("chmod 0644", "/opt/hootguard/snooze"),
+#    ("chown hootguard:hootguard", "/opt/hootguard/snooze"),
+#    ("chmod 0644", "/opt/hootguard/vpn"),
+#    ("chown hootguard:hootguard", "/opt/hootguard/vpn"),
 
-    config = load_yaml_config(CONFIG_PATH)
-    BACKUP_ITEMS = config["backup_items"]
-    EXCLUDE_FROM_UPDATE = config["exclude_from_update"]
-    PERMISSIONS = config["permissions"]
-    OWNER_UPDATES = config["ownership"]
-except Exception as e:
-    logging.error(f"Failed to load configuration file: {e}")
-    sys.exit(1)
+    ("find /opt/hootguard -type d -exec chmod 0755 {} +", ""),  # Apply 0755 to all directories
+    ("find /opt/hootguard -type f -exec chmod 0644 {} +", ""),  # Apply 0644 to all files
+    ("chown -R hootguard:hootguard /opt/hootguard", "")         # Recursively set ownership
 
-def run_command(command):
-    """Execute a shell command and handle errors."""
+    ("chmod 0644", "/etc/lighttpd/lighttpd.conf"),
+    ("chown root:root", "/etc/lighttpd/lighttpd.conf"),
+
+    ("chmod 0755", "/boot/config.txt"),
+    ("chown root:root", "/boot/config.txt"),
+
+    ("chmod 0644", "/etc/pihole/setupVars.conf"),
+    ("chown root:root", "/etc/pihole/setupVars.conf"),
+
+    ("chmod 0644", "/etc/sudoers.d/hootguard"),
+    ("chown root:root", "/etc/sudoers.d/hootguard"),
+
+    ("chmod 0644", "/etc/systemd/system/hg-deactivate-i2c.service"),
+    ("chown root:root", "/etc/systemd/system/hg-deactivate-i2c.service"),
+
+    ("chmod 0644", "/etc/systemd/system/hg-info-display.service"),
+    ("chown root:root", "/etc/systemd/system/hg-info-display.service"),
+
+    ("chmod 0644", "/etc/systemd/system/hg-main.service"),
+    ("chown root:root", "/etc/systemd/system/hg-main.service"),
+
+    ("chmod 0644", "/etc/systemd/system/hg-ntp-update.service"),
+    ("chown root:root", "/etc/systemd/system/hg-ntp-update.service"),
+
+    ("chmod 0644", "/etc/systemd/system/hg-reset.service"),
+    ("chown root:root", "/etc/systemd/system/hg-reset.service"),
+
+    ("chmod 0644", "/etc/systemd/system/hg-snooze.service"),
+    ("chown root:root", "/etc/systemd/system/hg-snooze.service"),
+
+    ("chmod 0644", "/etc/unbound/unbound.conf.d/pi-hole.conf"),
+    ("chown root:root", "/etc/unbound/unbound.conf.d/pi-hole.conf"),
+
+    ("chmod 0644", "/etc/resolvconf.conf]"),
+    ("chown root:root", "/etc/resolvconf.conf]"),
+
+    ("chmod 0700", "/usr/local/bin/hootguard"),
+    ("chown root:root", "/usr/local/bin/hootguard"),
+
+#    ("chmod 0644", "/etc/dhcpcd.conf.bkp"),
+#    ("chown root:root", "/etc/dhcpcd.conf.bkp"),
+
+#    ("chmod 0644", "/etc/dhcpcd.conf.original"),
+#    ("chown root:root", "/etc/dhcpcd.conf.original"),
+
+#    ("chmod 0644", "/etc/hostname"),
+#    ("chown root:root", "/etc/hostname"),
+
+#    ("chmod 0644", "/etc/hosts"),
+#    ("chown root:root", "/etc/hosts"),
+]
+
+# ------------------------------------------------------------------------------
+# LOGGING SETUP - logs both to console and /var/log/hootguard_system.log (example)
+# ------------------------------------------------------------------------------
+
+LOG_FILENAME = "/var/log/hootguard_system.log"
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s [%(filename)s] %(message)s",
+    handlers=[
+        logging.FileHandler(LOG_FILENAME),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
+# ------------------------------------------------------------------------------
+# HELPER FUNCTIONS
+# ------------------------------------------------------------------------------
+
+def run_shell_command(command):
+    """
+    Runs a shell command (string), logs success/error, and returns (True/False).
+    Example: run_shell_command("tar -czf backup.tar.gz /etc/lighttpd")
+    """
+    logging.info(f"Running command: {command}")
     try:
-        subprocess.run(command, check=True, shell=True)
-        logging.info(f"Successfully executed: {command}")
+        # Using shlex.split for safer handling of spaces, but direct string can work if well-formed
+        subprocess.run(shlex.split(command), check=True)
+        logging.info(f"Command succeeded: {command}")
         return True
     except subprocess.CalledProcessError as e:
-        logging.error(f"Error executing {command}: {e}")
+        logging.error(f"Command failed ({e.returncode}): {e.cmd}")
         return False
 
-def create_backup():
-    """Create a backup of specified system files and directories."""
-    os.makedirs(BACKUP_PATH, exist_ok=True)
-    for src, dest_name in BACKUP_ITEMS.items():
-        backup_dest = os.path.join(BACKUP_PATH, dest_name)
+def create_backup_tar():
+    """
+    Creates a tar.gz backup of CRITICAL_PATHS and stores it in BACKUP_TARBALL_PATH.
+    If the tar creation fails, return False. Otherwise True.
+    """
+    # Ensure the parent directory of the tarball exists
+    backup_dir = os.path.dirname(BACKUP_TARBALL_PATH)
+    os.makedirs(backup_dir, exist_ok=True)
 
-        if os.path.isdir(src):
-            logging.info(f"Backing up directory {src} to {backup_dest}, excluding '__pycache__'...")
-            # Exclude __pycache__ directories
-            if not run_command(f"rsync -a --exclude='__pycache__' {src}/ {backup_dest}/"):
-                logging.error(f"Failed to back up directory {src}")
-                return False
-        elif os.path.isfile(src):
-            logging.info(f"Backing up file {src} to {backup_dest}...")
-            if not run_command(f"cp {src} {backup_dest}"):
-                logging.error(f"Failed to back up file {src}")
-                return False
-        else:
-            logging.warning(f"Skipping {src}, as it does not exist.")
+    # Build the tar command
+    # --exclude='__pycache__' as an example, add more excludes as needed.
+    # Using 'zcf' -> z = gzip, c = create, f = filename
+    paths_str = " ".join(CRITICAL_PATHS)
+    #command = f"tar -zcf {BACKUP_TARBALL_PATH} --exclude='__pycache__' {paths_str}"
+    command = (
+        f"tar -zcf {BACKUP_TARBALL_PATH} "
+        f"--exclude='__pycache__' "
+        f"--exclude='/var/www/html/admin' "  # <--- Exclude admin folder here
+        f"{paths_str}"
+    )
 
-    return True
+    logging.info(f"Creating backup tarball at: {BACKUP_TARBALL_PATH}")
+    return run_shell_command(command)
 
-def update_repository():
-    """Clone or pull the latest changes from the repository."""
-    if os.path.exists(LOCAL_REPO_PATH):
-        logging.info("Pulling latest changes from repository...")
-        return run_command(f"git -C {LOCAL_REPO_PATH} pull")
+def clone_or_pull_repo():
+    """
+    Clones the repo into LOCAL_REPO_PATH if it doesn't exist.
+    If it does exist, attempts a 'git pull'. Return True on success, False otherwise.
+    """
+    if os.path.isdir(LOCAL_REPO_PATH):
+        logging.info("Local repo path exists, pulling changes...")
+        command = f"git -C {LOCAL_REPO_PATH} pull"
     else:
-        logging.info("Cloning repository for the first time...")
-        return run_command(f"git clone {REPO_URL} {LOCAL_REPO_PATH}")
+        logging.info("Cloning the repo for the first time...")
+        command = f"git clone {REPO_URL} {LOCAL_REPO_PATH}"
 
-def copy_files():
-    """Synchronize updated files to their respective locations."""
-    for folder, dest in BACKUP_ITEMS.items():
-        if folder in EXCLUDE_FROM_UPDATE:
-            logging.info(f"Skipping update for excluded file: {folder}")
+    return run_shell_command(command)
+
+def apply_new_files():
+    """
+    RSync new files from the local cloned repo to the system directories or files.
+    Loops over REPO_TO_SYSTEM_MAP. Return True on full success, False on any error.
+    """
+    for local_subpath, system_dest in REPO_TO_SYSTEM_MAP.items():
+        repo_path = os.path.join(LOCAL_REPO_PATH, local_subpath)  # e.g. /tmp/hootguard_update/etc/hostname
+
+        if not os.path.exists(repo_path):
+            logging.warning(f"Repo subpath not found, skipping: {repo_path}")
             continue
 
-        if folder.startswith("/usr/local/bin"):
-            source_path = os.path.join(LOCAL_REPO_PATH, "usr/local/bin")
+        # Check if the repo path is a directory or a file.
+        if os.path.isdir(repo_path):
+            # Directory => add trailing slash to both sides
+            command = f"rsync -a {repo_path}/ {system_dest}/"
+            logging.info(f"Syncing directory {repo_path}/ -> {system_dest}/ ...")
+        elif os.path.isfile(repo_path):
+            # File => no trailing slash on the source
+            # Destination could be a directory or a file path
+            if os.path.isdir(system_dest):
+                # If system_dest is a directory, place the file inside it
+                command = f"rsync -a {repo_path} {system_dest}/"
+                logging.info(f"Syncing file {repo_path} -> directory {system_dest}/ ...")
+            else:
+                # If system_dest is the exact file path
+                command = f"rsync -a {repo_path} {system_dest}"
+                logging.info(f"Syncing file {repo_path} -> file {system_dest} ...")
         else:
-            source_path = os.path.join(LOCAL_REPO_PATH, folder)
+            logging.warning(f"Path {repo_path} is neither file nor directory, skipping.")
+            continue
 
-        if os.path.exists(source_path):
-            logging.info(f"Updating {dest} from {source_path}...")
-            if not run_command(f"rsync -a {source_path}/ {dest}/"):
-                logging.error(f"Failed to copy files from {source_path} to {dest}")
-                return False
+        if not run_shell_command(command):
+            logging.error(f"Failed to rsync from {repo_path} to {system_dest}")
+            return False
+
     return True
 
 def apply_permissions():
-    """Apply correct permissions to critical files."""
-    for cmd, file_path in PERMISSIONS:
-        if os.path.exists(file_path):
-            logging.info(f"Applying permissions: {cmd}")
-            if not run_command(cmd):
-                logging.error(f"Failed to apply permissions for {file_path}")
+    """
+    Applies predefined chmod/chown commands from PERMISSIONS_COMMANDS.
+    Return True if all succeed, False if any fail.
+    """
+    for (cmd, path) in PERMISSIONS_COMMANDS:
+        if os.path.exists(path):
+            full_cmd = f"{cmd} {path}"
+            logging.info(f"Applying: {full_cmd}")
+            if not run_shell_command(full_cmd):
                 return False
+        else:
+            logging.warning(f"Path not found for permission update: {path}")
     return True
 
-def update_ownership():
-    """Update ownership for critical files."""
-    for cmd, file_path in OWNER_UPDATES:
-        if os.path.exists(file_path):
-            logging.info(f"Updating ownership: {cmd}")
-            if not run_command(cmd):
-                logging.error(f"Failed to update ownership for {file_path}")
-                return False
-    return True
+def reboot():
+    """
+    Reboots the system.
+    """
+    logging.info("Rebooting the system now...")
+    # Make sure you REALLY want to do this automatically.
+    run_shell_command("reboot")
 
-def cleanup_temp_files():
-    """Clean up temporary files."""
-    # Delete update available flag file (/opt/hootguard/misc/update_available)
-    if os.path.exists(UPDATE_FLAG_FILE):
-        try:
-            os.remove(UPDATE_FLAG_FILE)
-            logging.info(f"Removed temporary file: {UPDATE_FLAG_FILE}")
-        except Exception as e:
-            logging.error(f"Failed to remove temporary file {UPDATE_FLAG_FILE}: {e}")
-            return False
-    # Delete update pending flag file (/opt/hootguard/misc/update_pending)
-    if os.path.exists(UPDATE_PENDING_FLAG_FILE):
-        try:
-            os.remove(UPDATE_FLAG_FILE)
-            logging.info(f"Removed temporary file: {UPDATE_PENDING_FLAG_FILE}")
-        except Exception as e:
-            logging.error(f"Failed to remove temporary file {UPDATE_PENDING_FLAG_FILE}: {e}")
-            return False
-    return True
-
-def mark_rollback_pending():
-    """Mark that a rollback may be needed."""
-    with open(ROLLBACK_FLAG_FILE, "w") as file:
-        file.write("ROLLBACK_PENDING")
-    logging.info("Rollback pending flag set.")
-
-def clear_rollback_flag():
-    """Clear the rollback flag."""
-    if os.path.exists(ROLLBACK_FLAG_FILE):
-        os.remove(ROLLBACK_FLAG_FILE)
-        logging.info("Rollback pending flag cleared.")
+# ------------------------------------------------------------------------------
+# MAIN FLOW
+# ------------------------------------------------------------------------------
 
 def main():
-    """Main update process with rollback support."""
-    logging.info("Starting HootGuard update process...")
+    """
+    Main update flow:
+    1. Create a tar backup of critical paths.
+    2. Clone or pull the new repository code.
+    3. Rsync new files to the system.
+    4. Apply permissions.
+    5. Reboot.
+    """
+    logging.info("=== Starting HootGuard Simplified Update Process ===")
 
-    try:
-        mark_rollback_pending()
-
-        if not create_backup():
-            logging.error("Failed to create backups. Aborting update.")
-            sys.exit(1)
-
-        if not update_repository():
-            logging.error("Failed to update the repository.")
-            sys.exit(1)
-
-        if not copy_files():
-            logging.error("Failed to copy updated files.")
-            sys.exit(1)
-
-        if not apply_permissions():
-            logging.error("Failed to apply correct permissions.")
-            sys.exit(1)
-
-        if not update_ownership():
-            logging.error("Failed to update ownerships.")
-            sys.exit(1)
-
-        if not cleanup_temp_files():
-            logging.warning("Failed to clean temporary files. Update process will continue.")
-
-        clear_rollback_flag()
-
-        logging.info("HootGuard update completed successfully! Restarting the system...")
-        reboot()
-
-    except Exception as e:
-        logging.error(f"An error occurred: {e}")
-        logging.warning("Calling rollback script...")
-        try:
-            subprocess.run(["python3", "/opt/hootguard/main/scripts/update/update_hootguard_rollback.py"], check=True)
-        except subprocess.CalledProcessError as e:
-            logging.error(f"Failed to execute rollback script: {e}")
+    # Step 1: Backup
+    logging.info("STEP 1: Backup critical paths.")
+    if not create_backup_tar():
+        logging.error("Backup failed! Aborting update.")
         sys.exit(1)
+
+    # Step 2: Clone or Pull Repo
+    logging.info("STEP 2: Retrieve latest HootGuard code from GitHub.")
+    if not clone_or_pull_repo():
+        logging.error("Repo retrieval failed! Aborting update.")
+        sys.exit(1)
+
+    # Step 3: Apply new files from repo
+    logging.info("STEP 3: RSync new files onto the system.")
+    if not apply_new_files():
+        logging.error("File sync failed! Aborting update.")
+        # Optional: Could do a rollback here by untarring backup if you want.
+        sys.exit(1)
+
+    # Step 4: Apply permissions
+    logging.info("STEP 4: Apply required permissions.")
+    if not apply_permissions():
+        logging.warning("Some permission commands failed. Check logs.")
+        # You could decide to abort or continue. We'll just continue for now.
+
+    # Step 5: Reboot
+    logging.info("STEP 5: Reboot system to finalize changes.")
+    reboot()
+
 
 if __name__ == "__main__":
     main()
