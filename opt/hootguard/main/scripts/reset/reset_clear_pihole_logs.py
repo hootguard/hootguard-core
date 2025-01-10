@@ -28,6 +28,10 @@ FTL_DB_PATH = "/etc/pihole/pihole-FTL.db"
 
 def clear_pihole_logs():
     try:
+	# Flush pihole log and database
+        subprocess.run(['pihole', '-f'], check=True)
+        logger.info("Pi-hole log and databased flushed successfully.")
+
         # Clear DNS query log
         if os.path.exists(PIHOLE_LOG_PATH):
             subprocess.run(['/usr/bin/sudo', SECURE_RUN_FILE, 'clear-log', PIHOLE_LOG_PATH], check=True)

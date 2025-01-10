@@ -25,6 +25,7 @@ import yaml
 from .reset_ip_address_and_password import reset_ip_and_password
 from .reset_delete_wg_keys_and_configs import delete_wg_keys_and_configs
 from .reset_clear_pihole_logs import clear_pihole_logs
+from .reset_clear_system_logs import clear_system_logs
 from scripts.initial_setup import is_update_env_secret_key
 from scripts.ssh_control_service import disable_ssh
 from scripts.ddns_configure_user_duckdns import ddns_write_and_activate_duckdns
@@ -349,6 +350,10 @@ def reset_vpn_configurations(initial_setup=None):
 
         # Clear pi-hole logs and database
         if not clear_pihole_logs():
+            return False
+
+        # Clear system logs and delete .gz log archived files
+        if not clear_system_logs():
             return False
 
         # Clear existing firewall rules and activate basic factory firewall rules

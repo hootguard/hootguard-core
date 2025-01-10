@@ -22,6 +22,8 @@ def update_gravity_db():
     try:
         subprocess.run(['pihole', '-g'], check=True)
         logging.info("INFO - Pi-hole gravity updated successfully.")
+        subprocess.run(['pihole', 'enable'], check=True)
+        logging.info("INFO - Pi-hole successfully enabled.")
         return True
     except subprocess.SubprocessError as e:
         logging.info(f"ERROR - Error updating Pi-hole gravity: {str(e)}")

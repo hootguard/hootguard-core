@@ -27,8 +27,6 @@ from .initial_setup import is_update_password_secret_key
 from .initial_setup import is_generate_wireguard_keys
 from .initial_setup import is_generate_wireguard_interface_conf
 from .initial_setup import is_create_initial_setup_flag_file
-#from .adblock_update_status_file import adblock_profile_change
-#from .adblock_update_gravity_db import update_gravity_db
 from .reset import reset_factory
 from .global_logger import logger
 from scripts.global_config_loader import load_config
@@ -74,7 +72,6 @@ def perform_initial_setup(ip_v4_address, subnet_mask, standard_gateway, password
         logger.info("Error: Failed to save ip settings and apply the configuration.")
         error_occurred = True
 
-    # --- START - IP Address generation ---
     # --- START - IP Address generation ---
     try:
         ipv4_wg0 = is_generate_wireguard_ip_addresses.generate_ipv4()
@@ -169,28 +166,11 @@ def perform_initial_setup(ip_v4_address, subnet_mask, standard_gateway, password
         logger.error(f"Failed to update global config: {e}")
         error_occurred = True
 
-    # --- START - Update Pi-hole gravity database
-#    try:
-#        logger.debug("INFO - Running 'pihole -g' to update gravity database.")
-#        subprocess.run(['pihole', '-g'], check=True)
-#        logger.debug("SUCCESS - Pi-hole gravity updated successfully.")
-#        error_occurred = False
-#    except subprocess.CalledProcessError as e:
-#        logger.debug(f"ERROR - Failed to update Pi-hole gravity database: {str(e)}")
-#        error_occurred = True
-#    except Exception as e:
-#        logger.debug(f"ERROR - Unexpected error during Pi-hole gravity update: {str(e)}")
-#        error_occurred = True
-    # --- END - Update Pi-hole gravity database ---
-
     # --- START - Firewall configuration and restart
     # Activate production firewall and restart the netfilter to activate the rules
     try:
         # Use subprocess to run the shell script
         result = subprocess.run(['/usr/bin/sudo', 'bash', config['vpn']['iptables_settings_file']], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-        # Output the result (optional)
-        # print("Script output:", result.stdout)
 
         # Restart the netfilter-persistent service to make the rules persistent
         subprocess.run(['/usr/bin/sudo', 'systemctl', 'restart', 'netfilter-persistent'], check=True)
@@ -202,7 +182,6 @@ def perform_initial_setup(ip_v4_address, subnet_mask, standard_gateway, password
         # Handle errors if the script execution fails
         logger.error("Error activating production firewall rules occurred while running the script:")
         print(e.stderr)
-        #return False  # Return False if an error occurred
         error_occurred = True
     # --- END - Firewall configuration and restart
 
