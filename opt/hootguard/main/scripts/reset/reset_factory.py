@@ -1,10 +1,10 @@
 # Script Name: reset_factory.py
-# Version: 0.7
+# Version: 0.8
 # Author: HootGuard
-# Date: 25. November 2024
+# Date: 11. January 2025
 
 # Description:
-# This script performs a factory reset for the HootGuard system, clearing all VPN configurations, keys, and logs, 
+# This script performs a factory reset for the HootGuard system, clearing all VPN configurations, keys, and logs,
 # while resetting system settings to defaults. Key actions include:
 # - Deleting VPN client configurations, QR codes, and client keys.
 # - Clearing VPN client database tables and WireGuard keys/configurations.
@@ -189,6 +189,7 @@ def replace_global_config():
 
         # Replace entries with dummy data
         config_data['network']['interface_1_v4_ip_address'] = '192.168.0.250/24'
+        config_data['network']['interface_1_v4_network'] = '192.168.0.0/24'
         config_data['network']['interface_1_v6_ip_address'] = '2a02:abcd:1337:c001:d00d:face:b00c:1234/64'
         config_data['network']['primary_dns'] = '192.168.0.250'
         config_data['vpn']['endpoint'] = 'dummy.yourdns.com'

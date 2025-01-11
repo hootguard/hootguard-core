@@ -45,6 +45,7 @@ misc:
 network:
   interface_1: eth0
   interface_1_v4_ip_address: 192.168.0.250/24
+  interface_1_v4_network: 192.168.0.0/24
   interface_1_v6_ip_address: 2a02:abcd:1337:c001:d00d:face:b00c:1234/64
   primary_dns: 192.168.0.250
   secondary_dns: 1.1.1.1

@@ -4,16 +4,17 @@
 eval $(/usr/bin/python3 /opt/hootguard/main/scripts/firewall_load_iptables_global_config.py)
 
 # Display variable values for verification
-echo "ETH_INTERFACE_1: $ETH_INTERFACE_1"
-echo "WG_INTERFACE_1: $WG_INTERFACE_1"
-echo "WG_INTERFACE_2: $WG_INTERFACE_2"
-echo "IPV4_ADDRESS_WG_INT_1: $IPV4_ADDRESS_WG_INT_1"
-echo "IPV4_NETWORK_WG_INT_1: $IPV4_NETWORK_WG_INT_1"
-echo "IPV4_ADDRESS_WG_INT_2: $IPV4_ADDRESS_WG_INT_2"
-echo "IPV4_NETWORK_WG_INT_2: $IPV4_NETWORK_WG_INT_2"
-echo "IPV6_NETWORK_WG_INT_1: $IPV6_NETWORK_WG_INT_1"
-echo "IPV6_NETWORK_WG_INT_2: $IPV6_NETWORK_WG_INT_2"
-echo "PIHOLE_IP: $PIHOLE_IP"
+#echo "ETH_INTERFACE_1: $ETH_INTERFACE_1"
+#echo "ETH_INTERFACE_1_NETWORK: $ETH_INTERFACE_1_NETWORK"
+#echo "WG_INTERFACE_1: $WG_INTERFACE_1"
+#echo "WG_INTERFACE_2: $WG_INTERFACE_2"
+#echo "IPV4_ADDRESS_WG_INT_1: $IPV4_ADDRESS_WG_INT_1"
+#echo "IPV4_NETWORK_WG_INT_1: $IPV4_NETWORK_WG_INT_1"
+#echo "IPV4_ADDRESS_WG_INT_2: $IPV4_ADDRESS_WG_INT_2"
+#echo "IPV4_NETWORK_WG_INT_2: $IPV4_NETWORK_WG_INT_2"
+#echo "IPV6_NETWORK_WG_INT_1: $IPV6_NETWORK_WG_INT_1"
+#echo "IPV6_NETWORK_WG_INT_2: $IPV6_NETWORK_WG_INT_2"
+#echo "PIHOLE_IP: $PIHOLE_IP"
 
 # Flush existing rules
 iptables -F
@@ -32,9 +33,20 @@ iptables -A OUTPUT -o lo -j ACCEPT
 # Allow established connections
 iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
+# Allow mDNS traffic (UDP port 5353)
+iptables -A INPUT -i $ETH_INTERFACE_1 -p udp --dport 5353 -j ACCEPT
+ip6tables -A INPUT -i $ETH_INTERFACE_1 -p udp --dport 5353 -j ACCEPT
+
+# Allow IGMP traffic for multicast
+iptables -A INPUT -i $ETH_INTERFACE_1 -p igmp -j ACCEPT
+
 # Allow VPN traffic
 iptables -A INPUT -p udp --dport 51820 -j ACCEPT
 iptables -A INPUT -p udp --dport 51821 -j ACCEPT
+
+# Allow DNS traffic from the local network to the HootGuard Sentry
+iptables -A INPUT -i $ETH_INTERFACE_1 -s $ETH_INTERFACE_1_NETWORK -p udp --dport 53 -j ACCEPT
+iptables -A INPUT -i $ETH_INTERFACE_1 -s $ETH_INTERFACE_1_NETWORK -p tcp --dport 53 -j ACCEPT
 
 # Block traffic between VPN clients
 iptables -A FORWARD -i $WG_INTERFACE_1 -o $WG_INTERFACE_1 -j DROP
@@ -121,6 +133,9 @@ iptables -A FORWARD -i $ETH_INTERFACE_1 -o $WG_INTERFACE_2 -m conntrack --ctstat
 # Enable NAT for VPN clients
 iptables -t nat -A POSTROUTING -s $IPV4_NETWORK_WG_INT_1 -o $ETH_INTERFACE_1 -j MASQUERADE
 iptables -t nat -A POSTROUTING -s $IPV4_NETWORK_WG_INT_2 -o $ETH_INTERFACE_1 -j MASQUERADE
+
+# Enable NAT for local network
+iptables -t nat -A POSTROUTING -s $ETH_INTERFACE_1_NETWORK -o $ETH_INTERFACE_1 -j MASQUERADE
 
 # Log dropped packets for troubleshooting (optional)
 iptables -A INPUT -j LOG --log-prefix "Dropped INPUT: "

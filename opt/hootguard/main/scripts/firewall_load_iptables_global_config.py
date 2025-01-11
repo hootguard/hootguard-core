@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 # Script Name: export_network_config.py
-# Version: 0.1
+# Version: 0.2
 # Author: HootGuard
-# Date: 25. November 2024
+# Date: 11. January 2025
 
 # Description:
 # This script reads the global YAML configuration file and extracts network and VPN settings.
@@ -21,6 +21,7 @@ with open(config_file_path, "r") as file:
 
 # Extract values from the YAML
 eth_interface_1 = config['network']['interface_1']
+eth_interface_1_network = config['network']['interface_1_v4_network']
 wg_interface_1 = config['vpn']['wireguard_interface_1']
 wg_interface_2 = config['vpn']['wireguard_interface_2']
 ipv4_address_wg_int_1 = config['vpn']['wireguard_interface_1_v4_ip_addresse']
@@ -38,6 +39,7 @@ ipv6_network_wg_int_2 = config['vpn']['wireguard_interface_2_v6_ip_addresse'].sp
 
 # Print variables in bash export format
 print(f'export ETH_INTERFACE_1="{eth_interface_1}"')
+print(f'export ETH_INTERFACE_1_NETWORK="{eth_interface_1_network}"')
 print(f'export WG_INTERFACE_1="{wg_interface_1}"')
 print(f'export WG_INTERFACE_2="{wg_interface_2}"')
 print(f'export IPV4_ADDRESS_WG_INT_1="{ipv4_address_wg_int_1}"')
