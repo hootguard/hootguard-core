@@ -21,7 +21,7 @@ logging.basicConfig(filename='/var/log/hootguard_system.log', level=logging.INFO
 config = load_config()
 
 # Pin Setup
-RESET_BUTTON_PIN = 5 # GPIO 5
+RESET_BUTTON_PIN = 14 # GPIO 14
 GPIO.setmode(GPIO.BCM) # BCM = GPIO numbering (BOARD = pin numbering)
 GPIO.setup(RESET_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
