@@ -27,7 +27,7 @@ SNOOZE_TIME_FILE_PATH = config['misc']['snooze_time_file']
 logging.basicConfig(filename='/var/log/hootguard_system.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(filename)s - %(message)s')
 
 # Pin Setup
-BUTTON_PIN = 17  # GPIO 17 (Pin 11)
+BUTTON_PIN = 7  # GPIO 7 (Pin 26)
 LED_PIN = 16    # GPIO pin for the LED
 
 GPIO.setmode(GPIO.BCM)  # BCM = GPIO numbering (BOARD = pin numbering)
