@@ -26,7 +26,7 @@ import logging
 logging.basicConfig(filename='/var/log/hootguard_system.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(filename)s - %(message)s')
 
 # Pin Setup
-BUTTON_PIN = 17  # GPIO 7 (Pin 11)
+BUTTON_PIN = 17  # GPIO 17 (Pin 11)
 
 GPIO.setmode(GPIO.BCM)  # BCM = GPIO numbering (BOARD = pin numbering)
 GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
