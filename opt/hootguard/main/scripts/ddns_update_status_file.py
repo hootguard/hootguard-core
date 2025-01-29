@@ -41,6 +41,14 @@ def ddns_update_status(option):
             status = 'UserDuckDNS-ipv4'
         elif option == 'user-duckdns-ipv6':
             status = 'UserDuckDNS-ipv6'
+        elif option == 'user-ipv64-ipv4':
+            status = 'UserIPv64-ipv4'
+        elif option == 'user-ipv64-ipv6':
+            status = 'UserIPv64-ipv6'
+        elif option == 'user-dynu-ipv4':
+            status = 'UserDynu-ipv4'
+        elif option == 'user-dynu-ipv6':
+            status = 'UserDynu-ipv6'
         elif option == 'no-config':
             status = 'NoConfiguration'
         else:

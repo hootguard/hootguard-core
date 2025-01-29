@@ -18,31 +18,58 @@
                 margin-bottom: 20px;
                 width: 100%;
         }
-.section-container {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-}
 
-.section-heading {
-    text-align: left;
-    font-weight: bold;
-    margin-bottom: 10px;
-    margin-left: 15px;
-}
+	.section-container {
+	    display: flex;
+	    flex-direction: column;
+	    width: 100%;
+	}
 
-.explain-text {
-    margin: 10px 0;
-    text-align: left;
-}
+	.section-heading {
+	    text-align: left;
+	    font-weight: bold;
+	    margin-bottom: 10px;
+	    margin-left: 15px;
+	}
 
-.section_link {
-    text-align: right;
-    margin-top: 10px;
-    margin-right: 20px;
-    text-decoration: underline;
-    font-size: 15px;
-}
+	.explain-text {
+	    margin: 10px 0;
+	    text-align: left;
+	}
+	
+	.section_link {
+	    text-align: right;
+	    margin-top: 10px;
+	    margin-right: 20px;
+	    text-decoration: underline;
+	    font-size: 15px;
+	}
+
+	.btn-shutdown {
+	    padding: 10px 15px;
+	    background-color: transparent; 
+	    color: #ffffff; 
+	    border: 1px solid red;
+	    border-radius: 10px;
+	    cursor: pointer;
+	    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; /* Include border-color and color transition */
+	}
+
+	.btn-shutdown:hover {
+	    background-color: red; /* Optional: Add a red background on hover */
+	    color: #FFFFFF; /* Change text color to white on hover */
+	    border-color: red; /* Keep the border color consistent */
+	}
+
+            .fa-spinner {
+                display: none;
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+
     </style>
 </head>
 <body>
@@ -158,19 +185,39 @@
 
 	<div class="section-container">
 	    <div class="section-heading">
-		System Reset
+		Factory Reset
 	    </div>
 	    <div class="explain-text">
 		To perform a complete factory reset of your system, click the link below. Be aware that this action is irreversible. All custom settings, VPN clients, and Adblock configurations will be permanently deleted.
 	    </div>
-	    <div class="section_link" style="color:red;">
+	    <div class="section_link">
 	        <i class="fa-solid fa-link"></i>
-        	<a href="/system_reset"><span style="color:red;">System Reset</span></a>
+        	<a href="/system_reset">Factory Reset</a>
 	    </div>
 	</div>
 	
 	<hr class="hrsep">
 
+        <div class="section-container">
+            <div class="section-heading">
+                Turn Off HootGuard Sentry
+            </div>
+            <div class="explain-text">
+                To turn off your HootGuard Sentry device click the "Turn Off" button below. If you need to restart your HootGuard Sentry, after your turned it off, simply unplug the power supply and reconnect it.
+            </div>
+            <div class="section_link" style="color:red;"> 
+                <form id="system_shutdown" action="/system_shutdown" method="post" onsubmit="return confirmShutdown()">
+                        <div class="section">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn-shutdown"><i class="fa-solid fa-power-off"></i> Turn Off <i class="fa-solid fa-spinner"></i></button>
+                        </div>
+                </form>
+            </div>
+            </div>
+
+            <hr class="hrsep">
+
+        </div>
 
     </div>
 
@@ -178,9 +225,24 @@
     <div id="footer-placeholder"></div>
 <!-- FOOTER PLACEHOLDER - END -->
 
-
     <script src="/hootguard/components/loadComponents.js"></script>
-    
+
+    <script>
+    	function confirmShutdown() {
+        	if (confirm("Are you sure you want to turn off the HootGuard Sentry?")) {
+	            const submitButton = document.getElementById('shutdown-button');
+        	    const spinner = submitButton.querySelector('.fa-spinner');
+            
+	            // Show spinner and hide the power-off icon
+	            spinner.style.display = 'inline-block';
+	            submitButton.childNodes[0].nodeValue = ' ';
+	            submitButton.disabled = true; // Disable the button
+            
+        	    return true; // Proceed with form submission
+	        }
+        	return false; // Prevent form submission
+	    }
+    </script>    
     
 </body>
 </html>

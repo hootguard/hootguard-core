@@ -122,6 +122,21 @@ def initial_setup_run():
 # Login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+
+    # Check if the user is temporarily locked out
+    if 'failed_attempts' in session and session['failed_attempts'] >= 3:
+        lockout_time = session.get('lockout_time', 0)
+        time_since_lockout = time.time() - lockout_time
+
+        # Enforce a 30-second lockout period
+        if time_since_lockout < 30:
+            remaining_time = int(30 - time_since_lockout)
+            return render_template('login.html', wrong_password="tooManyTries")
+
+        # Reset failed attempts after lockout period ends
+        session['failed_attempts'] = 0
+
+    # Check if password is correct
     if request.method == 'POST':
         password = request.form['password']
         if check_password_hash(password_hash, password):
@@ -129,10 +144,19 @@ def login():
             session['logged_in'] = True
             return redirect(url_for('home'))
         else:
-            return redirect('/login?pwd=False')
-    #If the password is wrong, call the same login page again with the message wrong password
-    wrong_pwd = request.args.get('pwd')
-    return render_template('login.html', wrong_password=wrong_pwd)
+            # Increment failed attempts in the session
+            session['failed_attempts'] = session.get('failed_attempts', 0) + 1
+
+            # If the user has 3 failed attempts, set the lockout time
+            if session['failed_attempts'] >= 3:
+                session['lockout_time'] = time.time()
+                return render_template('login.html', wrong_password="lock_login")
+
+            # Wrong password but not locked out
+            return render_template('login.html', wrong_password="wrong_pwd")
+
+    # Render login page without errors
+    return render_template('login.html', wrong_password=None)
 
 # Logout
 @app.route('/logout')
@@ -174,6 +198,24 @@ def system_update():
 @app.route('/system_reset')
 def system_reset():
     return render_template('system_reset.html')
+
+# System Shutdown
+@app.route('/system_shutdown', methods=['GET', 'POST'])
+def system_shutdown():
+    if request.method == 'POST':
+        try:
+            # Execute the shutdown command
+            subprocess.run(['sudo', '/bin/systemctl', 'poweroff'], check=True)
+            return jsonify({
+                'message': 'System is shutting down.',
+                'details': (
+                    'This process typically takes 10–15 seconds. '
+                    'To restart your system after the shutdown, unplug the power supply '
+                    'and plug it back in to restart the HootGuard Sentry.'
+                )
+            }), 200
+        except subprocess.CalledProcessError as e:
+            return jsonify({'error': f'Shutdown failed: {str(e)}'}), 500
 
 # Run System Reset
 @app.route('/system_reset_perform')

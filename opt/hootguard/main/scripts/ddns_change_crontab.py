@@ -31,6 +31,10 @@ DDNS_USER_CLOUDFLARE_COMMAND = config['ddns']['user_cloudflare_command']
 DDNS_USER_CLOUDFLARE_V6_COMMAND = config['ddns']['user_cloudflare_v6_command']
 DDNS_USER_DUCKDNS_COMMAND = config['ddns']['user_duckdns_command']
 DDNS_USER_DUCKDNS_V6_COMMAND = config['ddns']['user_duckdns_v6_command']
+DDNS_USER_IPV64_COMMAND = config['ddns']['user_ipv64_command']
+DDNS_USER_IPV64_V6_COMMAND = config['ddns']['user_ipv64_v6_command']
+DDNS_USER_DYNU_COMMAND = config['ddns']['user_dynu_command']
+DDNS_USER_DYNU_V6_COMMAND = config['ddns']['user_dynu_v6_command']
 
 def ddns_update_crontab(ddns_type):
     """
@@ -64,7 +68,11 @@ def ddns_update_crontab(ddns_type):
         'user-cloudflare-ipv6': (DDNS_USER_CLOUDFLARE_V6_COMMAND, 'DDNSUpdateIPv6'),
         'user-cloudflare-ipv4': (DDNS_USER_CLOUDFLARE_COMMAND, 'DDNSUpdateIPv4'),
         'user-duckdns-ipv6': (DDNS_USER_DUCKDNS_V6_COMMAND, 'DDNSUpdateIPv6'),
-        'user-duckdns-ipv4': (DDNS_USER_DUCKDNS_COMMAND, 'DDNSUpdateIPv4')
+        'user-duckdns-ipv4': (DDNS_USER_DUCKDNS_COMMAND, 'DDNSUpdateIPv4'),
+        'user-ipv64-ipv6': (DDNS_USER_IPV64_V6_COMMAND, 'DDNSUpdateIPv6'),
+        'user-ipv64-ipv4': (DDNS_USER_IPV64_COMMAND, 'DDNSUpdateIPv4'),
+        'user-dynu-ipv6': (DDNS_USER_DYNU_V6_COMMAND, 'DDNSUpdateIPv6'),
+        'user-dynu-ipv4': (DDNS_USER_DYNU_COMMAND, 'DDNSUpdateIPv4')
     }
 
     if ddns_type in ddns_commands:
@@ -79,7 +87,7 @@ def ddns_update_crontab(ddns_type):
         job.setall('*/5 * * * *')
         logger.debug(f"INFO - Added a new cron job for '{ddns_type}' to run every 5 minutes with command: {command}")
     else:
-        logger.debug(f"ERROR - Invalid DDNS type: {ddns_type}")        
+        logger.debug(f"ERROR - Invalid DDNS type: {ddns_type}")
         return False
 
     # Write changes to the crontab

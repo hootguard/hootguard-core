@@ -29,12 +29,12 @@
     
     <div class="container">
 	
-	<div id="success-message" class="success-message">SSH Password was successully changed</div>
-	<div id="error-message" class="error-message">An error occurred, the password wasn't changed</div>
+	<div id="success-message" class="success-message">DDNS settings were successully changed</div>
+	<div id="error-message" class="error-message">An error occurred, the DDNS settings wasn't changed</div>
 	
         <h1>DDNS Settings</h1>
         <div class="explain-text">
-            To use the VPN feature on your HootGuard Sentry, you can easily set up your own DDNS through Cloudflare or DuckDNS. HootGuard supports IPv4 and IPv6.
+            To use the VPN feature on your HootGuard Sentry, you can easily set up your own DDNS through Cloudflare, IPv64 or Dynu. HootGuard supports IPv4 and IPv6.
         </div>
 
 	<br>
@@ -55,25 +55,6 @@
 		</tbody>
 	    </table>
 	</div>	
-
-<!--
-	<form class="frame" id="hootguard-ddns-form" action="/ddns_activate_hootguard_cloudflare" method="post">
-	    <div class="section">
-		Option 1: <strong>HootGuard DDNS</strong>
-		<br><br>
-		The simplest option is to enable our HootGuard DDNS service, which is entirely free. However, by using this service, your public IP address will be shared with our DDNS provider, Cloudflare, and with us. Rest assured, Cloudflare fully complies with GDPR regulations, and we do not share your information with any third parties.
-		<br> <br>
-		<i>In accordance with the General Data Protection Regulation (GDPR), we require your explicit consent to proceed. To provide this consent, simply check the box below. Remember, you have the right to withdraw your consent at any point by deactivating the dynamic DNS service.</i>
-		<div class="checkbox-style">
-		    <input type="checkbox" id="show-passwords" required>
-		    <label for="show-passwords"><i>I consent to share my public IP address with Cloudflare and HootGuard DDNS.</i></label>
-		</div>
-		<div class="btn-group">
-		    <button type="submit" class="btn-save">Activate HootGuard DDNS</button>
-		</div>
-	    </div>
-	</form>       
--->
 	
 	<div class="frame">
 	    <div class="section">
@@ -90,12 +71,25 @@
 	
 	<div class="frame">
 	    <div class="section">
-		Option 2: <strong>Configure your Own DuckDNS DDNS</strong>
+		Option 2: <strong>Configure your Own IPv64 DDNS</strong>
 		<br><br>
-		To enhance data privacy, you have the option to enter your own DuckDNS configuration directly here. This approach allows for a customized level of privacy and control. For DuckDNS you don't need your own Domain, you can simply create a DuckDNS subdomain. The DuckDNS service is free to use.
+		For IPv64 you don't need your own Domain, you can simply create an account and in this account a IPv64 (sub)-domain. IPv64 supports IPv4 and IPv6. The IPv64 service is free to use.
 		<div class="btn-group">
-		    <a href="ddns_settings_user_duckdns">
-			<button type="submit" class="btn-save">Enter DuckDNS Configuration</button>
+		    <a href="ddns_settings_user_ipv64">
+			<button type="submit" class="btn-save">Enter IPv64 Configuration</button>
+		    </a>
+		</div>
+	    </div>
+	</div> 
+
+	<div class="frame">
+	    <div class="section">
+		Option 3: <strong>Configure your Own Dynu DDNS</strong>
+		<br><br>
+		For Dynu you don't need your own Domain, you can simply create an account and in this account a Dynu domain. Dynu supports IPv4 and IPv6. The Dynu service is free to use.
+		<div class="btn-group">
+		    <a href="ddns_settings_user_dynu">
+			<button type="submit" class="btn-save">Enter Dynu Configuration</button>
 		    </a>
 		</div>
 	    </div>

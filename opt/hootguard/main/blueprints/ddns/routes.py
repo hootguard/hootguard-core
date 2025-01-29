@@ -1,11 +1,15 @@
 from flask import Blueprint, request, render_template, redirect, url_for
 from scripts.ddns_read_status import ddns_read_status_and_return_status
 from scripts.ddns_read_configuration_duckdns import ddns_read_config_duckdns
+from scripts.ddns_read_configuration_ipv64 import ddns_read_config_ipv64
+from scripts.ddns_read_configuration_dynu import ddns_read_config_dynu
 from scripts.ddns_read_configuration_cloudflare import ddns_read_config_cloudflare
 from scripts.ddns_update_status_file import ddns_update_status
 from scripts.ddns_change_crontab import ddns_update_crontab
 from scripts.ddns_configure_user_cloudflare import ddns_write_and_activate_cloudflare
 from scripts.ddns_configure_user_duckdns import ddns_write_and_activate_duckdns
+from scripts.ddns_configure_user_ipv64 import ddns_write_and_activate_ipv64
+from scripts.ddns_configure_user_dynu import ddns_write_and_activate_dynu
 from scripts.ddns_update_endpoint_in_global_config import replace_vpn_endpoint
 from scripts.global_logger import logger
 
@@ -35,6 +39,10 @@ def ddns_activate_hootguard_cloudflare():
             # If an error occurs, redirect to the error route
             return redirect(url_for('error'))
 
+
+# ------------------------------------------------------------------------------------------
+# --------------------------------- CLOUDFLARE ---------------------------------------------
+# ------------------------------------------------------------------------------------------
 
 @ddns_bp.route('/ddns_settings_user_cloudflare', methods=['GET', 'POST'])
 def ddns_settings_user_cloudflare():
@@ -117,6 +125,156 @@ def ddns_activate_user_cloudflare_ipv4():
         # If an error occurs, redirect to the error route
         return redirect(url_for('error'))
 
+
+# ------------------------------------------------------------------------------------------
+# --------------------------------- IPV64 --------------------------------------------------
+# ------------------------------------------------------------------------------------------
+
+@ddns_bp.route('/ddns_settings_user_ipv64', methods=['GET', 'POST'])
+def ddns_settings_user_ipv64():
+
+    # Call the ddns_read_config_ipv64 function to get the key
+    ipv4_domain, ipv4_key, ipv6_domain, ipv6_key = ddns_read_config_ipv64()
+
+    # Helper function to mask and shorten sensitive data
+    def mask_and_shorten_data(data, max_length=15):
+        if data and len(data) > 4:  # Check if data is not empty and longer than 4 characters
+            visible_suffix = data[-4:]  # Keep the last 4 characters visible
+            mask_length = max_length - len(visible_suffix)  # Calculate how many characters to mask
+            masked = '*' * mask_length + visible_suffix  # Combine masking and visible characters
+            return masked
+        return data  # Return original data if empty or shorter than 4 characters
+
+    # Mask and shorten token fields
+    ipv4_key = mask_and_shorten_data(ipv4_key)
+    ipv6_key = mask_and_shorten_data(ipv6_key)
+
+    # Render the template with the masked and shortened tokens
+    return render_template(
+        'ddns/ddns_settings_user_ipv64.html',
+        current_ipv4_domain=ipv4_domain,
+        current_ipv4_key=ipv4_key,
+        current_ipv6_domain=ipv6_domain,
+        current_ipv6_key=ipv6_key
+    )
+
+@ddns_bp.route('/ddns_activate_user_ipv64_ipv6', methods=['GET', 'POST'])
+def ddns_activate_user_ipv64_ipv6():
+        try:
+            # Update IPv64 configuration file
+            ddns_write_and_activate_ipv64(request.form['domain-ipv6'], request.form['token-ipv6'], "ipv6")
+            # Update DDNS status
+            ddns_update_status('user-ipv64-ipv6')
+            # Update crontab
+            ddns_update_crontab('user-ipv64-ipv6')
+	    # Update Endpoint in global configuratio file
+            replace_vpn_endpoint(request.form['domain-ipv6'])
+
+            # If all operations are successful, render the settings page
+            #return redirect(url_for('ddns_settings'))
+            return redirect('/ddns_settings?nds=True')
+        except Exception as e:
+            logger.info(e)
+            # If an error occurs, redirect to the error route
+            return redirect(url_for('error'))
+
+@ddns_bp.route('/ddns_activate_user_ipv64_ipv4', methods=['GET', 'POST'])
+def ddns_activate_user_ipv64_ipv4():
+        try:
+            # Update IPv64 configuration file
+            ddns_write_and_activate_ipv64(request.form['domain'], request.form['token'], "ipv4")
+            # Update DDNS status
+            ddns_update_status('user-ipv64-ipv4')
+            # Update crontab
+            ddns_update_crontab('user-ipv64-ipv4')
+	    # Update Endpoint in global configuratio file
+            replace_vpn_endpoint(request.form['domain'])
+
+            # If all operations are successful, render the settings page
+            #return redirect(url_for('ddns_settings'))
+            return redirect('/ddns_settings?nds=True')
+        except Exception as e:
+            logger.info(e)
+            # If an error occurs, redirect to the error route
+            return redirect(url_for('error'))
+
+
+# ------------------------------------------------------------------------------------------
+# --------------------------------- DYNU --------------------------------------------------
+# ------------------------------------------------------------------------------------------
+
+@ddns_bp.route('/ddns_settings_user_dynu', methods=['GET', 'POST'])
+def ddns_settings_user_dynu():
+
+    # Call the ddns_read_config_dynu function to get the key
+    ipv4_domain, ipv4_password, ipv6_domain, ipv6_password = ddns_read_config_dynu()
+
+    # Helper function to mask and shorten sensitive data
+    def mask_and_shorten_data(data, max_length=15):
+        if data and len(data) > 4:  # Check if data is not empty and longer than 4 characters
+            visible_suffix = data[-4:]  # Keep the last 4 characters visible
+            mask_length = max_length - len(visible_suffix)  # Calculate how many characters to mask
+            masked = '*' * mask_length + visible_suffix  # Combine masking and visible characters
+            return masked
+        return data  # Return original data if empty or shorter than 4 characters
+
+    # Mask and shorten token fields
+    ipv4_password = mask_and_shorten_data(ipv4_password)
+    ipv6_password = mask_and_shorten_data(ipv6_password)
+
+    # Render the template with the masked and shortened tokens
+    return render_template(
+        'ddns/ddns_settings_user_dynu.html',
+        current_ipv4_domain=ipv4_domain,
+        current_ipv4_password=ipv4_password,
+        current_ipv6_domain=ipv6_domain,
+        current_ipv6_password=ipv6_password
+    )
+
+@ddns_bp.route('/ddns_activate_user_dynu_ipv6', methods=['GET', 'POST'])
+def ddns_activate_user_dynu_ipv6():
+        try:
+            # Update DYNU configuration file
+            ddns_write_and_activate_dynu(request.form['domain-ipv6'], request.form['password-ipv6'], "ipv6")
+            # Update DDNS status
+            ddns_update_status('user-dynu-ipv6')
+            # Update crontab
+            ddns_update_crontab('user-dynu-ipv6')
+	    # Update Endpoint in global configuratio file
+            replace_vpn_endpoint(request.form['domain-ipv6'])
+
+            # If all operations are successful, render the settings page
+            #return redirect(url_for('ddns_settings'))
+            return redirect('/ddns_settings?nds=True')
+        except Exception as e:
+            logger.info(e)
+            # If an error occurs, redirect to the error route
+            return redirect(url_for('error'))
+
+@ddns_bp.route('/ddns_activate_user_dynu_ipv4', methods=['GET', 'POST'])
+def ddns_activate_user_dynu_ipv4():
+        try:
+            # Update DYNU configuration file
+            ddns_write_and_activate_dynu(request.form['domain'], request.form['password'], "ipv4")
+            # Update DDNS status
+            ddns_update_status('user-dynu-ipv4')
+            # Update crontab
+            ddns_update_crontab('user-dynu-ipv4')
+	    # Update Endpoint in global configuratio file
+            replace_vpn_endpoint(request.form['domain'])
+
+            # If all operations are successful, render the settings page
+            #return redirect(url_for('ddns_settings'))
+            return redirect('/ddns_settings?nds=True')
+        except Exception as e:
+            logger.info(e)
+            # If an error occurs, redirect to the error route
+            return redirect(url_for('error'))
+
+
+# ------------------------------------------------------------------------------------------
+# ------------------------------- DUCKDNS --------------------------------------------------
+# ------------------------------------------------------------------------------------------
 
 @ddns_bp.route('/ddns_settings_user_duckdns', methods=['GET', 'POST'])
 def dns_settings_user_duckdns():

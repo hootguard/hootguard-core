@@ -26,6 +26,14 @@ ddns:
   user_duckdns_script: /opt/hootguard/ddns/user-duckdns.sh
   user_duckdns_v6_command: /bin/bash /opt/hootguard/ddns/user-duckdnsv6.sh
   user_duckdns_v6_script: /opt/hootguard/ddns/user-duckdnsv6.sh
+  user_dynu_command: /bin/bash /opt/hootguard/ddns/user-dynu.sh
+  user_dynu_script: /opt/hootguard/ddns/user-dynu.sh
+  user_dynu_v6_command: /bin/bash /opt/hootguard/ddns/user-dynuv6.sh
+  user_dynu_v6_script: /opt/hootguard/ddns/user-dynuv6.sh
+  user_ipv64_command: /bin/bash /opt/hootguard/ddns/user-ipv64.sh
+  user_ipv64_script: /opt/hootguard/ddns/user-ipv64.sh
+  user_ipv64_v6_command: /bin/bash /opt/hootguard/ddns/user-ipv64v6.sh
+  user_ipv64_v6_script: /opt/hootguard/ddns/user-ipv64v6.sh
 dhcp:
   dhcpcd_backup_path: /etc/dhcpcd.conf.bkp
   dhcpcd_original_path: /etc/dhcpcd.conf.original

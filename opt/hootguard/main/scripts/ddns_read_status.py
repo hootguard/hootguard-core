@@ -37,6 +37,10 @@ def ddns_read_status_and_return_status():
         'UserCloudflare-ipv6': 'Personal Cloudflare DDNS (IPv6)',
         'UserDuckDNS-ipv4': 'Personal DuckDNS DDNS (IPv4)',
         'UserDuckDNS-ipv6': 'Personal DuckDNS DDNS (IPv6)',
+        'UserIPv64-ipv4': 'Personal IPv64 DDNS (IPv4)',
+        'UserIPv64-ipv6': 'Personal IPv64 DDNS (IPv6)',
+        'UserDynu-ipv4': 'Personal Dynu DDNS (IPv4)',
+        'UserDynu-ipv6': 'Personal Dynu DDNS (IPv6)',
         'NoConfiguration': 'DDNS inactive'
     }
 

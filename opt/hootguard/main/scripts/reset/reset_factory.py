@@ -29,6 +29,8 @@ from .reset_clear_system_logs import clear_system_logs
 from scripts.initial_setup import is_update_env_secret_key
 from scripts.ssh_control_service import disable_ssh
 from scripts.ddns_configure_user_duckdns import ddns_write_and_activate_duckdns
+from scripts.ddns_configure_user_ipv64 import ddns_write_and_activate_ipv64
+from scripts.ddns_configure_user_dynu import ddns_write_and_activate_dynu
 from scripts.ddns_configure_user_cloudflare import ddns_write_and_activate_cloudflare
 from scripts.ddns_update_status_file import ddns_update_status
 from scripts.ddns_change_crontab import ddns_update_crontab
@@ -307,18 +309,35 @@ def reset_vpn_configurations(initial_setup=None):
             return False
 
         # DDNS configurations
+        ### IPv64
+        if not ddns_write_and_activate_ipv64('xxx', 'xxx', "ipv4", True): # Delete Duckdns configuration for IPv4
+            return False
+
+        if not ddns_write_and_activate_ipv64('xxx', 'xxx', "ipv6", True): # Delete Duckdns configuration for IPv6
+            return False
+
+        ### DYNU
+        if not ddns_write_and_activate_dynu('xxx', 'xxx', "ipv4", True): # Delete Duckdns configuration for IPv4
+            return False
+
+        if not ddns_write_and_activate_dynu('xxx', 'xxx', "ipv6", True): # Delete Duckdns configuration for IPv6
+            return False
+
+        ### DUCKDNS
         if not ddns_write_and_activate_duckdns('xxxx', 'xxx', "ipv4", True): # Delete Duckdns configuration for IPv4
             return False
 
         if not ddns_write_and_activate_duckdns('xxxx', 'xxx', "ipv6", True): # Delete Duckdns configuration for IPv6
             return False
 
+        ### CLOUDFLARE
         if not ddns_write_and_activate_cloudflare('xxx', 'xxx', 'xxx', 'xxx', "ipv4", True): # Delete Cloudflare configuration for IPv4
             return False
 
         if not ddns_write_and_activate_cloudflare('xxx', 'xxx', 'xxx', 'xxx', "ipv6", True): # Delete Cloudflare configuration for IPv6
             return False
 
+        ### NO CONFIG
         if not ddns_update_status("no-config"): # Reset ddns status
             return False
 

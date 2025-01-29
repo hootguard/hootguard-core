@@ -49,6 +49,7 @@
             font-size: 16px;
             font-weight: 500;
         }
+
         .btn-save:hover {
             background-color: #0056b3;
         }
@@ -68,6 +69,15 @@
         input[type="checkbox"] {
             display: inline-block !important;
         }
+
+	.lock-message {
+	    visibility: hidden;
+	    background-color: rgba(255, 255, 0, .2);
+	    color: #ffffff;
+	    padding: 10px;
+	    border-radius: 5px;
+	    margin-top: -45px;
+	}
     </style>
 </head>
 <body>
@@ -78,6 +88,7 @@
         <br>
         <div class="explain-text">
             Enter your password below to access settings. You can find this password on the underside of your HootGuard box.
+<!--	    <div style="margin-top: 10px; font-size: 0.8em;"> <i> Three wrong password attempts block login for 30 seconds. <i> </div>-->
         </div>
         <br>
         <form action="/login" method="post" >
@@ -89,11 +100,14 @@
             </div>
             <button type="submit" id="login-button" class="btn-save">Login <i class="fa-solid fa-spinner"></i></button>
         </form>
+        <div class="explain-text" style="margin: 10px; font-size: 0.7em;"> Three wrong password attempts block login for 30 seconds. </div>
         
+
         <br><br>        
         
         <center>
-            <div id="success-message" class="success-message"> <i class="fa-solid fa-triangle-exclamation"></i> Wrong password</div>
+            <div id="success-message" class="success-message"> <i class="fa-solid fa-triangle-exclamation"></i> Wrong password </div>
+            <div id="lock-message" class="lock-message"> <i class="fa-solid fa-triangle-exclamation"></i> Too many attempts. Wait 30s. </div>
         </center>
     </div>
     
@@ -110,12 +124,21 @@
 
         // Check if wrong_password is true and display "success" message for 3 seconds
         const wrongPassword = {{ wrong_password | tojson }};
-        if (wrongPassword) {
+        if (wrongPassword === "wrong_pwd") {
             const successMessage = document.getElementById('success-message');
             successMessage.style.visibility = 'visible';
             setTimeout(function () {
                 successMessage.style.visibility = 'hidden';
             }, 3000);
+        } else if (wrongPassword === "lock_login") {
+       	    const lockMessage = document.getElementById('lock-message');
+            const loginButton = document.getElementById('login-button');
+	    lockMessage.style.visibility = 'visible';
+            loginButton.disabled = true; // Disable the button
+            setTimeout(function () {
+                lockMessage.style.visibility = 'hidden';
+                loginButton.disabled = false; 
+            }, 30000); // Lock message visible for 30 seconds
         }
         
         document.querySelector('form').addEventListener('submit', function() {
@@ -126,7 +149,7 @@
             loginButton.childNodes[0].nodeValue = ' ';
             loginButton.disabled = true; // Disable the button
         });
-        
+
     </script>
 
 
