@@ -60,7 +60,7 @@ Whether you’re privacy-conscious, security-focused, or just want a cleaner int
 - Set your router’s DNS server to HootGuard for network-wide ad-blocking and filtering.
 
 **VPN & DDNS:**
-- Choose a DDNS provider: DuckDNS or Cloudflare are supported.  
+- Choose a DDNS provider: Dynu, IPv64 or Cloudflare are supported.  
 - For Cloudflare, ensure you have a domain name set up.
 - Enter the DDNS credentials into HootGuard’s web interface.
 - Create VPN users, scan their generated QR codes, and start using the VPN immediately.
