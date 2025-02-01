@@ -31,7 +31,7 @@ def check_ddns_status():
         with open(DDNS_STATUS_FILE_PATH, 'r') as file:
             status = file.read().strip()
             # Check if the status indicates an active DDNS service
-            if status in ['HootGuardCloudflare', 'UserCloudflare-ipv4', 'UserCloudflare-ipv6', 'UserDuckDNS-ipv4', 'UserDuckDNS-ipv6']:
+            if status in ['HootGuardCloudflare', 'UserCloudflare-ipv4', 'UserCloudflare-ipv6', 'UserDuckDNS-ipv4', 'UserDuckDNS-ipv6', 'UserIPv64-ipv4', 'UserIPv64-ipv6', 'UserDynu-ipv4', 'UserDynu-ipv6']:
                 logger.debug(f"INFO - DDNS service is active with status: {status}")
                 return "Active"
             elif status == 'NoConfiguration':
