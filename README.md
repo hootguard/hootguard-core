@@ -44,7 +44,7 @@ Whether you’re privacy-conscious, security-focused, or just want a cleaner int
    Visit [HootGuard.com](https://hootguard.com) to download the latest HootGuard image.
    
 2. **Write Image to SD Card:**  
-   Use a tool like [Etcher](https://www.balena.io/etcher/) to flash the image to your SD card.
+   Use a tool like [Raspberry Pi Imager](https://www.raspberrypi.com/software/) to flash the image to your SD card.
    
 3. **Boot Up the Raspberry Pi:**  
    Insert the SD card into your Raspberry Pi and connect it to your network router.
