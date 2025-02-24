@@ -17,6 +17,9 @@ iptables -A OUTPUT -o lo -j ACCEPT
 # Allow established and related incoming traffic
 iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
+# Allow mDNS (Multicast DNS) on UDP 5353
+iptables -A INPUT -p udp --dport 5353 -j ACCEPT
+
 # Allow incoming HTTP traffic (port 80)
 iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 
@@ -48,6 +51,9 @@ ip6tables -A OUTPUT -o lo -j ACCEPT
 
 # Allow established and related incoming IPv6 traffic
 ip6tables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+# Allow mDNS (Multicast DNS) on UDP 5353
+ip6tables -A INPUT -p udp --dport 5353 -j ACCEPT
 
 # Allow incoming HTTP traffic (port 80) for IPv6
 ip6tables -A INPUT -p tcp --dport 80 -j ACCEPT

@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
     <link rel="stylesheet" href="hootguard/css/all.css">
     <style>
+	.status-inactive {
+	    color: red;
+	}
 
         .frame-container {
             display: flex;
@@ -223,7 +226,7 @@
 
 
         {% if update_available %}
-	<!-- Update Button -->
+B	<!-- Update Button -->
         <div id="update-notification" style="margin-top: 40px;">
             <a href="/system_update">
                 <button type="button" class="btn-clear">Update Available! Click to Install</button>
@@ -254,8 +257,10 @@
             const indicator = document.getElementById('internet-status');
             if(data.status === 'OK') {
                 statusElement.innerText = 'Ok';
+                statusElement.classList.remove('status-inactive');
             } else {
                 statusElement.innerText = 'No internet connection';
+                statusElement.classList.add('status-inactive');
             }
         })
         .catch(() => {
@@ -272,8 +277,10 @@
             const indicator = document.getElementById('adblocker-status');
             if(data.status === 'Active') {
                 statusElement.innerText = 'Active';
+		statusElement.classList.remove('status-inactive'); // Remove red if active
             } else {
                 statusElement.innerText = 'Inactive';
+		statusElement.classList.add('status-inactive'); // Add red color
             }
         })
         .catch(() => {
@@ -287,6 +294,7 @@
         .then(response => response.json())
         .then(data => {
             const statusElement = document.getElementById('vpn-running-status');
+            statusElement.classList.remove('status-inactive'); // Reset first - No red color
             const indicator = document.getElementById('vpn-status');
             if (data.status === 'Active') {
                 statusElement.innerText = 'Active (wg0 & wg1)';
@@ -296,6 +304,7 @@
                 statusElement.innerText = 'Active (wg1)';
             } else if (data.status === 'Inactive') {
                 statusElement.innerText = 'Inactive';
+                statusElement.classList.add('status-inactive'); // Add red color
             } else {
                 statusElement.innerText = 'Unknown status';
             }
@@ -314,8 +323,10 @@
             const indicator = document.getElementById('ddns-status');
             if(data.status === 'Active') {
                 statusElement.innerText = 'Active';
+                statusElement.classList.remove('status-inactive');
             } else {
                 statusElement.innerText = 'Inactive';
+                statusElement.classList.add('status-inactive');
             }
         })
         .catch(() => {

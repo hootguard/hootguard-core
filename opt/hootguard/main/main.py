@@ -23,6 +23,8 @@ from scripts.pihole_get_data_from_api_summary import get_data_from_api_summary
 from scripts.initial_setup_main import perform_initial_setup
 # --- RESET ---
 from scripts.reset_main import perform_reset
+# --- FREE IP DETECTION ---
+from scripts.network_free_ipv4 import find_free_ip
 # --- OTHER SCRIPTS ---
 from scripts.global_logger import logger
 from scripts.global_config_loader import load_config
@@ -106,8 +108,16 @@ def initial_setup():
         # Redirect to login after setup
         return redirect(url_for('login'))
 
+    # Get suggested network settings
+    suggested_ip, subnet_mask, standard_gw = find_free_ip()
+    
+    # Fallback values if no free IP is found
+    suggested_ip = suggested_ip if suggested_ip else "Not available"
+    subnet_mask = subnet_mask if subnet_mask else "255.255.255.0"
+    standard_gw = standard_gw if standard_gw else "192.168.1.1"
+
     # Render the setup page
-    return render_template('initial_setup.html')
+    return render_template('initial_setup.html', suggested_ip=suggested_ip, subnet_mask=subnet_mask, standard_gw=standard_gw)
 
 # Initital Setup Run
 @app.route('/initial_setup_run', methods=['POST'])

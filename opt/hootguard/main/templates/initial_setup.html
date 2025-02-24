@@ -40,6 +40,22 @@
         input[type="checkbox"] {
                 display: inline-block !important;
         }
+        .btn-accept {
+            padding: 5px 14px;
+            margin: 15px 0;
+            background-color: #FFFF00;
+            color: #000000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .btn-accept:hover {
+            background-color: #FDD835;
+        }
+        .btn-accept:active {
+            background-color: #F9A825;
+        }
     </style>
 </head>
 <body>
@@ -62,27 +78,51 @@
         <form id="initial-settings-form" action="/initial_setup_run" method="post">
 
                 <hr class="hrsep">
-                <div>
+                <div style="font-size: 1.2em; font-weight: bold;">
                         <u>1. Network Settings</u>
                 </div>
+
                 <div class="explain-text section-text">
                         To ensure HootGuard Sentry runs smoothly on your home network, it needs a static IP address that matches your network settings. Please provide an appropriate IP address, subnet mask, and standard gateway below. If you're unsure, you can find these details in your router's configuration.
                 </div>
-                        <div class="form-group">
-                                <label for="ip-address">IP Address:</label>
-                                <input type="text" id="ip-address" name="ip_address" placeholder="e.g. 192.168.0.100" required>
 
-                                <label for="subnet-mask">Subnet Mask:</label>
-                                <input type="text" id="subnet-mask" name="subnet_mask" placeholder="e.g. 255.255.255.0" required>
+                <div class="explain-text" style="text-align: right; width: 100%;">
+                        <table style="border: 0.5px solid grey; padding: 5px; margin-left: auto; margin-right: 0; text-align: center;">
+				<tr><td>
+					<strong><u>Network Settings Suggestions</u></strong>
+                                        <div style="font-size: 0.8em">
+						This IP is suggested based on a simple ping and may not be free.
+                                        </div>
+					<div style="margin-top: 15px;">
+		       				IP Address: <span id="suggested-ip" class="status-highlight">{{ suggested_ip }}</span>
+					        &nbsp;<strong>|</strong>&nbsp;
+						Subnet Mask: <span id="suggested-subnet" class="status-highlight">{{ subnet_mask }}</span>
+					        &nbsp;<strong>|</strong>&nbsp;
+					        Gateway: <span id="suggested-gw" class="status-highlight">{{ standard_gw }}</span>
+                                		<div align="right">
+                                			<button type="button" id="apply-suggested-ip" class="btn-accept" style="font-size: 0.9em;">Accept Suggestion</button>
+		                                </div>	
+					</div>
+				</td></tr>
+  			</table>
+                </div>
 
-                                <label for="standard-gateway">Standard Gateway:</label>
-                                <input type="text" id="standard-gateway" name="standard_gateway" placeholder="e.g. 192.168.0.1" required>
+                <div class="form-group" style="margin-top: 20px;">
+                        <label for="ip-address">IP Address:</label>
+                        <input type="text" id="ip-address" name="ip_address" placeholder="e.g. 192.168.0.100" required>
 
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        </div>
+                        <label for="subnet-mask">Subnet Mask:</label>
+                        <input type="text" id="subnet-mask" name="subnet_mask" placeholder="e.g. 255.255.255.0" required>
+
+                        <label for="standard-gateway">Standard Gateway:</label>
+                        <input type="text" id="standard-gateway" name="standard_gateway" placeholder="e.g. 192.168.0.1" required>
+
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                </div>
 
                 <hr class="hrsep">
-                <div>
+
+                <div style="font-size: 1.2em; font-weight: bold;">
                         <u>2. Password</u>
                 </div>
                 <div class="explain-text section-text">
@@ -103,7 +143,8 @@
                     </div>
 
                 <hr class="hrsep">
-                <div>
+
+                <div style="font-size: 1.2em; font-weight: bold;">
                         <u>3. Save Settings and Reboot</u>
                 </div>
                 <div class="explain-text section-text">
@@ -121,6 +162,13 @@
 
     <script src="/hootguard/components/loadComponents.js"></script>
         <script>
+/* IP ADDRESS SUGGESTION BELOW ---*/
+	document.getElementById("apply-suggested-ip").addEventListener("click", function() {
+        	document.getElementById("ip-address").value = document.getElementById("suggested-ip").textContent.trim();
+	        document.getElementById("subnet-mask").value = document.getElementById("suggested-subnet").textContent.trim();
+        	document.getElementById("standard-gateway").value = document.getElementById("suggested-gw").textContent.trim();
+	});
+
 /* --- IP ADDRESS PART BELOW --- */
 
                 function isValidFormat(str) {
@@ -144,7 +192,7 @@
                         }
                 });
 
-                document.getElementById("standard-gateway").addEventListener("input", function() {
+                document.getElementById("standard-gateway").addEventListener("input", function() {B
                         if (!isValidFormat(this.value)) {
                                 this.setCustomValidity("Invalid IP Address. Please enter a value like 192.168.0.1");
                         } else {

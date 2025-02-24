@@ -13,6 +13,8 @@ adblock:
   - gambling
   - max
   db_path: /etc/pihole/gravity.db
+  snooze_end_time_path: /opt/hootguard/adblock/adblock-snooze-end-time.txt
+  snooze_status_path: /opt/hootguard/adblock/adblock-status.txt
   status_path: /opt/hootguard/adblock/adblock-active-profile.txt
 ddns:
   consent_file: /opt/hootguard/ddns/ddns-consent.txt

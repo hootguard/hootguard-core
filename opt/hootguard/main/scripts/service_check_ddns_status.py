@@ -1,7 +1,7 @@
 # Script Name: service_check_ddns_status.py
-# Version: 0.1
+# Version: 0.2
 # Author: HootGuard
-# Date: 7. October 2024
+# Date: 24. February 2024
 
 # Description:
 # This script checks the DDNS service status by reading the content of the `ddns-status.txt` file.
@@ -31,7 +31,7 @@ def check_ddns_status():
         with open(DDNS_STATUS_FILE_PATH, 'r') as file:
             status = file.read().strip()
             # Check if the status indicates an active DDNS service
-            if status in ['HootGuardCloudflare', 'UserCloudflare-ipv4', 'UserCloudflare-ipv6', 'UserDuckDNS-ipv4', 'UserDuckDNS-ipv6']:
+            if status in ['HootGuardCloudflare', 'UserCloudflare-ipv4', 'UserCloudflare-ipv6', 'UserDuckDNS-ipv4', 'UserDuckDNS-ipv6', 'UserIPv64-ipv4', 'UserIPv64-ipv6', 'UserDynu-ipv4', 'UserDynu-ipv6']:
                 logger.debug(f"INFO - DDNS service is active with status: {status}")
                 return "Active"
             elif status == 'NoConfiguration':
