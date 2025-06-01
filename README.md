@@ -36,7 +36,7 @@ Whether you’re privacy-conscious, security-focused, or just want a cleaner int
 ## Installation
 
 **Requirements:**
-- A Raspberry Pi (currently verified on Raspberry Pi 3B; Pi 4 support is in progress).
+- A Raspberry Pi (currently verified on Raspberry Pi 3B and Pi 4).
 - An SD Card with at least 8GB capacity (32GB recommended).
 
 **Steps:**
