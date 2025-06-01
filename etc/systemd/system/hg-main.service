@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve Flask app
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/hootguard/main
+ExecStart=/home/hootguard/.local/bin/gunicorn --workers 3 --bind 127.0.0.1:5000 main:app
+Restart=on-failure
+User=hootguard
+
+[Install]
+WantedBy=multi-user.target

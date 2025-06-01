@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>Network Settings</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">
+    <style>
+	    .fa-spinner {
+		display: none;
+		animation: spin 1s linear infinite;
+	    }
+	    @keyframes spin {
+		from { transform: rotate(0deg); }
+		to { transform: rotate(360deg); }
+	    }
+	    .form-group {
+		margin-bottom: 2.0em;
+	    }
+	    .ip-heading {
+		font-weight: bold;
+		margin-bottom: 30px;
+		text-align: center;
+	        letter-spacing: 3px;
+	     }
+             .hrsep {
+                border: none;
+                height: 1px;
+		background-color: #333333;
+                margin-top: 50px;
+	        margin-bottom: 10px;
+                width: 100%;
+             }
+
+  </style>
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+    <div id="navigation-placeholder"></div>
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+    
+    <div class="container">
+        <h1>Network Settings</h1>
+        <div class="explain-text">
+            To ensure connectivity and that the HootGuard Sentry server works properly on your network, it is important to assign it a static IP address that matches the configuration of your network. To do this, please fill out the form and enter the appropriate information for your HootGuard Sentry. 
+        </div>
+
+<!--    <hr class="hrsep" style="margin-bottom: -40px;">-->
+        <hr class="hrsep">
+	<div class="ip-heading"> -- IP ADDRESS VERSION 4 -- </div>
+
+	<div class="table-settings">
+		<table>
+			<thead>
+				<tr>
+					<td colspan="2">Current Network Settings (v4)</td>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>
+						IP Address: <span class="status-highlight">{{config.ip_address}}</span>
+						<br>
+						Subnet Mask: <span class="status-highlight">{{config.subnet_mask}}</span>
+						<br>
+						Gateway: <span class="status-highlight">{{config.standard_gw}}</span>
+						<br>
+						Type: <span class="status-highlight">{{config.type}}</span>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>		
+	
+	<div class="explain-text" style="margin-top: 20px";>
+		To change your IP address (v4), fill in your new static IP address, subnet mask, and default gateway. All fields are required. After verifying your information, click 'Save & Reboot' to update.
+	</div>
+
+	<form class="frame" id="ip-settings-form" action="/network_change" method="post">
+		<div class="section">
+
+			<div class="form-group">
+				<label for="ip-address">IP Address:</label>
+				<input type="text" id="ip-address" name="ip_address" placeholder="e.g. 192.168.0.100" required>
+			</div>
+			
+			<div class="form-group">
+				<label for="subnet-mask">Subnet Mask:</label>
+				<input type="text" id="subnet-mask" name="subnet_mask" placeholder="e.g. 255.255.255.0" required>
+			</div>
+
+			<div class="form-group">
+				<label for="standard-gateway">Standard Gateway:</label>
+				<input type="text" id="standard-gateway" name="standard_gateway" placeholder="e.g. 192.168.0.1" required>
+			</div>
+
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+			<div class="btn-group">
+				<button type="button" id="cancel-button" class="btn-clear" onclick="document.getElementById('ip-address').value='';document.getElementById('subnet-mask').value='';document.getElementById('standard-gateway').value=''">Clear Form</button>
+				<button type="submit" id="submit-button" class="btn-save">Save & Reboot <i class="fa-solid fa-spinner"></i></button>
+			</div>
+		</div>
+	</form>
+
+<!--	<hr class="hrsep" style="margin-bottom: -40px;">	-->
+	<hr class="hrsep">
+        <div class="ip-heading"> -- IP ADDRESS VERSION 6 -- </div>
+
+	<div class="table-settings">
+		<table>
+			<thead>
+				<tr>
+					<th colspan="2">Current Network Settings (v6)</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>
+						IP Address: <span class="status-highlight">{{config.ipv6_address}}</span>
+                        			<br>
+<!--
+						Gateway: <span class="status-highlight">{{config.standard_gwv6}}</span>
+						<br>
+-->
+						Type: <span class="status-highlight">{{config.typev6}}</span>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>		
+
+        <div class="explain-text" style="margin-top: 20px";>
+		To change your IP address (v6), fill in your new static IP address, subnet mask, and default gateway. All fields are required. After verifying your information, click 'Save & Reboot' to update.
+	</div>
+
+        <form class="frame" id="ip-settings-form-v6" action="/network_change_v6" method="post">
+                <div class="section">
+
+                        <div class="form-group">
+                                <label for="ip-address-v6">IP Address (v6):</label>
+                                <input type="text" id="ip-address-v6" name="ip_address_v6" placeholder="e.g. 2001:0db8:85a3:0000:0000:8a2e:0370:7334" required>
+                        </div>
+<!--
+                        <div class="form-group">
+                                <label for="subnet-mask-v6">Subnet mask (v6):</label>
+                                <input type="text" id="subnet-mask-v6" name="subnet_mask_v6" placeholder="e.g. /64" required>
+                        </div>
+-->
+<!--
+                        <div class="form-group">
+                                <label for="standard-gateway-v6">Standard Gateway (v6):</label>
+                                <input type="text" id="standard-gateway-v6" name="standard-gateway-v6" placeholder="e.g. 2001:0db8:85a3:0000:0000:8a2e:0370:0001" required>
+                        </div>
+-->
+
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+			<div class="btn-group">
+				<button type="button" id="cancel-button-v6" class="btn-clear" onclick="document.getElementById('ip-address-v6').value='';document.getElementById('subnet-mask-v6').value='';document.getElementById('standard-gateway-v6').value=''">Clear Form</button>
+				<button type="submit" id="submit-button-v6" class="btn-save">Save & Reboot <i class="fa-solid fa-spinner"></i></button>
+			</div>
+                </div>
+        </form>
+
+
+	<div class="note">
+		<strong>Please note:</strong> In the event that your HootGuard Sentry becomes unreachable, you have the option to reset your network settings back to DHCP by pressing the reset button located on the side of your HootGuard Sentry. However, be aware that using the reset button will also set your password back to the default password, which you can find on your HootGuard Sentry.
+	</div>
+        
+        
+        
+    </div>
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+    <script>
+		function isValidFormat(str) {
+			const blockRegExp = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+			return blockRegExp.test(str);
+		}
+
+                function isValidFormatV6(str) {
+                        const ipv6RegExp = /^(?:[a-fA-F0-9]{1,4}:){7}[a-fA-F0-9]{1,4}$|^(?:[a-fA-F0-9]{1,4}:){1,7}:$|^(?:[a-fA-F0-9]{1,4}:){1,6}:[a-fA-F0-9]{1,4}$|^(?:[a-fA-F0-9]{1,4}:){1,5}(?::[a-fA-F0-9]{1,4}){1,2}$|^(?:[a-fA-F0-9]{1,4}:){1,4}(?::[a-fA-F0-9]{1,4}){1,3}$|^(?:[a-fA-F0-9]{1,4}:){1,3}(?::[a-fA-F0-9]{1,4}){1,4}$|^(?:[a-fA-F0-9]{1,4}:){1,2}(?::[a-fA-F0-9]{1,4}){1,5}$|^[a-fA-F0-9]{1,4}:(?:(?::[a-fA-F0-9]{1,4}){1,6})$|^:(?:(?::[a-fA-F0-9]{1,4}){1,7}|:)$|^(?:[a-fA-F0-9]{1,4}:){1,7}[a-fA-F0-9]{1,4}$|^(?:(?:[a-fA-F0-9]{1,4}:){6}(?:[a-fA-F0-9]{1,4}){2})$/;
+                        return ipv6RegExp.test(str);
+                }
+
+		document.getElementById("ip-address").addEventListener("input", function() {
+			if (!isValidFormat(this.value)) {
+				this.setCustomValidity("Invalid IP Address. Please enter a value like 192.168.0.100");
+			} else {
+				this.setCustomValidity("");
+			}
+		});
+
+		document.getElementById("subnet-mask").addEventListener("input", function() {
+			if (!isValidFormat(this.value)) {
+				this.setCustomValidity("Invalid Subnet Mask. Please enter a value like 255.255.255.0");
+			} else {
+				this.setCustomValidity("");
+			}
+		});
+		
+		document.getElementById("standard-gateway").addEventListener("input", function() {
+			if (!isValidFormat(this.value)) {
+				this.setCustomValidity("Invalid IP Address. Please enter a value like 192.168.0.1");
+			} else {
+				this.setCustomValidity("");
+			}
+		});
+
+                document.getElementById("ip-address-v6").addEventListener("input", function() {
+                        if (!isValidFormatV6(this.value)) {
+                                this.setCustomValidity("Invalid IP Address. Please enter a valid IPv6 address.");
+                        } else {
+                                this.setCustomValidity("");
+                        }
+                });
+/*
+                document.getElementById("subnet-mask-v6").addEventListener("input", function() {
+                        const subnetRegExp = /^\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8])$/;
+                        if (!subnetRegExp.test(this.value)) {
+                                this.setCustomValidity("Invalid Subnet Mask. Please enter a value like /64");
+                        } else {
+                                this.setCustomValidity("");
+                        }
+                });
+*/		
+/*                
+		document.getElementById("standard-gateway-v6").addEventListener("input", function() {
+                        if (!isValidFormatV6(this.value)) {
+                                this.setCustomValidity("Invalid IP Address. Please enter a valid IPv6 address.");
+                        } else {
+                                this.setCustomValidity("");
+                        }
+                });
+*/
+
+		function showLoadingSpinner() {
+		    const submitButton = document.getElementById('submit-button');
+		    const cancelButton = document.getElementById('cancel-button');
+		    const spinner = submitButton.querySelector('.fa-spinner');
+		    // Show spinner and hide button text
+		    spinner.style.display = 'inline-block';
+		    submitButton.childNodes[0].nodeValue = ' ';
+		    submitButton.disabled = true; // Disable submit button
+		    cancelButton.disabled = true; // Disable cancel button
+		}
+
+                function showLoadingSpinnerV6() {
+                    const submitButton = document.getElementById('submit-button-v6');
+                    const cancelButton = document.getElementById('cancel-button-v6');
+                    const spinner = submitButton.querySelector('.fa-spinner');
+                    // Show spinner and hide button text
+                    spinner.style.display = 'inline-block';
+                    submitButton.childNodes[0].nodeValue = ' ';
+                    submitButton.disabled = true; // Disable submit button
+                    cancelButton.disabled = true; // Disable cancel button
+                }
+
+
+		document.getElementById("ip-settings-form").addEventListener("submit", function(event) {
+			const ipInput = document.getElementById("ip-address");
+			const subnetInput = document.getElementById("subnet-mask");
+			const gatewayInput = document.getElementById("standard-gateway");
+
+			if (!isValidFormat(ipInput.value) || !isValidFormat(subnetInput.value)) {
+				event.preventDefault();
+				alert("Please enter valid IP Address, Subnet Mask and Standard Gateway in the format xxx.xxx.xxx.xxx, where xxx is a number from 0 to 255.");
+			} else {
+				event.preventDefault(); // Prevent form from submitting immediately
+				if (confirm("The system will restart now and after the restart, you will have to reconnect via the login page. Do you want to proceed?")) {
+					showLoadingSpinner();
+					this.submit(); // Submit the form if the user confirms
+				}
+			}
+		});
+
+                document.getElementById("ip-settings-form-v6").addEventListener("submit", function(event) {
+                        const ipInputV6 = document.getElementById("ip-address-v6");
+                        //const subnetInputV6 = document.getElementById("subnet-mask-v6");
+                        //const gatewayInputV6 = document.getElementById("standard-gateway-v6");
+
+                        //if (!isValidFormatV6(ipInputV6.value) || !subnetInputV6.checkValidity() || !isValidFormatV6(gatewayInputV6.value)) {
+                        if (!isValidFormatV6(ipInputV6.value)) {
+                                event.preventDefault();
+                                alert("Please enter valid IP Addressin the correct formats.");
+                        } else {
+                                event.preventDefault(); // Prevent form from submitting immediately
+                                if (confirm("The system will restart now and after the restart, you will have to reconnect via the login page. Do you want to proceed?")) {
+                                        showLoadingSpinnerV6();
+                                        this.submit(); // Submit the form if the user confirms
+                                }
+                        }
+                });
+
+    </script>
+    
+    
+</body>
+</html>

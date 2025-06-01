@@ -1,0 +1,25 @@
+# HootGuard Sentry - Miscellaneous Folder
+
+This folder can contain the following files:
+
+### global_config.yaml
+Contains all the configuration settings for HootGuard Sentry.
+
+### version.txt
+Indicates the current version of the HootGuard Sentry software.
+
+### ssh_first_time_flag (optional)
+This flag file indicates whether SSH has been activated before:
+- If this file exists, SSH was previously activated.
+- If this file does not exist, SSH has never been activated on this system.
+
+### init_flag (optional)
+Indicates whether the user has completed the initial setup of HootGuard Sentry:
+- If this file exists, the initial setup has already been completed.
+- If this file does not exist, the initial setup needs to be performed for proper use of HootGuard Sentry.
+
+### update_available (optional)
+Indicates that an update is available and triggers a button on the frontend
+
+### update_pending (optional)
+Indicates that the update process was started by the user. At restart of the system, the system will check whether this flag exists and if it exists, perform a system update.

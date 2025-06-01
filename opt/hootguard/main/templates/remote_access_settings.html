@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>Snooze Settings</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">	
+    <style>
+        .fa-spinner {
+            display: none;
+            animation: spin 1s linear infinite;
+        }
+        
+	@keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+	
+	.button-size {
+	     width: 200px;
+	}
+	
+    </style>
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+    <div id="navigation-placeholder"></div>
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+    
+    <div class="container">
+
+<!--	<div id="success-message" class="success-message">Snooze time successfully updated</div> -->
+
+        <h1>Remote Access Management</h1>
+        <div class="explain-text">
+	    	SSH (Secure Shell) allows you to securely access and control your HootGuard device remotely. For security reasons, SSH is disabled by default. However, you can easily activate or deactivate SSH from this page when needed.
+		<p>For the best security practices, we recommend only activating SSH when necessary and deactivating it afterward.</p>
+        </div>
+
+	<br>
+        <!-- Display current SSH status -->
+        <p>Current SSH status: <strong>{{ 'Activated' if ssh_active else 'Deactivated' }}</strong></p>
+
+        <!-- Buttons to enable or disable SSH -->
+        <form method="POST">
+            {% if ssh_active %}
+                <button class="button-size" type="submit" name="disable">Deactivate SSH</button>
+            {% else %}
+                <button class="button-size" type="submit" name="enable">Activate SSH</button>
+            {% endif %}
+        </form>
+
+        <!-- Success or error messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert">
+                    {% for category, message in messages %}
+                        <div class="alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        
+    </div>
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+    
+    
+</body>
+</html>

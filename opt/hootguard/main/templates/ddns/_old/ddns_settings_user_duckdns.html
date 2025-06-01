@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>DuckDNS DDNS Settings</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">
+    <style>
+        .hrsep {
+                border: none;
+                height: 1px;
+                background-color: #333333;
+                margin-top: 20px;
+                margin-bottom: 20px;
+                width: 100%;
+        }
+        summary {
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+        }
+        summary:hover {
+            color: lightgrey;
+        }
+        .details-content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+        }
+        .fa-spinner {
+            display: none;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .button-size {
+             width: 310px;
+        }
+    </style>
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+    <div id="navigation-placeholder"></div>
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+    
+    <div class="container">
+        <h1>DuckDNS DDNS Settings</h1>
+        <div class="explain-text">
+            To integrate your own DuckDNS account with HootGuard Sentry, kindly complete the form below, verify its accuracy, and then save your settings. Following this, the system will reboot to apply the new configurations.
+        </div>
+	<br>
+	<div class="explain-text">
+		<i>We would like to remind you that the use of a DuckDNS account signifies your acceptance of DuckDNS's Terms of Use. For a full understanding of these terms and the Privacy Statement, we encourage you to visit the DuckDNS website. Please note that HootGuard operates independently of DuckDNS and that any concerns or obligations related to DuckDNS's Terms of Use do not fall under our authority.</i>
+	</div>
+
+	<br>
+
+	<hr class="hrsep">
+        <details id="details-ipv6">
+        <summary>
+                IP ADDRESS VERSION 6
+                <div class="explain-text"> Recommanded </div>
+        </summary>
+        <div class="details-content">
+
+	<br>
+
+	<div class="table-settings">
+	    <table>
+		<thead>
+		    <tr>
+			<th colspan="2">Current DuckDNS DDNS Configuration (IPv6)</th>
+		    </tr>
+		</thead>
+		<tbody>
+		    <tr>
+			<td>
+			    <span class="small-text">Domain</span> 
+			    <br>
+			    <span class="status-highlight">{{current_domain_ipv6}}</span>
+			    <hr>
+			    
+			    <span class="small-text">Token</span> 
+			    <br>
+			    <span class="status-highlight">{{current_token_ipv6}}</span>
+			</td>
+		    </tr>
+		</tbody>
+	    </table>
+	</div>	
+
+	<form class="frame" id="ip-settings-form-ipv6" action="/ddns_activate_user_duckdns_ipv6" method="post" onsubmit="showSpinners(event)">
+		<div class="section">
+		
+			<label for="domain-ipv6">Domain(s):</label>
+			<input type="text" id="domain-ipv6" name="domain-ipv6" placeholder="e.g. yourname.duckdns.org" required>
+			
+			<label for="token-ipv6">Token:</label>
+			<input type="text" id="token-ipv6" name="token-ipv6" placeholder="e.g. 12d7ba71-a9b5-4fa8-a22e-770ed10dbf9f" required>
+
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+			<div class="btn-group">
+				<button type="button" class="btn-clear" onclick="document.getElementById('domain-ipv6').value='';document.getElementById('token-ipv6').value=''">Clear IPv6 Configuration</button>
+				<button type="submit" class="btn-save button-size">Save & Activate IPv6 Configuration <i class="fa-solid fa-spinner"></i></button>
+			</div>	
+		</div>
+	</form>
+	<div class="note">
+		<strong>Domain(s):</strong> The domain name you choose e.g. http://hootguard.duckdns.org -> hootguard would be the domain name. <br>
+		<strong>Token:</strong> Your access token. you can find it in the echo statement when looking at the linux cron. <br>
+	</div>
+	</div>
+	</details>        
+
+        <hr class="hrsep">
+        <details id="details-ipv4">
+        <summary>
+                IP ADDRESS VERSION 4
+                <div class="explain-text"> Ensure your ISP does not use shared address space (CGNAT / LSN) </div>
+        </summary>
+        <div class="details-content">
+
+        <br>
+
+        <div class="table-settings">
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="2">Current DuckDNS DDNS Configuration (IPv4)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <span class="small-text">Domain</span>
+                            <br>
+                            <span class="status-highlight">{{current_domain}}</span>
+                            <hr>
+
+                            <span class="small-text">Token</span>
+                            <br>
+                            <span class="status-highlight">{{current_token}}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <form class="frame" id="ip-settings-form" action="/ddns_activate_user_duckdns_ipv4" method="post" onsubmit="showSpinners(event)">
+                <div class="section">
+
+                        <label for="domain">Domain(s):</label>
+                        <input type="text" id="domain" name="domain" placeholder="e.g. yourname" required>
+
+                        <label for="token">Token:</label>
+                        <input type="text" id="token" name="token" placeholder="e.g. 12d7ba71-a9b5-4fa8-a22e-770ed10dbf9f" required>
+
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <div class="btn-group">
+                                <button type="button" class="btn-clear" onclick="document.getElementById('domain').value='';document.getElementById('token').value=''">Clear IPv4 Configuration</button>
+                                <button type="submit" class="btn-save button-size">Save & Activate IPv4 Configuration <i class="fa-solid fa-spinner"></i></button>
+                        </div>
+                </div>
+        </form>
+	<div class="note">
+		<strong>Domain(s):</strong> The domain name you choose e.g. http://hootguard.duckdns.org -> hootguard would be the domain name. <br>
+		<strong>Token:</strong> Your access token. you can find it in the echo statement when looking at the linux cron. <br>
+	</div>
+        </div>
+        </details>
+
+        <hr class="hrsep">
+
+        <br><br>
+
+        <div class="explain-text">
+                <p>To connect your DuckDNS account with HootGuard Sentry, please ensure you have a valid DuckDNS account and that the appropriate DNS entries are already configured. Only pre-existing DNS entries can be updated by HootGuard. Once your DNS is properly set up, complete the form below, verify all details, and save your settings.</p>
+                <p><i>We would like to remind you that the use of a DuckDNS signifies your acceptance of DuckDNS's Terms of Use. For a full understanding of these terms and the Privacy Policy, we encourage you to visit the DuckDNS website. Please note that HootGuard operates independently of DuckDNS and that any concerns or obligations related to DuckDNS's Terms of Use do not fall under our authority.</i></p>
+        </div>
+    </div>
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+    <script>
+    // Trim and sanitize input
+    document.addEventListener("DOMContentLoaded", function() {
+        var inputs = document.querySelectorAll("input[type='text']");
+        inputs.forEach(function(input) {
+            input.addEventListener("change", function() {
+                this.value = this.value.trim(); // Remove leading and trailing spaces
+                this.value = this.value.replace(/</g, "&lt;").replace(/>/g, "&gt;"); // Sanitize input
+            });
+        });
+    });
+
+        // Get all the details elements
+        const detailsElements = document.querySelectorAll('details');
+
+        detailsElements.forEach((detail) => {
+            detail.addEventListener('toggle', function() {
+                // Close all other details except the one that was just toggled open
+                if (this.open) {
+                    detailsElements.forEach((otherDetail) => {
+                        if (otherDetail !== this) {
+                            otherDetail.removeAttribute('open');
+                        }
+                    });
+                }
+            });
+        });
+
+    function showSpinners(event) {
+        event.preventDefault(); // Prevent default form submission temporarily
+
+        // Get all submit buttons
+        const submitButtons = document.querySelectorAll('.btn-save');
+
+        // Loop through each button, activate its spinner and disable it
+        submitButtons.forEach((button) => {
+            const spinner = button.querySelector('.fa-spinner');
+            spinner.style.display = 'inline-block'; // Show the spinner
+            button.childNodes[0].nodeValue = ''; // Clear button text
+            button.disabled = true; // Disable the button
+        });
+
+        // Submit the form that triggered the event after showing spinners
+        event.target.submit();
+    }
+    </script>
+    
+</body>
+</html>

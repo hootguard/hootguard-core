@@ -1,0 +1,6 @@
+# HootGuard - Secure your home network and beyond
+# (c) 2024 HootGuard (https://hootguard.com)
+# Secure your home network with HootGuard Sentry.
+
+# Allow hootguard user to reboot and run the HootGuard script without a password
+hootguard ALL=(ALL) NOPASSWD: /bin/systemctl reboot, /sbin/reboot, /usr/local/bin/hootguard, /usr/sbin/ntpdate

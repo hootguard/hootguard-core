@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>VPN Add Temporary Client</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">
+    <style>
+        input[type="datetime-local"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-top: 8px;
+        }
+
+        input[type="datetime-local"]:focus {
+            border-color: #007BFF;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+        
+	.formatted-datetime {
+            font-size: 0.8em;
+            margin-top: 5px;
+	    color: grey;
+        }
+	
+	hr {
+            background-color: #333333;
+            border: none;
+            height: 1px;
+            margin-bottom: 30px;
+	    margin-top: 30px;
+        }
+        
+	table {
+            width: 100%;
+        }
+
+        table td {
+            padding: 15px;
+            vertical-align: top;
+        }
+        .fa-plus {
+            display: inline-block;
+        }
+        .fa-spinner {
+            display: none;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+    <div id="navigation-placeholder"></div>
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+    
+    <div class="container">
+        <h1>Add Temporary VPN Client</h1>
+        <div class="explain-text">
+            Create a temporary VPN client here. The client is enabled and disabled based on the selected dates and times (start date, end date). Select your dates and times for your temporary VPN client below
+        </div>
+        <div style="margin-top: 40px;"></div>
+
+        <div class="table-settings" style="overflow-wrap: break-word;">
+		<table>
+			<thead>
+				<tr>
+					<td id="client-name-cell">Client Name: <strong id="client-name">{{ client_name }}</strong></td>
+				</tr>
+			</thead>
+		</table>
+	</div>			
+
+	<form class="frame" method="post" action="vpn_add_temp_client_action" id="vpnForm">
+		<input type="hidden" name="username" value="{{ client_name }}">
+		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+	       	Choose Start Date: <br>
+                <input
+                  type="datetime-local"
+                  id="starting-time"
+                  name="starting-time" />
+                <div
+                  class="formatted-datetime"
+                  id="formatted-datetime">
+		</div> 
+		
+		<hr>                                     
+
+                Choose End Date: <br>
+                <input
+                  type="datetime-local"
+                  id="ending-time"
+                  name="ending-time" />
+                <div
+                  class="formatted-datetime"
+                  id="formatted-endtime">
+                </div>
+
+		<hr>
+		
+		<div style="margin-bottom: 15px;">
+			You can limit the bandwidth of this VPN Client below in MBits/s. Only full numbers between 1 and 100 are accepted <strong>(optional)</strong>.
+		</div>
+		
+		<table>
+			<tr>
+				<td>
+					Download Limit: <br>
+					<input type="number" id="download_speed" name="download_speed" placeholder="e.g. 50" style="width: 100px; display: inline-block;" min="1" max="100">
+				        <span style="display: inline-block; margin-left: 5px;">Mbit/s</span>
+				</td>
+				<td>
+			                Upload Limit: <br>
+					<input type="number" id="upload_speed" name="upload_speed" placeholder="e.g. 50" style="width: 100px; display: inline-block;" min="1" max="100">
+				        <span style="display: inline-block; margin-left: 5px;">Mbit/s</span>
+
+				</td>
+			</tr>
+		</table>
+
+		<hr>
+		
+		<div style="margin-bottom: 20px;">
+		    <strong>Automatic deletion of VPN client</strong>
+                    <br>
+                    Check the box below if you wish to delete this temporary VPN client immediately after disablement (following the end date).
+		</div>
+                <label class="entry-label">
+                    <input type="checkbox" name="automatic_deletion" value="true">
+                    <span class="custom-checkbox"></span>
+                    <span class="checkbox-text">Automatically delete VPN client after deactivation</span>
+                </label>		
+
+		<div class="btn-group" style="margin-top: 20px">
+		        <button type="button" id="cancel-button" class="btn-clear">
+        		    <a href="/vpn_settings"> <i class="fa-solid fa-ban"></i> &nbsp;Cancel</a>
+	        	</button>
+		        <button type="submit" id="submit-button" class="btn-save">
+        		    <i class="fa-solid fa-plus"></i><i class="fa-solid fa-spinner"></i> &nbsp;Create</a>
+	        	</button>
+		</div>
+	</form>
+
+        <br><br>              
+                <div class="note">
+                        <strong>Start Date:</strong> The start date defines the date and time when the VPN tunnel will be automatically enabled.
+			<br>
+                        <strong>End Date:</strong> The end date defines the date and time when the VPN tunnel will be automatically deactivated.
+                </div>
+    </div>
+
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+    <script>
+        // Function to get the current date and time in the format required by datetime-local
+        function getCurrentDateTimeLocal() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        // Function to get the date one year ago in the format required by datetime-local
+        function getMinDateTimeLocal() {
+            const now = new Date();
+            const year = now.getFullYear() - 1;
+            const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = '00'; // Starting time at the beginning of the day
+            const minutes = '00';
+
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        // Function to format the datetime into the desired format
+        function formatDateTime(datetime) {
+            const date = new Date(datetime);
+            const day = date.getDate();
+            const month = date.toLocaleString('default', { month: 'long' });
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+
+            return `${day}. ${month} ${year} ${hours}:${minutes}h`;
+        }
+
+        // --- STARTING-DATE - START ---
+        // Set the current date and time as the value of the input
+        const startingTimeInput = document.getElementById('starting-time');
+        startingTimeInput.value = getCurrentDateTimeLocal();
+        // Set the min attribute to one year ago
+        startingTimeInput.min = getMinDateTimeLocal();
+
+        // Display the formatted datetime
+        const startingTimeFormatted = document.getElementById('formatted-datetime');
+        function updateStartingFormattedDatetime() {
+            startingTimeFormatted.textContent = `${formatDateTime(startingTimeInput.value)}`;
+        }
+        startingTimeInput.addEventListener('input', updateStartingFormattedDatetime);
+        updateStartingFormattedDatetime();
+        // --- STARTING-DATE - END ---
+
+        // --- ENDING-TIME - START ---
+        // Set the current date and time as the value of the input
+        const endingTimeInput = document.getElementById('ending-time');
+        endingTimeInput.value = getCurrentDateTimeLocal();
+        // Set the min attribute to one year ago
+        endingTimeInput.min = getMinDateTimeLocal();
+
+        // Display the formatted datetime
+        const endingTimeFormatted = document.getElementById('formatted-endtime');
+        function updateEndingFormattedDatetime() {
+            endingTimeFormatted.textContent = `${formatDateTime(endingTimeInput.value)}`;
+        }
+        endingTimeInput.addEventListener('input', updateEndingFormattedDatetime);
+        updateEndingFormattedDatetime();
+        // --- ENDING-TIME - END ---
+
+        // Function to check if the start date is before the end date
+        function validateDates(event) {
+            const startTime = new Date(startingTimeInput.value);
+            const endTime = new Date(endingTimeInput.value);
+
+            if (startTime >= endTime) {
+                alert("Invalid date selection. The start date must be earlier than the end date. Please adjust your selection.");
+                event.preventDefault();
+            }
+        }
+
+        // Add event listener to the form submit
+        const form = document.getElementById('vpnForm');
+        form.addEventListener('submit', validateDates);
+
+	form.addEventListener('submit', function(event) {
+        	const download = document.getElementById('download_speed').value;
+	        const upload = document.getElementById('upload_speed').value;
+
+        	// Check if either field is filled and the other is not
+	        if ((download && !upload) || (!download && upload)) {
+        	    alert("Please fill both the download and upload speed fields, or leave both empty.");
+	            event.preventDefault(); // Prevent form submission
+                    return;
+        	}
+
+        // Spinner for submit button
+        const submitButton = document.getElementById('submit-button');
+        const spinner = submitButton.querySelector('.fa-spinner');
+        const plus = submitButton.querySelector('.fa-plus');
+    
+        // Show spinner and hide plus symbol
+        spinner.style.display = 'inline-block';
+        plus.style.display = 'none';
+        submitButton.childNodes[0].nodeValue = ' ';
+        submitButton.disabled = true; // Disable the submit button
+
+        // Disable the cancel button
+        const cancelButton = document.getElementById('cancel-button');
+        cancelButton.disabled = true; // Disable the cancel button	
+    });
+    </script>
+</body>
+</html>
+
+
+

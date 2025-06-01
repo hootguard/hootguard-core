@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>Factory Reset</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">	
+    <style>
+	.btn-save{
+	    background-color: red;
+	}
+	.btn-save:hover{
+	    background-color: #8B0000;
+	}
+	
+    </style>
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+    <div id="navigation-placeholder"></div>
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+    
+    <div class="container">
+
+        <h1>Factory Reset</h1>
+        <div class="explain-text">
+	    <center><strong style="color:red;"> Attention! </strong></center>
+            If you click on the "Reset system" button, all data is permanently deleted, the system is reset to the factory settings, the IP address is reset to DHCP, all VPN settings are deleted and the default password is restored. 
+	    <br>
+	    <strong style="color:red;">This action cannot be undone.</strong>
+        </div>
+	
+	<form class="frame" id="reset-system-form">
+            <div class="section">
+                <label for="confirmation-input">To reset the system, please type "Enable Factory Reset" below:</label>
+                <input type="text" id="confirmation-input" name="confirmationInput" placeholder="Type here...">
+		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="btn-group">
+                    <button type="button" class="btn-save" onclick="checkConfirmation()">Reset System</button>
+                </div>
+            </div>
+        </form>         
+        
+    </div>
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+    <script>
+        function checkConfirmation() {
+            var confirmationInput = document.getElementById('confirmation-input').value;
+            if (confirmationInput === "Enable Factory Reset") {
+                window.location.href = "/system_reset_perform";
+            } else {
+                alert("You must type 'Enable Factory Reset' to proceed with resetting the system.");
+            }
+        }
+    </script>
+    
+    
+</body>
+</html>

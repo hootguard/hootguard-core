@@ -1,0 +1,267 @@
+html {
+    height: 100%;
+}
+body {
+    font-family: 'Roboto';
+    color: #e0e0e0;
+    background-color: #121212;
+    margin: 0;
+    padding: 20px;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Use viewport height to ensure full height */
+}
+
+.container {
+    display: flex; 
+    flex-direction: column; /* Stack children vertically */
+    align-items: center; /* Center-align flex children horizontally */
+    max-width: 800px; /* Keep your max-width or adjust as necessary */
+    margin: 80px auto 20px; /* Adjust top margin if needed, auto for left and right margins */
+    padding: 20px;
+}
+
+h1, p.heading-text {
+    color: #ffffff;
+    text-align: center;
+}
+
+.button-container {
+    background-color: #2A2A2A; /* Slightly lighter than the page background for contrast */
+    border-radius: 8px; /* Soft rounded corners */
+    padding: 10px; /* Padding inside the container */
+    margin-bottom: 10px; /* Space between each button container */
+    width: 100%; /* Take the full width of the .container */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    display: flex; /* Use flexbox for layout */
+    flex-direction: column; /* Stack button and text vertically */
+    align-items: center; /* Center-align items horizontally */
+    transition: background-color 0.3s ease; /* Smooth transition for hover */
+}
+
+.button-container:hover {
+    background-color: #333; /* Slightly lighter on hover to indicate interactivity */
+}
+
+.button-big {
+    background-color: #007BFF; /* Vibrant blue background */
+    color: #FFFFFF; /* White text */
+    border: 2px solid #FFFFFF; /* White border outline */
+    padding: 10px 28px; /* Adjust padding to account for border */
+    border-radius: 50px; /* Pill-shaped border-radius */
+    cursor: pointer; /* Indicates a clickable button */
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease; /* Smooth transitions */
+    font-family: 'Roboto', sans-serif; /* Consistent font family */
+    font-size: 16px; /* Readable font size */
+    font-weight: 500; /* Medium font weight */
+    letter-spacing: 0.5px; /* Enhances readability */
+    outline: none; /* Focus styles should be handled for accessibility */
+    display: inline-block; /* Allows for width and margin adjustments */
+    text-decoration: none; /* Ensures no underline for link-styled buttons */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+
+.button-big:hover, .button-big:focus {
+    background-color: #0056b3; /* Darker blue on hover/focus for feedback */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Enhanced shadow for depth */
+    transform: translateY(-2px); /* Slight lift effect for interactivity */
+}
+
+.button-big:active {
+    background-color: #004494; /* Even darker for pressed effect */
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2); /* Lower shadow for 'pressed' look */
+    transform: translateY(1px); /* Mimics the button being pressed down */
+}
+
+.explain-text {
+    text-align: center; /* Center-align the explanatory text */
+    color: #ffffff;
+    padding: 0 15px;
+    font-size:0.8em;
+    color: grey;
+}
+
+.small-text {
+    font-size: 11px;
+}
+
+.heading-text {
+    text-align: center; /* Center-align the explanatory text */
+    padding: 0 15px;
+}
+
+
+input[type="text"], input[type="number"], input[type="password"] {
+    background-color: #333;
+    border: none;
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 10px;
+    width: calc(100% - 30px);
+    color: #e0e0e0;
+}
+input:focus {
+    outline: none;
+}
+
+.btn-save {
+    padding: 10px 28px;
+    margin: 20px 0;
+    background-color: #007BFF;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-size: 16px;
+    font-weight: 500;
+}
+.btn-save:hover {
+    background-color: #0056b3;
+}
+.btn-save:active {
+    background-color: #004494;
+}
+
+.btn-clear {
+    padding: 9px 27px;
+    margin: 20px 0;
+    background-color: transparent; /* Transparent background */
+    color: #FFFFFF; 
+    border: 1px solid #FFFFFF;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease; /* Smooth transition for hover and active states */
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.btn-clear:hover {
+    background-color: rgba(255, 255, 255, 0.2); /* Slightly white background on hover for subtle feedback */
+    border-color: #E0E0E0; /* Lighter border on hover */
+}
+
+.btn-clear:active {
+    background-color: rgba(255, 255, 255, 0.3); /* More pronounced white background on active for clear interaction feedback */
+    border-color: #CCCCCC; /* Even lighter border on active */
+}
+
+.note {
+    padding: 10px;
+    color: grey;
+    text-align: center;
+    font-size: 13px;
+}
+
+.frame {
+    border: 2px solid #333333;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 50px;
+    margin-bottom: 50px;
+    width: 100%;
+}
+
+.btn-group {
+	text-align: right;
+	margin-top: 10px;
+}
+      
+a:link, a:visited, a:hover, a:active { 
+  text-decoration: none; 
+  color: white;
+} 
+
+.table-settings {
+    overflow: hidden;
+    width: 100%; 
+    max-width: 500px; 
+}
+
+.table-settings table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.table-settings th, .table-settings td {
+    padding: 10px 20px;
+    border: 1px solid #555;
+    text-align: center;
+}
+
+.status-highlight {
+    color: #ffff00;
+}
+
+.success-message {
+    visibility: hidden;
+    background-color: rgba(255, 255, 255, .2);
+    color: #ffff00;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: -45px;
+}
+
+.error-message {
+    display: none;
+    background-color: rgba(255, 255, 255, .2);
+    color: red;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: -45px;
+}
+.input-hint-text {
+    font-size: 0.75em;
+    color: gray;
+}
+
+/* CHECKBOX DESIGN - START */
+.entry-label {
+    display: flex;
+    align-items: center;
+    margin-bottom: -20px; /* Adds space below each label */
+}
+
+input[type="checkbox"] {
+    display: none;
+}
+
+/* Create a custom checkbox */
+.custom-checkbox {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #FFFFFF;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #000000;
+    vertical-align: middle; /* Aligns the checkbox with the text */
+}
+
+/* Checkmark indicator */
+.custom-checkbox::after {
+    content: "";
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    width: 10px;
+    height: 5px;
+    border: 2px solid #FFFFFF;
+    border-width: 0 0 2px 2px;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    opacity: 0;
+    transition: all 0.1s ease;
+}
+
+/* Show checkmark when checked */
+input[type="checkbox"]:checked + .custom-checkbox::after {
+    opacity: 1;
+}
+
+.checkbox-text {
+    margin-left: 10px;
+}
+/* CHECKBOX DESIGN - END */

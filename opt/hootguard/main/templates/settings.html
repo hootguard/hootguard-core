@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>Settings</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">	
+    <style>
+	 .hrsep {
+                border: none;
+                height: 1px;
+                background-color: #333333;
+                margin-top: 20px;
+                margin-bottom: 20px;
+                width: 100%;
+        }
+
+	.section-container {
+	    display: flex;
+	    flex-direction: column;
+	    width: 100%;
+	}
+
+	.section-heading {
+	    text-align: left;
+	    font-weight: bold;
+	    margin-bottom: 10px;
+	    margin-left: 15px;
+	}
+
+	.explain-text {
+	    margin: 10px 0;
+	    text-align: left;
+	}
+	
+	.section_link {
+	    text-align: right;
+	    margin-top: 10px;
+	    margin-right: 20px;
+	    text-decoration: underline;
+	    font-size: 15px;
+	}
+
+	.btn-shutdown {
+	    padding: 10px 15px;
+	    background-color: transparent; 
+	    color: #ffffff; 
+	    border: 1px solid red;
+	    border-radius: 10px;
+	    cursor: pointer;
+	    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; /* Include border-color and color transition */
+	}
+
+	.btn-shutdown:hover {
+	    background-color: red; /* Optional: Add a red background on hover */
+	    color: #FFFFFF; /* Change text color to white on hover */
+	    border-color: red; /* Keep the border color consistent */
+	}
+
+            .fa-spinner {
+                display: none;
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+
+    </style>
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+    <div id="navigation-placeholder"></div>
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+    
+    <div class="container">
+
+        <h1 class="section-heading">Settings</h1>
+        <div class="explain-text">
+		This page allows you to customize and optimize your HootGuard Sentry setup to suit your needs. From network configurations to Dynamic DNS management and beyond, you’ll find all the tools necessary to tailor your system. Explore the various settings below to enhance security, manage connections, and adjust preferences. Each link will guide you to a dedicated configuration page for a seamless experience.			
+        </div>
+
+	<br>
+
+      	<hr class="hrsep">
+	
+	<div class="section-container">
+	    <div class="section-heading">
+        	Adblock - Blacklisting / Whitelisting
+	    </div>
+	    <div class="explain-text">
+		If there is a need to fine-tune the Adblocker’s filtering preferences, the options below provide flexibility. Use the whitelist link to ensure specific websites are always accessible, or use the blacklist to block access to certain sites. This approach offers enhanced control over the browsing experience and helps maintain security across all devices connected to the network.
+	    </div>
+	    <div class="section_link">
+	        <i class="fa-solid fa-link"></i>
+        	<a href="/adblock_manage_whitelist">Manage Whitelist</a>
+		<br>
+	        <i class="fa-solid fa-link"></i>
+        	<a href="/adblock_manage_blacklist">Manage Blacklist</a>
+	    </div>
+	</div>
+	
+	<hr class="hrsep">
+
+	<div class="section-container">
+	    <div class="section-heading">
+        	Dynamic DNS Settings
+	    </div>
+	    <div class="explain-text">
+		To change your DNS provider or DNS settings, please click the link below. Be aware that if you have active VPN connections, modifying DNS settings may affect the functionality of your VPN clients or connections.
+	    </div>
+	    <div class="section_link">
+	        <i class="fa-solid fa-link"></i>
+        	<a href="/ddns_settings">DDNS Settings</a>
+	    </div>
+	</div>
+	
+	<hr class="hrsep">
+
+	<div class="section-container">
+	    <div class="section-heading">
+        	Snooze Settings
+	    </div>
+	    <div class="explain-text">
+		To adjust the snooze time, which temporarily disables your HootGuard Adblocker, click the link below. Keep in mind that this deactivation will also apply to all VPN connections, meaning they will no longer use any adblocker during this period.
+	    </div>
+	    <div class="section_link">
+	        <i class="fa-solid fa-link"></i>
+        	<a href="/snooze_settings">Snooze Settings</a>
+	    </div>
+	</div>
+	
+	<hr class="hrsep">
+
+	<div class="section-container">
+	    <div class="section-heading">
+        	Network Settings
+	    </div>
+	    <div class="explain-text">
+        	To change the IPv4 or IPv6 address of your HootGuard system, click the link below. Please note that the system will need to reboot after changing the IP address. If you are using VPNs, ensure you update the firewall settings on your ISP router to reflect the new IP address.
+	    </div>
+	    <div class="section_link">
+	        <i class="fa-solid fa-link"></i>
+        	<a href="/network_settings">Network Settings</a>
+	    </div>
+	</div>
+
+	<hr class="hrsep">
+
+	<div class="section-container">
+	    <div class="section-heading">
+        	Password Settings
+	    </div>
+	    <div class="explain-text">
+		To change the login password for your HootGuard Sentry, click the link below.
+	    </div>
+	    <div class="section_link">
+	        <i class="fa-solid fa-link"></i>
+        	<a href="/password_settings">Password Settings</a>
+	    </div>
+	</div>
+	
+	<hr class="hrsep">
+
+	<div class="section-container">
+	    <div class="section-heading">
+		Remote Access Management
+	    </div>
+	    <div class="explain-text">
+		To activate/deactivate remote access (SSH) to your HootGuard system or to change the remote access password, click the link below.
+	    </div>
+	    <div class="section_link">
+	        <i class="fa-solid fa-link"></i>
+        	<a href="/ssh_settings">SSH Settings</a>
+	    </div>
+	</div>
+	
+	<hr class="hrsep">
+
+	<div class="section-container">
+	    <div class="section-heading">
+		Factory Reset
+	    </div>
+	    <div class="explain-text">
+		To perform a complete factory reset of your system, click the link below. Be aware that this action is irreversible. All custom settings, VPN clients, and Adblock configurations will be permanently deleted.
+	    </div>
+	    <div class="section_link">
+	        <i class="fa-solid fa-link"></i>
+        	<a href="/system_reset">Factory Reset</a>
+	    </div>
+	</div>
+	
+	<hr class="hrsep">
+
+        <div class="section-container">
+            <div class="section-heading">
+                Turn Off HootGuard Sentry
+            </div>
+            <div class="explain-text">
+                To turn off your HootGuard Sentry device click the "Turn Off" button below. If you need to restart your HootGuard Sentry, after your turned it off, simply unplug the power supply and reconnect it.
+            </div>
+            <div class="section_link" style="color:red;"> 
+                <form id="system_shutdown" action="/system_shutdown" method="post" onsubmit="return confirmShutdown()">
+                        <div class="section">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn-shutdown"><i class="fa-solid fa-power-off"></i> Turn Off <i class="fa-solid fa-spinner"></i></button>
+                        </div>
+                </form>
+            </div>
+            </div>
+
+            <hr class="hrsep">
+
+        </div>
+
+    </div>
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+
+    <script>
+    	function confirmShutdown() {
+        	if (confirm("Are you sure you want to turn off the HootGuard Sentry?")) {
+	            const submitButton = document.getElementById('shutdown-button');
+        	    const spinner = submitButton.querySelector('.fa-spinner');
+            
+	            // Show spinner and hide the power-off icon
+	            spinner.style.display = 'inline-block';
+	            submitButton.childNodes[0].nodeValue = ' ';
+	            submitButton.disabled = true; // Disable the button
+            
+        	    return true; // Proceed with form submission
+	        }
+        	return false; // Prevent form submission
+	    }
+    </script>    
+    
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>Cloudflare DDNS Settings</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">
+    <style>
+       	.hrsep {
+                border: none;
+                height: 1px;
+                background-color: #333333;
+                margin-top: 20px;
+                margin-bottom: 20px;
+                width: 100%;
+      	}
+        summary {
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+	    text-align: center;
+        }
+        summary:hover {
+            color: lightgrey;
+        }
+    	.details-content {
+        	display: flex;
+	        flex-direction: column;
+	        align-items: center;
+        	justify-content: center;
+	}
+        .fa-spinner {
+            display: none;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .button-size {
+             width: 310px;
+        }
+  </style>
+
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+    <div id="navigation-placeholder"></div>
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+    
+    <div class="container">
+        <h1>Cloudflare DDNS Settings</h1>
+        <div class="explain-text">
+		<p> To connect your HootGuard Sentry with your Cloudflare DNS, please ensure you have a valid Cloudflare account and that the appropriate DNS entries are already configured. Only pre-existing DNS entries can be updated by HootGuard. Once your DNS is properly set up, complete the form below, verify all details, and save your settings.</p>
+		<p> We highly recommend using IPv6 for optimal performance.</p>        
+		<p> Please select your preferred IP version below. </p>
+	</div>
+	<br>
+	
+	<hr class="hrsep">
+	<details id="details-ipv6" >
+	<summary> 
+		IP ADDRESS VERSION 6
+        	<div class="explain-text"> Recommanded </div>
+	</summary>
+	<div class="details-content">
+	<br>
+
+	<div class="table-settings">
+	    <table>
+		<thead>
+		    <tr>
+			<th colspan="2">Current Cloudflare DDNS Configuration (IPv6)</th>
+		    </tr>
+		</thead>
+		<tbody>
+		    <tr>
+			<td>
+			    <span class="small-text">Authentication email</span> 
+			    <br> 
+    			    <span class="status-highlight">{{current_auth_email_ipv6}}</span>
+			    <hr>
+			
+			    <span class="small-text">Authentication key</span>
+			    <br> 
+                            <span class="status-highlight">{{current_auth_key_ipv6}}</span>
+			    <hr>
+			
+			    <span class="small-text">Zone identifier</span> 
+			    <br> 
+			    <span class="status-highlight">{{current_zone_identifier_ipv6}}</span>
+			    <hr>
+			
+			    <span class="small-text">Record name</span> 
+			    <br> 
+			    <span class="status-highlight">{{current_record_name_ipv6}}</span>
+			</td>
+		    </tr>
+		</tbody>
+	    </table>
+	</div>	
+
+	<form class="frame" id="ip-settings-form-ipv6" action="/ddns_activate_user_cloudflare_ipv6" method="post" onsubmit="showSpinners(event)">
+		<div class="section">
+		
+			<label for="auth-e-mail-ipv6">Authentication E-mail:</label>
+			<input type="text" id="auth-e-mail-ipv6" name="e_mail_ipv6" placeholder="e.g. name@yourdomain.com" required>
+			
+			<label for="auth-key-ipv6">Authentication Key:</label>
+			<input type="text" id="auth-key-ipv6" name="auth_key_ipv6" placeholder="e.g. 2b471e37d2ea7c5d972070et7b84d505c" required>
+
+			<label for="zone-identifier-ipv6">Zone Identifier:</label>
+			<input type="text" id="zone-identifier-ipv6" name="zone_identifier_ipv6" placeholder="e.g. ae18d3203a564cf0c3e363675bef" required>
+
+			<label for="record-name-ipv6">Record Name:</label>
+			<input type="text" id="record-name-ipv6" name="record_name_ipv6" placeholder="e.g. identifier.yourdomain.com" required>
+
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+			
+			<div class="btn-group">
+				<button type="button" class="btn-clear" onclick="document.getElementById('auth-e-mail-ipv6').value='';document.getElementById('auth-key-ipv6').value='';document.getElementById('zone-identifier-ipv6').value='';document.getElementById('record-name-ipv6').value=''">Clear IPv6 Configuration</button>
+				<button type="submit" class="btn-save button-size" id="submit-button">Save & Activate IPv6 Configuration <i class="fa-solid fa-spinner"></i></button>
+			</div>	
+		</div>
+	</form>
+
+        <br><br>
+
+		<div class="note">
+			<strong>Authentication Email:</strong> The email used to login 'https://dash.cloudflare.com'. <br>
+			<strong>Authentication Key:</strong> Your Global API Key. <br>
+			<strong>Zone Identifier:</strong> The one identifier can be found in the "Overview" tab of your domain. <br>
+			<strong>Record Name:</strong> Which record you want to be synced. <br>		
+		</div>
+	<br>
+
+
+	</div>
+	</details>
+
+	<hr class="hrsep">
+	<details id="details-ipv4">
+	<summary> 
+		IP ADDRESS VERSION 4
+        	<div class="explain-text"> Ensure your ISP does not use shared address space (CGNAT / LSN)</div>
+	</summary>
+	<div class="details-content">
+
+        <br>
+
+        <div class="table-settings">
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="2">Current Cloudflare DDNS Configuration (IPv4)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                             <span class="small-text">Authentication email</span>
+                             <br>
+                             <span class="status-highlight">{{current_auth_email}}</span>
+                             <hr>
+
+                             <span class="small-text">Authentication key</span>
+                             <br>
+			     <span class="status-highlight">{{current_auth_key}}</span>
+                             <hr>
+
+                            <span class="small-text">Zone identifier</span>
+                            <br>
+                            <span class="status-highlight">{{current_zone_identifier}}</span>
+                            <hr>
+
+                            <span class="small-text">Record name</span>
+                            <br>
+                            <span class="status-highlight">{{current_record_name}}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <form class="frame" id="ip-settings-form" action="/ddns_activate_user_cloudflare_ipv4" method="post" onsubmit="showSpinners(event)">
+                <div class="section">
+
+                        <label for="auth-e-mail">Authentication E-mail:</label>
+                        <input type="text" id="auth-e-mail" name="e_mail" placeholder="e.g. name@yourdomain.com" required>
+
+                        <label for="auth-key">Authentication Key:</label>
+                        <input type="text" id="auth-key" name="auth_key" placeholder="e.g. 2b471e37d2ea7c5d972070et7b84d505c" required>
+
+                        <label for="zone-identifier">Zone Identifier:</label>
+                        <input type="text" id="zone-identifier" name="zone_identifier" placeholder="e.g. ae18d3203a564cf0c3e363675bef" required>
+
+                        <label for="record-name">Record Name:</label>
+                        <input type="text" id="record-name" name="record_name" placeholder="e.g. identifier.yourdomain.com" required>
+
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <div class="btn-group">
+                                <button type="button" class="btn-clear" onclick="document.getElementById('auth-e-mail').value='';document.getElementById('auth-key').value='';document.getElementById('zone-identifier').value='';document.getElementById('record-name').value=''">Clear IPv4 Configuration</button>
+                                <button type="submit" class="btn-save button-size" id="submit-button button-size">Save & Activate IPv4 Configuration <i class="fa-solid fa-spinner"></i></button>
+                        </div>
+                </div>
+        </form>
+
+        <br><br>
+
+		<div class="note">
+			<strong>Authentication Email:</strong> The email used to login 'https://dash.cloudflare.com'. <br>
+			<strong>Authentication Key:</strong> Your Global API Key. <br>
+			<strong>Zone Identifier:</strong> The one identifier can be found in the "Overview" tab of your domain. <br>
+			<strong>Record Name:</strong> Which record you want to be synced. <br>		
+		</div>
+	<br>
+
+	</div>
+	</details>        
+	<hr class="hrsep">
+
+
+
+	<br><br>
+
+
+	<div class="explain-text">
+		<p>To connect your Cloudflare account with HootGuard Sentry, please ensure you have a valid Cloudflare account and that the appropriate DNS entries are already configured. Only pre-existing DNS entries can be updated by HootGuard. Once your DNS is properly set up, complete the form below, verify all details, and save your settings.</p>
+		<p><i>We would like to remind you that the use of a Cloudflare signifies your acceptance of Cloudflare's Terms of Use. For a full understanding of these terms and the Privacy Policy, we encourage you to visit the Cloudflare website. Please note that HootGuard operates independently of Cloudflare and that any concerns or obligations related to Cloudflare's Terms of Use do not fall under our authority.</i></p>
+	</div>
+
+        
+        
+        
+    </div>
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+    <script>
+        // Trim and sanitize input
+        document.addEventListener("DOMContentLoaded", function() {
+            var inputs = document.querySelectorAll("input[type='text']");
+            inputs.forEach(function(input) {
+                input.addEventListener("change", function() {
+                    this.value = this.value.trim(); // Remove leading and trailing spaces
+                    this.value = this.value.replace(/</g, "&lt;").replace(/>/g, "&gt;"); // Sanitize input
+                });
+            });
+        });
+
+        // Get all the details elements
+        const detailsElements = document.querySelectorAll('details');
+
+        detailsElements.forEach((detail) => {
+            detail.addEventListener('toggle', function() {
+                // Close all other details except the one that was just toggled open
+                if (this.open) {
+                    detailsElements.forEach((otherDetail) => {
+                        if (otherDetail !== this) {
+                            otherDetail.removeAttribute('open');
+                        }
+                    });
+                }
+            });
+        });
+
+    function showSpinners(event) {
+        event.preventDefault(); // Prevent default form submission temporarily
+
+        // Get all submit buttons
+        const submitButtons = document.querySelectorAll('.btn-save');
+
+        // Loop through each button, activate its spinner and disable it
+        submitButtons.forEach((button) => {
+            const spinner = button.querySelector('.fa-spinner');
+            spinner.style.display = 'inline-block'; // Show the spinner
+            button.childNodes[0].nodeValue = ''; // Clear button text
+            button.disabled = true; // Disable the button
+        });
+
+        // Submit the form that triggered the event after showing spinners
+        event.target.submit();
+    }
+    </script>
+    
+    
+</body>
+</html>

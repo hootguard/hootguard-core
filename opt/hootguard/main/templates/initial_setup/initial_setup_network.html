@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>Step1: Initial Setup - Network</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">
+    <style>
+        }
+        .hrsep {
+                border: none;
+                height: 1px;
+                background-color: #333333;
+                margin-top: 30px;
+                margin-bottom: 30px;
+                width: 100%;
+        }
+        .section-text {
+                text-align: left;
+                margin-top: 15px;
+                margin-bottom: 15px;
+        }
+        .form-group {
+            margin-bottom: 1.0em;
+        }
+        .checkbox-style {
+                margin-top: -1.8em;
+        }
+        input[type="checkbox"] {
+                display: inline-block !important;
+        }
+        .btn-accept {
+            padding: 5px 14px;
+            margin: 15px 0;
+            background-color: #FFFF00;
+            color: #000000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .btn-accept:hover {
+            background-color: #FDD835;
+        }
+        .btn-accept:active {
+            background-color: #F9A825;
+        }
+    </style>
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+<!--    <div id="navigation-placeholder"></div> -->
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+
+    <div class="container">
+
+        <h1>
+                <span style="font-size: 1.4em;">Initial Setup</span>
+                <br>
+                <span style="font-size: 1.1m;">Step 1: Network</span>
+        </h1>
+
+        <p>Follow the steps below to easily set up your HootGuard Sentry.</p>
+	
+	    <div class="frame">
+                <div class="explain-text section-text">
+			To ensure your HootGuard Sentry runs smoothly on your home network, it needs a static IP address that fits your local network settings. Please enter an appropriate IP address, subnet mask, and default gateway below. If you're unsure, you can usually find this information in your router's configuration.  
+		</div>
+{% if suggested_ip != "Not available" %}
+                 <div class="explain-text section-text">
+		        <br><br>
+		        Not sure what to choose? No problem, below you'll find our suggested settings. Click the <strong>Accept Suggestions</strong> button to automatically fill in the form.
+                </div>
+
+		<hr class="hrsep">
+
+               	<div class="explain-text" style="margin-top: 15px;">
+		      	
+			<div style="display: flex; justify-content: center;">
+			    <table border="0" style="min-width: 450px; text-align: left;">
+			        <tr>
+			            <td>
+			                <span style="font-size: 0.8em;">IP Address:</span> <span id="suggested-ip" class="status-highlight">{{ suggested_ip }}</span>
+			            </td>
+			            <td rowspan="2" style="padding: 5px; text-align: center; vertical-align: middle;">
+			                <button type="button" id="apply-suggested-ip" class="btn-accept" style="font-size: 1.0em;">
+			                    Accept Suggestion
+			                </button>
+			            </td>
+			        </tr>
+			        <tr>
+			            <td>
+			                <span style="font-size: 0.8em;">Subnet Mask:</span> <span id="suggested-subnet" class="status-highlight">{{ subnet_mask }}</span>
+			            </td>
+			        </tr>
+			        <tr>
+			            <td>
+			                <span style="font-size: 0.8em;">Gateway:</span> <span id="suggested-gw" class="status-highlight">{{ standard_gw }}</span>
+			            </td>
+			            <td style="padding: 5px; text-align: center; font-size: 0.7em">* IP suggested via ping; may not be free.</td>
+			        </tr>
+			    </table>
+			</div>
+		</div>
+
+		<hr class="hrsep">
+
+{% endif %}
+		<form id="initial-setup-form-network" action="/initial_setup_handler" method="post">
+        		<div class="form-group" style="margin-top: 20px;">
+                		<label for="ip-address">IP Address:</label>
+	                	<input type="text" id="ip-address" name="ip_address" placeholder="e.g. 192.168.0.100" required>
+	
+        	                <label for="subnet-mask">Subnet Mask:</label>
+                	        <input type="text" id="subnet-mask" name="subnet_mask" placeholder="e.g. 255.255.255.0" required>
+
+                        	<label for="standard-gateway">Standard Gateway:</label>
+	                        <input type="text" id="standard-gateway" name="standard_gateway" placeholder="e.g. 192.168.0.1" required>
+
+        	                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+				<!-- For main.py so that the route initial_setup_handler can assign the data suaber -->
+				<input type="hidden" name="step" value="network">
+				<div style="text-align: right; margin-top: 10px;">
+					<button type="submit" id="submit-button" class="btn-save">Save & Next</button>
+				</div>
+	                </div>
+      		  </form>
+            </div>
+    </div>
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+        <script>
+/* IP ADDRESS SUGGESTION BELOW ---*/
+const applySuggestedIpBtn = document.getElementById("apply-suggested-ip");
+if (applySuggestedIpBtn) {
+    applySuggestedIpBtn.addEventListener("click", function () {
+        document.getElementById("ip-address").value = document.getElementById("suggested-ip").textContent.trim();
+        document.getElementById("subnet-mask").value = document.getElementById("suggested-subnet").textContent.trim();
+        document.getElementById("standard-gateway").value = document.getElementById("suggested-gw").textContent.trim();
+    });
+}
+/* --- IP ADDRESS PART BELOW --- */
+
+                function isValidFormat(str) {
+                        const blockRegExp = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+                        return blockRegExp.test(str);
+                }
+
+                document.getElementById("ip-address").addEventListener("input", function() {
+                        if (!isValidFormat(this.value)) {
+                                this.setCustomValidity("Invalid IP Address. Please enter a value like 192.168.0.100");
+                        } else {
+                                this.setCustomValidity("");
+                        }
+                });
+
+                document.getElementById("subnet-mask").addEventListener("input", function() {
+                        if (!isValidFormat(this.value)) {
+                                this.setCustomValidity("Invalid Subnet Mask. Please enter a value like 255.255.255.0");
+                        } else {
+                                this.setCustomValidity("");
+                        }
+                });
+
+                document.getElementById("standard-gateway").addEventListener("input", function() {
+                        if (!isValidFormat(this.value)) {
+                                this.setCustomValidity("Invalid IP Address. Please enter a value like 192.168.0.1");
+                        } else {
+                                this.setCustomValidity("");
+                        }
+                });
+
+                document.getElementById("initial-setup-form-network").addEventListener("submit", function(event) {
+			console.log("🧪 Form submit triggered.");
+                        // Validate passwords
+                        //if (!validateAndConfirmPasswords()) {
+                        //    event.preventDefault(); // Prevent form submission if passwords do not match
+                        //    return;
+                        //}
+                        const ipInput = document.getElementById("ip-address");
+                        const subnetInput = document.getElementById("subnet-mask");
+                        const gatewayInput = document.getElementById("standard-gateway");
+
+                        if (!isValidFormat(ipInput.value) || !isValidFormat(subnetInput.value)) {
+                                event.preventDefault();
+                                alert("Please enter valid IP Address, Subnet Mask and Standard Gateway in the format xxx.xxx.xxx.xxx, where xxx is a number from 0 to 255.");
+                        } else {
+                                this.submit(); // Submit the form if the user confirms
+                        }
+                });
+
+    </script>
+
+</body>
+</html>

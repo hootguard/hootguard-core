@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>Login</title>
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">
+
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            background-color: #1f1f1f;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        h2 {
+            color: #ffffff;
+            text-align: center;
+        }
+        input[type=password], input[type=text] {
+            background-color: #333;
+            border: none;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            width: calc(100% - 30px);
+            color: #e0e0e0;
+        }
+        input:focus {
+            outline: none;
+            background-color: #575757;
+        }
+        .btn-save {
+            display: block;
+            width: 100%;
+            padding: 10px 28px;
+            margin: 20px 0;
+            background-color: #007BFF;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .btn-save:hover {
+            background-color: #0056b3;
+        }
+        .btn-save:active {
+            background-color: #004494;
+        }
+        .fa-spinner {
+            display: none;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+	/* Inline styles to ensure visibility */
+        input[type="checkbox"] {
+            display: inline-block !important;
+        }
+
+	.lock-message {
+	    visibility: hidden;
+	    background-color: rgba(255, 255, 0, .2);
+	    color: #ffffff;
+	    padding: 10px;
+	    border-radius: 5px;
+	    margin-top: -45px;
+	}
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div align="center">
+            <img src="hootguard/HootGuard-Logo-White_500x210.png" alt="HootGuard Logo" width="150">
+        </div>
+        <br>
+        <div class="explain-text">
+            Enter your password below to access settings. You can find this password on the underside of your HootGuard box.
+<!--	    <div style="margin-top: 10px; font-size: 0.8em;"> <i> Three wrong password attempts block login for 30 seconds. <i> </div>-->
+        </div>
+        <br>
+        <form action="/login" method="post" >
+            <input type="password" id="password" name="password" placeholder="Password" required>
+	    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+             <div>
+                <input type="checkbox" id="show-password" onclick="togglePassword()">
+                <label for="show-password">Show Password</label>
+            </div>
+            <button type="submit" id="login-button" class="btn-save">Login <i class="fa-solid fa-spinner"></i></button>
+        </form>
+        <div class="explain-text" style="margin: 10px; font-size: 0.7em;"> Three wrong password attempts block login for 30 seconds. </div>
+        
+
+        <br><br>        
+        
+        <center>
+            <div id="success-message" class="success-message"> <i class="fa-solid fa-triangle-exclamation"></i> Wrong password </div>
+            <div id="lock-message" class="lock-message"> <i class="fa-solid fa-triangle-exclamation"></i> Too many attempts. Wait 30s. </div>
+        </center>
+    </div>
+    
+    
+    <script>
+        function togglePassword() {
+                var passwordInput = document.getElementById("password");
+                if (passwordInput.type === "password") {
+                    passwordInput.type = "text";
+                } else {
+                    passwordInput.type = "password";
+                }
+        }
+
+        // Check if wrong_password is true and display "success" message for 3 seconds
+        const wrongPassword = {{ wrong_password | tojson }};
+        if (wrongPassword === "wrong_pwd") {
+            const successMessage = document.getElementById('success-message');
+            successMessage.style.visibility = 'visible';
+            setTimeout(function () {
+                successMessage.style.visibility = 'hidden';
+            }, 3000);
+        } else if (wrongPassword === "lock_login") {
+       	    const lockMessage = document.getElementById('lock-message');
+            const loginButton = document.getElementById('login-button');
+	    lockMessage.style.visibility = 'visible';
+            loginButton.disabled = true; // Disable the button
+            setTimeout(function () {
+                lockMessage.style.visibility = 'hidden';
+                loginButton.disabled = false; 
+            }, 30000); // Lock message visible for 30 seconds
+        }
+        
+        document.querySelector('form').addEventListener('submit', function() {
+            const loginButton = document.getElementById('login-button');
+            const spinner = loginButton.querySelector('.fa-spinner');
+            // Show spinner and hide Login text
+            spinner.style.display = 'inline-block';
+            loginButton.childNodes[0].nodeValue = ' ';
+            loginButton.disabled = true; // Disable the button
+        });
+
+    </script>
+
+
+</body>
+</html>

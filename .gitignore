@@ -1,0 +1,28 @@
+# Ignore the environment variables file
+opt/hootguard/.env
+
+# Ignore Adblock cache files
+opt/hootguard/adblock/adblock_cache/normal.txt
+opt/hootguard/adblock/adblock_cache/enhanced.txt
+opt/hootguard/adblock/adblock_cache/max.txt
+opt/hootguard/adblock/adblock_cache/adult.txt
+opt/hootguard/adblock/adblock_cache/gambling.txt
+opt/hootguard/adblock/adblock_cache/social.txt
+
+# Ignore all VPN configuration files except the README
+opt/hootguard/vpn/configs/*
+!opt/hootguard/vpn/configs/README
+
+# Ignore all static files (qr code files) except the README
+opt/hootguard/main/static/*
+!opt/hootguard/main/static/README
+
+# Ignore initialization flags
+opt/hootguard/misc/init_flag
+opt/hootguard/misc/ssh_first_time_flag
+
+# Ignore Python bytecode files
+*.pyc
+
+# Ignore __pycache__ directories
+__pycache__/

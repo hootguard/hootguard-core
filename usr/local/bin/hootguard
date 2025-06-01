@@ -1,0 +1,658 @@
+#!/bin/bash
+# HootGuard Master Script
+# Handles privileged operations securely
+
+LOG_FILE="/var/log/hootguard_system.log"
+
+# Define usage instructions
+usage() {
+    echo "Usage: $0 <command> [args]"
+    echo "Commands:"
+    echo "  set-password <username> <password>   Set a user's password"
+    echo "  wg-show                              Show WireGuard status (all interfaces)"
+    echo "  set-bandwidth <wg_interface> <ip> <download_rate> <upload_rate> <flowid_download> <flowid_upload>"
+    echo "                                       Apply bandwidth limits for a client"
+    echo "  remove-bandwidth <wg_interface> <ip> <flowid_download> <flowid_upload>"
+    echo "                                       Remove bandwidth limits for a client"
+    echo "  append-peer <wg_interface> <peer_config>"
+    echo "                                       Append a peer to the WireGuard configuration file"
+    echo "  update-root-hints                    Update the Unbound root.hints file"
+    echo "  restore-backup <backup> <destination>"
+    echo "                                       Restore a backup file to a destination"
+    echo "  update-network-config <config-file> <destination>"
+    echo "                                       Update the network configuration file"
+    echo "  modify-firewall-rules <iptables-script>"
+    echo "                                       Modify firewall rules and make persistent"
+    echo "  reset-ip <original_file> <target_file>"
+    echo "                                       Reset the IP configuration to DHCP"
+    echo "  comment-peer <config_file> <client_name>"
+    echo "                                       Comment out a peer in the WireGuard configuration file" 
+    echo "  uncomment-peer <config_file> <client_name>"
+    echo "                                       Uncomment a peer in the WireGuard configuration file"
+    echo "  remove-peer <config_file> <client_name>"
+    echo "                                       Remove a peer from the WireGuard configuration file"
+    echo "  clear-traffic-control <interface>"
+    echo "                                       Clear traffic control rules for an interface"
+    echo "  reset-firewall <script_path>         Reset firewall rules to factory defaults"
+    echo "  clear-log <file>                     Clear the specified log file"
+    echo "  remove-file <file>                   Remove the specified file"
+    echo "  stop-service <service>               Stop the specified service"
+    echo "  start-service <service>              Start the specified service"
+    echo "  set-file-ownership <file_name> <owner> <group>"
+    echo "                                       Set file ownership"
+    echo "  set-file-permissions <file_name> <permissions>"
+    echo "                                       Set file permissions"
+    echo "  reboot-system                        Reboot the system"
+    echo "  help                                 Show this help message"
+}
+
+# Log messages to a debug file
+log() {
+    echo "$(date): $1" >> "$LOG_FILE"
+}
+
+# Command: Set a user's password
+set_password() {
+    USERNAME="$1"
+    PASSWORD="$2"
+
+    # Ensure the user exists
+    if ! id "$USERNAME" &>/dev/null; then
+        log "Error: User '$USERNAME' does not exist."
+        echo "Error: User '$USERNAME' does not exist."
+        exit 1
+    fi
+
+    # Change the user's password
+    if echo "$USERNAME:$PASSWORD" | /usr/sbin/chpasswd; then
+        log "Password successfully changed for user '$USERNAME'."
+        echo "Password successfully changed for user '$USERNAME'."
+    else
+        log "Error: Failed to change password for user '$USERNAME'."
+        echo "Error: Failed to change password for user '$USERNAME'."
+        exit 1
+    fi
+}
+
+# Command: Show WireGuard status
+wg_show() {
+    # Run the 'wg show all' command
+    if /usr/bin/wg show all; then
+        log "Successfully retrieved WireGuard status."
+        exit 0
+    else
+        log "Error: Failed to retrieve WireGuard status."
+        echo "Error: Failed to retrieve WireGuard status."
+        exit 1
+    fi
+}
+
+# Command: Apply traffic control (bandwidth limits)
+set_bandwidth() {
+    WG_INTERFACE="$1"
+    CLIENT_IP="$2"
+    DOWNLOAD_RATE="$3"
+    UPLOAD_RATE="$4"
+    FLOWID_DOWNLOAD="$5"
+    FLOWID_UPLOAD="$6"
+    BURST_SIZE="100k"
+
+    log "set-bandwidth called with wg_interface=$WG_INTERFACE, ip=$CLIENT_IP, download_rate=$DOWNLOAD_RATE, upload_rate=$UPLOAD_RATE, flowid_download=$FLOWID_DOWNLOAD, flowid_upload=$FLOWID_UPLOAD"
+
+    # Ensure all arguments are provided
+    if [[ -z "$WG_INTERFACE" || -z "$CLIENT_IP" || -z "$DOWNLOAD_RATE" || -z "$UPLOAD_RATE" || -z "$FLOWID_DOWNLOAD" || -z "$FLOWID_UPLOAD" ]]; then
+        log "Error: Missing arguments for set-bandwidth"
+        echo "Usage: $0 set-bandwidth <wg_interface> <ip> <download_rate> <upload_rate> <flowid_download> <flowid_upload>"
+        exit 1
+    fi
+
+    # Check if root qdisc exists; if not, add it
+    if ! /usr/sbin/tc qdisc show dev "$WG_INTERFACE" | grep -q "fq_codel"; then
+        log "Adding root qdisc for $WG_INTERFACE"
+        /usr/sbin/tc qdisc add dev "$WG_INTERFACE" root handle 1: fq_codel
+    fi
+
+    # Apply egress bandwidth limit (download)
+    log "Applying egress bandwidth limit for $CLIENT_IP ($DOWNLOAD_RATE) with flowid $FLOWID_DOWNLOAD"
+    /usr/sbin/tc filter add dev "$WG_INTERFACE" protocol ip parent 1: prio 1 u32 \
+        match ip dst "$CLIENT_IP" police rate "$DOWNLOAD_RATE" burst "$BURST_SIZE" drop flowid "$FLOWID_DOWNLOAD"
+
+    # Check if ingress qdisc exists; if not, add it
+    if ! /usr/sbin/tc qdisc show dev "$WG_INTERFACE" | grep -q "ingress"; then
+        log "Adding ingress qdisc for $WG_INTERFACE"
+        /usr/sbin/tc qdisc add dev "$WG_INTERFACE" handle ffff: ingress
+    fi
+
+    # Apply ingress bandwidth limit (upload)
+    log "Applying ingress bandwidth limit for $CLIENT_IP ($UPLOAD_RATE) with flowid $FLOWID_UPLOAD"
+    /usr/sbin/tc filter add dev "$WG_INTERFACE" parent ffff: protocol ip prio 1 u32 \
+        match ip src "$CLIENT_IP" police rate "$UPLOAD_RATE" burst "$BURST_SIZE" drop flowid "$FLOWID_UPLOAD"
+
+    log "Bandwidth limits applied successfully for $CLIENT_IP"
+    echo "Bandwidth limits applied successfully for $CLIENT_IP"
+}
+
+# Command: Remove bandwidth limits
+remove_bandwidth() {
+    WG_INTERFACE="$1"
+    FLOWID_DOWNLOAD="$2"
+    FLOWID_UPLOAD="$3"
+
+    log "remove-bandwidth called with wg_interface=$WG_INTERFACE, flowid_download=$FLOWID_DOWNLOAD, flowid_upload=$FLOWID_UPLOAD"
+
+    # Ensure all arguments are provided
+    if [[ -z "$WG_INTERFACE" || -z "$FLOWID_DOWNLOAD" || -z "$FLOWID_UPLOAD" ]]; then
+        log "Error: Missing arguments for remove-bandwidth"
+        echo "Usage: $0 remove-bandwidth <wg_interface> <flowid_download> <flowid_upload>"
+        exit 1
+    fi
+
+    # Fetch all TC rules for the specified interface
+    ALL_RULES=$(/usr/sbin/tc filter show dev "$WG_INTERFACE" 2>/dev/null)
+
+    # Find the handle for the given flowid
+    HANDLE=$(echo "$ALL_RULES" | grep -E "flowid ($FLOWID_DOWNLOAD|$FLOWID_UPLOAD)" | awk '{for(i=1;i<=NF;i++) if ($i == "fh") print $(i+1)}' | head -n 1)
+
+    if [[ -z "$HANDLE" ]]; then
+        log "No matching TC rules found for flowid $FLOWID_DOWNLOAD or $FLOWID_UPLOAD."
+        echo "No matching TC rules found for flowid $FLOWID_DOWNLOAD or $FLOWID_UPLOAD."
+        exit 0
+    fi
+
+    # Delete egress rule
+    log "Deleting egress rule for handle $HANDLE"
+    if /usr/sbin/tc filter del dev "$WG_INTERFACE" parent 1: pref 1 handle "$HANDLE" u32 2>/dev/null; then
+        log "Successfully deleted egress rule for flowid $FLOWID_DOWNLOAD."
+        echo "Successfully deleted egress rule for flowid $FLOWID_DOWNLOAD."
+    else
+        log "Failed to delete egress rule for flowid $FLOWID_DOWNLOAD."
+        echo "Failed to delete egress rule for flowid $FLOWID_DOWNLOAD."
+    fi
+
+    # Delete ingress rule
+    log "Deleting ingress rule for handle $HANDLE"
+    if /usr/sbin/tc filter del dev "$WG_INTERFACE" parent ffff: pref 1 handle "$HANDLE" u32 2>/dev/null; then
+        log "Successfully deleted ingress rule for flowid $FLOWID_UPLOAD."
+        echo "Successfully deleted ingress rule for flowid $FLOWID_UPLOAD."
+    else
+        log "Failed to delete ingress rule for flowid $FLOWID_UPLOAD."
+        echo "Failed to delete ingress rule for flowid $FLOWID_UPLOAD."
+    fi
+}
+
+# Command: Append a peer to a WireGuard configuration file
+append_peer() {
+    WG_INTERFACE="$1"
+    PEER_CONFIG="$2"
+    WG_CONF_PATH="/etc/wireguard/${WG_INTERFACE}.conf"
+
+    log "append-peer called with interface=$WG_INTERFACE"
+
+    # Ensure the WireGuard configuration file exists
+    if [[ ! -f "$WG_CONF_PATH" ]]; then
+        log "Error: WireGuard configuration file $WG_CONF_PATH does not exist."
+        echo "Error: WireGuard configuration file $WG_CONF_PATH does not exist."
+        exit 1
+    fi
+
+    # Append the peer configuration securely
+    if echo -e "$PEER_CONFIG" | /usr/bin/tee -a "$WG_CONF_PATH" >/dev/null; then
+        log "Successfully appended peer configuration to $WG_CONF_PATH."
+        echo "Successfully appended peer configuration to $WG_CONF_PATH."
+    else
+        log "Error: Failed to append peer configuration to $WG_CONF_PATH."
+        echo "Error: Failed to append peer configuration to $WG_CONF_PATH."
+        exit 1
+    fi
+}
+
+# Command: Update root.hints
+update_root_hints() {
+    ROOT_HINTS_PATH="/var/lib/unbound/root.hints"
+    URL="https://www.internic.net/domain/named.root"
+
+    log "update-root-hints called to update $ROOT_HINTS_PATH"
+
+    # Download the root.hints file and save it to the correct location
+    if wget "$URL" -qO- | /usr/bin/tee "$ROOT_HINTS_PATH" >/dev/null; then
+        log "root.hints updated successfully at $ROOT_HINTS_PATH"
+        echo "root.hints updated successfully at $ROOT_HINTS_PATH"
+    else
+        log "Error: Failed to update root.hints"
+        echo "Error: Failed to update root.hints"
+        exit 1
+    fi
+}
+
+# Command: Restore a backup file
+restore_backup() {
+    BACKUP="$1"
+    DESTINATION="$2"
+
+    if [[ ! -f "$BACKUP" ]]; then
+        log "Error: Backup file $BACKUP does not exist."
+        echo "Error: Backup file $BACKUP does not exist."
+        exit 1
+    fi
+
+    if cp "$BACKUP" "$DESTINATION"; then
+        log "Backup file $BACKUP successfully restored to $DESTINATION."
+        echo "Backup file $BACKUP successfully restored to $DESTINATION."
+    else
+        log "Error: Failed to restore backup $BACKUP to $DESTINATION."
+        echo "Error: Failed to restore backup $BACKUP to $DESTINATION."
+        exit 1
+    fi
+}
+
+# Command: Update network configuration
+update_network_config() {
+    CONFIG_FILE="$1"
+    DESTINATION="$2"
+
+    if [[ ! -f "$CONFIG_FILE" ]]; then
+        log "Error: Configuration file $CONFIG_FILE does not exist."
+        echo "Error: Configuration file $CONFIG_FILE does not exist."
+        exit 1
+    fi
+
+    if cat "$CONFIG_FILE" | /usr/bin/tee -a "$DESTINATION" >/dev/null; then
+        log "Network configuration $CONFIG_FILE appended to $DESTINATION successfully."
+        echo "Network configuration $CONFIG_FILE appended to $DESTINATION successfully."
+    else
+        log "Error: Failed to append $CONFIG_FILE to $DESTINATION."
+        echo "Error: Failed to append $CONFIG_FILE to $DESTINATION."
+        exit 1
+    fi
+}
+
+# Command: Restart firewall
+modify_firewall_rules() {
+    IPTABLES_SCRIPT="$1"
+
+    if [[ ! -f "$IPTABLES_SCRIPT" ]]; then
+        log "Error: iptables script $IPTABLES_SCRIPT does not exist."
+        echo "Error: iptables script $IPTABLES_SCRIPT does not exist."
+        exit 1
+    fi
+
+    if bash "$IPTABLES_SCRIPT"; then
+        log "Firewall rules applied successfully."
+        echo "Firewall rules applied successfully."
+        if /usr/bin/systemctl restart netfilter-persistent; then
+            log "Netfilter service restarted successfully."
+            echo "Netfilter service restarted successfully."
+        else
+            log "Error: Failed to restart netfilter-persistent service."
+            echo "Error: Failed to restart netfilter-persistent service."
+            exit 1
+        fi
+    else
+        log "Error: Failed to apply firewall rules."
+        echo "Error: Failed to apply firewall rules."
+        exit 1
+    fi
+}
+
+# Command: Reset IP to DHCP
+reset_ip() {
+    ORIGINAL_PATH="$1"
+    TARGET_PATH="$2"
+
+    if [[ ! -f "$ORIGINAL_PATH" ]]; then
+        log "Error: Original DHCP configuration file $ORIGINAL_PATH does not exist."
+        echo "Error: Original DHCP configuration file $ORIGINAL_PATH does not exist."
+        exit 1
+    fi
+
+    if cp "$ORIGINAL_PATH" "$TARGET_PATH"; then
+        log "IP configuration reset to DHCP successfully."
+        echo "IP configuration reset to DHCP successfully."
+    else
+        log "Error: Failed to reset IP configuration."
+        echo "Error: Failed to reset IP configuration."
+        exit 1
+    fi
+}
+
+# Command: Comment out a peer in WireGuard configuration
+comment_peer() {
+    CONFIG_FILE="$1"
+    CLIENT_NAME="$2"
+
+    log "comment-peer called with config_file=$CONFIG_FILE and client_name=$CLIENT_NAME"
+
+    # Ensure the WireGuard configuration file exists
+    if [[ ! -f "$CONFIG_FILE" ]]; then
+        log "Error: WireGuard configuration file $CONFIG_FILE does not exist."
+        echo "Error: WireGuard configuration file $CONFIG_FILE does not exist."
+        exit 1
+    fi
+
+    # Use sed to comment out the peer configuration block
+    if /usr/bin/sed -i "/### begin ${CLIENT_NAME} ###/,/### end ${CLIENT_NAME} ###/s/^/#/" "$CONFIG_FILE"; then
+        log "Successfully commented out peer configuration for $CLIENT_NAME in $CONFIG_FILE."
+        echo "Successfully commented out peer configuration for $CLIENT_NAME in $CONFIG_FILE."
+    else
+        log "Error: Failed to comment out peer configuration for $CLIENT_NAME in $CONFIG_FILE."
+        echo "Error: Failed to comment out peer configuration for $CLIENT_NAME in $CONFIG_FILE."
+        exit 1
+    fi
+}
+
+# Command: Uncomment out a peer in WireGuard configuration
+uncomment_peer() {
+    CONFIG_FILE="$1"
+    CLIENT_NAME="$2"
+
+    log "uncomment-peer called for client $CLIENT_NAME in $CONFIG_FILE"
+
+    # Ensure the WireGuard configuration file exists
+    if [[ ! -f "$CONFIG_FILE" ]]; then
+        log "Error: WireGuard configuration file $CONFIG_FILE does not exist."
+        echo "Error: WireGuard configuration file $CONFIG_FILE does not exist."
+        exit 1
+    fi
+
+    # Use sed to uncomment the lines between '### begin <client_name> ###' and '### end <client_name> ###'
+    if sed -i "/### begin $CLIENT_NAME ###/,/### end $CLIENT_NAME ###/s/^#//" "$CONFIG_FILE"; then
+        log "Peer configuration for $CLIENT_NAME successfully uncommented in $CONFIG_FILE."
+        echo "Peer configuration for $CLIENT_NAME successfully uncommented in $CONFIG_FILE."
+    else
+        log "Error: Failed to uncomment peer configuration for $CLIENT_NAME in $CONFIG_FILE."
+        echo "Error: Failed to uncomment peer configuration for $CLIENT_NAME in $CONFIG_FILE."
+        exit 1
+    fi
+}
+
+# Command: Remove a peer from a WireGuard configuration file
+remove_peer() {
+    CONFIG_FILE="$1"
+    CLIENT_NAME="$2"
+
+    log "remove-peer called for client $CLIENT_NAME in $CONFIG_FILE"
+
+    # Ensure the WireGuard configuration file exists
+    if [[ ! -f "$CONFIG_FILE" ]]; then
+        log "Error: WireGuard configuration file $CONFIG_FILE does not exist."
+        echo "Error: WireGuard configuration file $CONFIG_FILE does not exist."
+        exit 1
+    fi
+
+    # Use sed to remove the peer configuration
+    if sed -i "/### begin $CLIENT_NAME ###/,/### end $CLIENT_NAME ###/d" "$CONFIG_FILE"; then
+        log "Peer configuration for $CLIENT_NAME removed from $CONFIG_FILE successfully."
+        echo "Peer configuration for $CLIENT_NAME removed from $CONFIG_FILE successfully."
+    else
+        log "Error: Failed to remove peer configuration for $CLIENT_NAME from $CONFIG_FILE."
+        echo "Error: Failed to remove peer configuration for $CLIENT_NAME from $CONFIG_FILE."
+        exit 1
+    fi
+}
+
+# Command: Clear all traffic controls from wg1 interface
+clear_traffic_control() {
+    INTERFACE="$1"
+
+    if [ -z "$INTERFACE" ]; then
+        log "Error: No interface provided for clear-traffic-control"
+        echo "Error: No interface provided for clear-traffic-control"
+        exit 1
+    fi
+
+    /usr/sbin/tc qdisc del dev "$INTERFACE" root 2>/dev/null || true
+    /usr/sbin/tc qdisc del dev "$INTERFACE" ingress 2>/dev/null || true
+    log "Traffic control rules cleared for $INTERFACE"
+    echo "Traffic control rules cleared for $INTERFACE"
+}
+
+clear_log() {
+    FILE="$1"
+
+    if [[ -z "$FILE" ]]; then
+        log "Error: Missing log file path for clear-log."
+        echo "Usage: $0 clear-log <file>"
+        exit 1
+    fi
+
+    if [[ -f "$FILE" ]]; then
+        /usr/bin/truncate -s 0 "$FILE" && log "Cleared log file: $FILE"
+        echo "Cleared log file: $FILE"
+    else
+        log "Error: Log file $FILE does not exist."
+        echo "Error: Log file $FILE does not exist."
+        exit 1
+    fi
+}
+
+remove_file() {
+    FILE="$1"
+
+    if [[ -z "$FILE" ]]; then
+        log "Error: Missing file path for remove-file."
+        echo "Usage: $0 remove-file <file>"
+        exit 1
+    fi
+
+    if [[ -f "$FILE" ]]; then
+        /usr/bin/rm "$FILE" && log "Removed file: $FILE"
+        echo "Removed file: $FILE"
+    else
+        log "Error: File $FILE does not exist."
+        echo "Error: File $FILE does not exist."
+        exit 1
+    fi
+}
+
+stop_service() {
+    SERVICE="$1"
+
+    if [[ -z "$SERVICE" ]]; then
+        log "Error: Missing service name for stop-service."
+        echo "Usage: $0 stop-service <service>"
+        exit 1
+    fi
+
+    if /usr/bin/systemctl stop "$SERVICE"; then
+        log "Stopped service: $SERVICE"
+        echo "Stopped service: $SERVICE"
+    else
+        log "Error: Failed to stop service: $SERVICE"
+        echo "Error: Failed to stop service: $SERVICE"
+        exit 1
+    fi
+}
+
+start_service() {
+    SERVICE="$1"
+
+    if [[ -z "$SERVICE" ]]; then
+        log "Error: Missing service name for start-service."
+        echo "Usage: $0 start-service <service>"
+        exit 1
+    fi
+
+    if /usr/bin/systemctl start "$SERVICE"; then
+        log "Started service: $SERVICE"
+        echo "Started service: $SERVICE"
+    else
+        log "Error: Failed to start service: $SERVICE"
+        echo "Error: Failed to start service: $SERVICE"
+        exit 1
+    fi
+}
+
+# Command: Reset firewall to basic settings
+reset_firewall() {
+    IPTABLES_SCRIPT="$1"
+
+    if [ ! -f "$IPTABLES_SCRIPT" ]; then
+        log "Error: Firewall reset script not found at $IPTABLES_SCRIPT"
+        echo "Error: Firewall reset script not found at $IPTABLES_SCRIPT"
+        exit 1
+    fi
+
+    if ! bash "$IPTABLES_SCRIPT"; then
+        log "Error: Failed to execute $IPTABLES_SCRIPT"
+        echo "Error: Failed to execute $IPTABLES_SCRIPT"
+        exit 1
+    fi
+
+    if ! /usr/bin/systemctl restart netfilter-persistent; then
+        log "Error: Failed to restart netfilter-persistent service"
+        echo "Error: Failed to restart netfilter-persistent service"
+        exit 1
+    fi
+
+    log "Firewall reset and rules persisted successfully"
+    echo "Firewall reset and rules persisted successfully"
+}
+
+# Command: Set file ownership
+set-file-ownership() {
+    FILE="$1"
+    OWNER="$2"
+    GROUP="$3"
+
+    if [[ -z "$FILE" || -z "$OWNER" || -z "$GROUP" ]]; then
+        log "Error: Missing arguments for set-file-ownership."
+        echo "Usage: $0 set-file-ownership <file> <owner> <group>"
+        exit 1
+    fi
+
+    if [[ ! -f "$FILE" ]]; then
+        log "Error: File $FILE does not exist."
+        echo "Error: File $FILE does not exist."
+        exit 1
+    fi
+
+    if /bin/chown "$OWNER:$GROUP" "$FILE"; then
+        log "Ownership of $FILE set to $OWNER:$GROUP."
+        echo "Ownership of $FILE set to $OWNER:$GROUP."
+    else
+        log "Error: Failed to set ownership for $FILE."
+        echo "Error: Failed to set ownership for $FILE."
+        exit 1
+    fi
+}
+
+# Command: Set file permissions
+set-file-permissions() {
+    FILE="$1"
+    PERMISSIONS="$2"
+
+    if [[ -z "$FILE" || -z "$PERMISSIONS" ]]; then
+        log "Error: Missing arguments for set-file-permissions."
+        echo "Usage: $0 set-file-permissions <file> <permissions>"
+        exit 1
+    fi
+
+    if [[ ! -f "$FILE" ]]; then
+        log "Error: File $FILE does not exist."
+        echo "Error: File $FILE does not exist."
+        exit 1
+    fi
+
+    if /bin/chmod "$PERMISSIONS" "$FILE"; then
+        log "Permissions of $FILE set to $PERMISSIONS."
+        echo "Permissions of $FILE set to $PERMISSIONS."
+    else
+        log "Error: Failed to set permissions for $FILE."
+        echo "Error: Failed to set permissions for $FILE."
+        exit 1
+    fi
+}
+
+# Command: Reboot system
+reboot_system() {
+    log "Rebooting the system."
+    if /usr/bin/systemctl reboot; then
+        log "System reboot initiated successfully."
+        echo "System reboot initiated successfully."
+    else
+        log "Error: Failed to initiate system reboot."
+        echo "Error: Failed to initiate system reboot."
+        exit 1
+    fi
+}
+
+# Main logic to handle commands
+case "$1" in
+    set-password)
+        set_password "$2" "$3"
+        ;;
+    wg-show)
+        wg_show
+        ;;
+    set-bandwidth)
+        set_bandwidth "$2" "$3" "$4" "$5" "$6" "$7"
+        ;;
+    remove-bandwidth)
+        remove_bandwidth "$2" "$3" "$4" "$5"
+        ;;
+    append-peer)
+        append_peer "$2" "$3"
+        ;;
+    update-root-hints)
+        update_root_hints
+        ;;
+    restore-backup)
+        restore_backup "$2" "$3"
+        ;;
+    update-network-config)
+        update_network_config "$2" "$3"
+        ;;
+    modify_firewall_rules)
+        restart_firewall "$2"
+        ;;
+    reset-ip)
+        reset_ip "$2" "$3"
+        ;;
+    comment-peer)
+        comment_peer "$2" "$3"
+        ;;
+    uncomment-peer)
+        uncomment_peer "$2" "$3"
+        ;;
+    remove-peer)
+        remove_peer "$2" "$3"
+        ;;
+    clear-traffic-control)
+        clear_traffic_control "$2"
+        ;;
+    reset-firewall)
+        reset_firewall "$2"
+        ;;
+    clear-log)
+        clear_log "$2"
+        ;;
+    remove-file)
+        remove_file "$2"
+        ;;
+    stop-service)
+        stop_service "$2"
+        ;;
+    start-service)
+        start_service "$2"
+        ;;
+    set-file-ownership)
+        set-file-ownership "$2" "$3" "$4"
+        ;;
+    set-file-permissions)
+        set-file-permissions "$2" "$3"
+        ;;
+    reboot-system)
+        reboot_system
+        ;;
+    help|--help|-h)
+        usage
+        ;;
+    *)
+        log "Error: Unknown command $1"
+        echo "Error: Unknown command: $1"
+        usage
+        exit 1
+        ;;
+esac
+
+exit 0
