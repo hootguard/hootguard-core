@@ -24,11 +24,11 @@ ddns:
   user_dynu_script: /opt/hootguard/ddns/user-dynu.sh
   user_dynu_v6_command: /bin/bash /opt/hootguard/ddns/user-dynuv6.sh
   user_dynu_v6_script: /opt/hootguard/ddns/user-dynuv6.sh
-  user_hootdns_api_key: 
+  user_hootdns_api_key: null
   user_hootdns_command: /bin/bash /opt/hootguard/ddns/user-hootdns.sh
   user_hootdns_domain: hootdns.com
   user_hootdns_script: /opt/hootguard/ddns/user-hootdns.sh
-  user_hootdns_subdomain: 
+  user_hootdns_subdomain: null
   user_hootdns_v6_command: /bin/bash /opt/hootguard/ddns/user-hootdnsv6.sh
   user_hootdns_v6_script: /opt/hootguard/ddns/user-hootdnsv6.sh
 dhcp:
@@ -49,10 +49,10 @@ misc:
   version_file: /opt/hootguard/misc/version.txt
 network:
   interface_1: eth0
-  interface_1_v4_ip_address: 192.168.1.254/24
-  interface_1_v4_network: 192.168.1.0/24
+  interface_1_v4_ip_address: 192.168.0.250/24
+  interface_1_v4_network: 192.168.0.0/24
   interface_1_v6_ip_address: 2a02:abcd:1337:c001:d00d:face:b00c:1234/64
-  primary_dns: 192.168.1.254
+  primary_dns: 192.168.0.250
   secondary_dns: 1.1.1.1
 ntp:
   servers:
@@ -85,11 +85,11 @@ vpn:
   endpoint: dummy.yourdns.com
   iptables_settings_file: /opt/hootguard/vpn/vpn_iptables_rules.sh
   wireguard_interface_1: wg0
-  wireguard_interface_1_v4_ip_addresse: 10.160.171.1
-  wireguard_interface_1_v6_ip_addresse: fd11:5ee:bad:c0ed::1
+  wireguard_interface_1_v4_ip_addresse: 10.0.0.0/24
+  wireguard_interface_1_v6_ip_addresse: fd00:::/64
   wireguard_interface_2: wg1
-  wireguard_interface_2_v4_ip_addresse: 10.160.199.1
-  wireguard_interface_2_v6_ip_addresse: fd11:5ee:bad:c0bd::1
+  wireguard_interface_2_v4_ip_addresse: 10.0.1.0/24
+  wireguard_interface_2_v6_ip_addresse: fd01::/64
   wireguard_main_path: /etc/wireguard
   wireguard_wg0_privatekey_path: /etc/wireguard/privatekey_wg0
   wireguard_wg0_publickey_path: /etc/wireguard/publickey_wg0

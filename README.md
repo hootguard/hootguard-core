@@ -37,14 +37,14 @@ Whether you’re privacy-conscious, security-focused, or just want a cleaner int
 
 **Requirements:**
 - A Raspberry Pi (currently verified on Raspberry Pi 3B; Pi 4 support is in progress).
-- An SD Card with at least 8GB capacity.
+- An SD Card with at least 8GB capacity (32GB recommended).
 
 **Steps:**
 1. **Download the Image:**  
    Visit [HootGuard.com](https://hootguard.com) to download the latest HootGuard image.
    
 2. **Write Image to SD Card:**  
-   Use a tool like [Etcher](https://www.balena.io/etcher/) to flash the image to your SD card.
+   Use a tool like [Rapsberry Pi Imager](https://www.raspberrypi.com/software/) to flash the image to your SD card.
    
 3. **Boot Up the Raspberry Pi:**  
    Insert the SD card into your Raspberry Pi and connect it to your network router.
@@ -60,8 +60,8 @@ Whether you’re privacy-conscious, security-focused, or just want a cleaner int
 - Set your router’s DNS server to HootGuard for network-wide ad-blocking and filtering.
 
 **VPN & DDNS:**
-- Choose a DDNS provider: DuckDNS or Cloudflare are supported.  
-- For Cloudflare, ensure you have a domain name set up.
+- Choose a DDNS provider: Dynu or HootDNS (HootGuards own DNS service) are supported.  
+- To use HootDNS you need to buy our software from [Hootguard.com](https://hootguard.com/).
 - Enter the DDNS credentials into HootGuard’s web interface.
 - Create VPN users, scan their generated QR codes, and start using the VPN immediately.
 
@@ -71,7 +71,7 @@ Whether you’re privacy-conscious, security-focused, or just want a cleaner int
 
 ## Usage
 
-Once installed and configured, visit the HootGuard web interface (e.g., `http://<HootGuard_IP>`) to:
+Once installed and configured, visit the HootGuard web interface (http://hootguard.local) to:
 
 - **Manage Ad-Blocking:**  
   Select from pre-defined profiles (e.g., block adult websites, gambling, social media) and fine-tune the level of filtering.
@@ -90,7 +90,7 @@ Once installed and configured, visit the HootGuard web interface (e.g., `http://
 Official documentation is in progress. For the latest instructions, tutorials, and video guides, please check:
 
 - [HootGuard Official Website](https://hootguard.com)
-- [YouTube Channel (Coming Soon)](#)
+- [YouTube Channel](https://www.youtube.com/@HootGuard)
 
 Feel free to submit issues and feature requests through GitHub’s [Issues](./issues) tab.
 
