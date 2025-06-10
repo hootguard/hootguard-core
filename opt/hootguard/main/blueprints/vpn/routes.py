@@ -1,0 +1,224 @@
+import subprocess # nosec
+import json
+from flask import Blueprint, request, render_template, redirect, url_for, send_from_directory, flash
+from markupsafe import Markup
+from scripts.vpn_get_temp_client_details import vpn_get_temp_start_end_time, vpn_get_automatic_deletion, vpn_get_temp_speeds
+from scripts.vpn_get_clients_data import get_vpn_clients_data
+from scripts.vpn_generate_qrcode import generate_qr_code
+from scripts.vpn_main_create_unlimited_client import create_vpn_client
+from scripts.vpn_main_remove_one_client import remove_vpn_client
+from scripts.vpn_main_disable_one_client import disable_vpn_client
+from scripts.vpn_main_enable_one_client import enable_vpn_client
+from scripts.vpn_get_clients_usage_data import get_vpn_usage_data
+from scripts.vpn_main_create_limited_client import create_limited_vpn_client
+from scripts.global_logger import logger
+#from scripts.global_config import VPN_CONFIGS_PATH
+from scripts.global_config_loader import load_config
+
+# Load the global config
+config = load_config()
+
+# Access configuration values
+VPN_CONFIGS_PATH = config['vpn']['client_configs_path']
+
+# Create the VPN Blueprint
+vpn_bp = Blueprint('vpn', __name__)
+
+# Check DDNS status before createing a new VPN client
+def check_ddns_status():
+    """Check the DDNS configuration status."""
+    ddns_status_file = '/opt/hootguard/ddns/ddns-status.txt'
+
+    try:
+        with open(ddns_status_file, 'r') as file:
+            status = file.read().strip()
+            if status == "NoConfiguration":
+                flash(
+                    Markup('DDNS is not configured. Configure DDNS before adding a VPN client. <a href="/ddns_settings">Click here</a>'),
+                    "error"
+                )
+                return redirect(url_for('vpn.vpn_settings'))
+    except Exception as e:
+        flash(f"An error occurred while checking DDNS status: {e}", "error")
+        return redirect(url_for('vpn.vpn_settings'))
+    
+    return None  # No issues with DDNS
+
+# Define your VPN routes within the Blueprint
+@vpn_bp.route('/vpn_settings')
+def vpn_settings():
+    # Call the script using sudo
+    #vpn_usage_data_json = subprocess.check_output(['sudo', '/usr/bin/python3', '/opt/hootguard/main/scripts/vpn_get_clients_usage_data.py'], text=True)
+    vpn_usage_data_json = subprocess.check_output(
+        ['/usr/bin/sudo', '/usr/bin/python3', '/opt/hootguard/main/scripts/vpn_get_clients_usage_data.py'], text=True
+    )
+
+    # Parse the JSON string into a Python dictionary
+    vpn_usage_data = json.loads(vpn_usage_data_json)
+
+    # Call external functions to get the existing wireguard clients and their data usage
+    active_clients, disabled_clients, temp_clients, temp_clients_names = get_vpn_clients_data()
+
+    # Add usage data to active clients
+    for client in active_clients:
+        if client['name'] in vpn_usage_data:
+            client['bytes_received'] = vpn_usage_data[client['name']]['received']
+            client['bytes_sent'] = vpn_usage_data[client['name']]['sent']
+            client['last_seen'] = vpn_usage_data[client['name']]['last_seen']
+        else:
+            # Set default values if no usage data is found for the client
+            client['bytes_received'] = '0 KiB'
+            client['bytes_sent'] = '0 KiB'
+            client['last_seen'] = 'Not connected'
+
+    # Add usage data to disabled clients
+    for client in disabled_clients:
+        if client['name'] in vpn_usage_data:
+            client['bytes_received'] = vpn_usage_data[client['name']]['received']
+            client['bytes_sent'] = vpn_usage_data[client['name']]['sent']
+            client['last_seen'] = vpn_usage_data[client['name']]['last_seen']
+        else:
+            # Set default values if no usage data is found for the client
+            client['bytes_received'] = '0 KiB'
+            client['bytes_sent'] = '0 KiB'
+            client['last_seen'] = 'Not connected'
+
+    # Combine active and disabled clients into a single dictionary
+    clients = {
+        'active_clients': active_clients,
+        'disabled_clients': disabled_clients,
+        'temp_clients': temp_clients,
+        'temp_clients_names': temp_clients_names
+    }
+
+    # Render the vpn_settings.html template
+    return render_template('vpn/vpn_settings.html', clients=clients)
+
+@vpn_bp.route('/vpn_add_client', methods=['GET', 'POST'])
+def handle_vpn_add_client():
+    # Check DDNS status
+    redirect_response = check_ddns_status()
+    if redirect_response:
+        return redirect_response
+
+    # Get client name
+    client_name = request.args.get('client_name') # Works with POST and GET
+    # Call external script
+    # Add a standard vpn client (not a temp client). The standard clients use always wg0
+    # wg0 = wireguard interface (wg0 = vpns without bandwith limitation), unlimited = this vpn client is neither time limited nor bandwith limited, 1 = this client is directly active (0 = disabled)
+    if create_vpn_client(client_name, "wg0", 1, "unlimited"):
+        # Generate QR Code of client config
+        if generate_qr_code(client_name):
+            # Redirect to vpn_add_client.html with the client name
+            return redirect(url_for('vpn.vpn_add_client_page', client_name=client_name))
+        else:
+            return redirect(url_for('error'))
+    else:
+        return redirect(url_for('error'))
+
+    return redirect(url_for('error'))
+
+
+@vpn_bp.route('/vpn_add_client_page', methods=['GET', 'POST'])
+def vpn_add_client_page():
+        client_name = request.args.get('client_name')
+        qr_code_path = f'{client_name}_qr.png'
+        return render_template('vpn/vpn_add_client.html', client_name=client_name, qr_code=qr_code_path)
+
+
+@vpn_bp.route('/vpn_show_qrcode', methods=['GET', 'POST'])
+def vpn_show_qrcode():
+        if request.method == 'POST':
+            client_name = request.form.get('username')
+            qr_code_path = f'{client_name}_qr.png'
+            # Fetch start_time and end_time using the new function
+            start_time, end_time = vpn_get_temp_start_end_time(client_name)
+            download_speed, upload_speed = vpn_get_temp_speeds(client_name)
+            auto_deletion = vpn_get_automatic_deletion(client_name)
+
+        return render_template('vpn/vpn_show_qrcode.html', client_name=client_name, qr_code=qr_code_path, start_time=start_time, end_time=end_time, automatic_deletion=auto_deletion, download_speed=download_speed, upload_speed=upload_speed)
+
+
+@vpn_bp.route('/vpn_confirm_client_deletion', methods=['GET', 'POST'])
+def vpn_confirm_client_deletion():
+        if request.method == 'POST':
+            client_name = request.form.get('username')
+        return render_template('vpn/vpn_confirm_client_deletion.html', client_name=client_name)
+
+
+@vpn_bp.route('/vpn_delete_client', methods=['GET', 'POST'])
+def vpn_delete_client():
+        if request.method == 'POST':
+            client_name = request.form.get('username')
+            # Call external script
+            if remove_vpn_client(client_name):
+                return redirect(url_for('vpn.vpn_settings'))
+            else:
+                return redirect(url_for('error'))
+
+
+@vpn_bp.route('/vpn_disable_client', methods=['GET', 'POST'])
+def vpn_disable_client():
+        if request.method == 'POST':
+            client_name = request.form.get('username')
+            # Call external script
+            if disable_vpn_client(client_name):
+                return redirect(url_for('vpn.vpn_settings'))
+            else:
+                return redirect(url_for('error'))
+
+
+
+@vpn_bp.route('/vpn_enable_client', methods=['GET', 'POST'])
+def vpn_enable_client():
+        if request.method == 'POST':
+            client_name = request.form.get('username')
+            # Call external script
+            if enable_vpn_client(client_name):
+                return redirect(url_for('vpn.vpn_settings'))
+            else:
+                return redirect(url_for('error'))
+
+
+@vpn_bp.route('/vpn_download_client_config', methods=['POST'])
+def vpn_download_client_config():
+    if request.method == 'POST':
+        client_name = request.form.get('client_name')
+        filename = f"{client_name}.conf"
+        return send_from_directory(VPN_CONFIGS_PATH, filename)
+    else:
+        return redirect(url_for('error'))
+
+
+@vpn_bp.route('/vpn_add_temp_client', methods=['GET', 'POST'])
+def vpn_add_temp_client():
+    # Check DDNS status
+    redirect_response = check_ddns_status()
+    if redirect_response:
+        return redirect_response    
+
+    # Render the template for adding a temporary client    
+    client_name = request.args.get('client_name')
+    logger.info(f"client_name: {client_name}")
+    return render_template('vpn/vpn_add_temp_client.html', client_name=client_name)
+
+
+@vpn_bp.route('/vpn_add_temp_client_action', methods=['GET', 'POST'])
+def vpn_add_temp_client_action():
+       client_name = request.form['username']
+       starting_time = request.form['starting-time']
+       ending_time = request.form['ending-time']
+       automatic_deletion = request.form.get('automatic_deletion') == 'true'
+       download_speed = request.form['download_speed']
+       upload_speed = request.form['upload_speed']
+
+       if create_limited_vpn_client(client_name, starting_time, ending_time, automatic_deletion, download_speed, upload_speed):
+            if generate_qr_code(client_name):
+                logger.info("Temporary client {client_name} was generated successfully")
+                return redirect(url_for('vpn.vpn_add_client_page', client_name=client_name))
+            else:
+                logger.error(f"Failed to generate QR code for client {client_name}")
+                return redirect(url_for('error'))
+       else:
+           logger.error(f"Failed to create limited VPN client {client_name}")
+           return redirect(url_for('error'))

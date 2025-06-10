@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>Snooze Settings</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">	
+    <style>
+        .fa-spinner {
+            display: none;
+            animation: spin 1s linear infinite;
+        }
+        
+	@keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+	
+	.button-size {
+	     width: 200px;
+	}
+	.button-block {
+	    display: inline;
+	    width: 100%;
+	    max-width: 300px;
+	    margin: 20px auto;
+	    padding: 10px 0;
+	    text-align: center;
+	}
+        .hrsep {
+       	    border: none;
+            height: 1px;
+            background-color: #333333;
+            margin-top: 50px;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+    <div id="navigation-placeholder"></div>
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+    
+    <div class="container">
+
+	<div id="success-message" class="success-message">Snooze time successfully updated</div>
+
+        <h1>Snooze Settings</h1>
+        <div class="explain-text">
+        	Snooze allows you to temporarily disable ad blocking for a set duration. On this page, you can activate or deactivate ad blocking (snooze). You can also set a snooze period between 10 seconds and one hour (3600 seconds) by entering a value below and clicking the button.
+        </div>
+
+
+	<div class="table-settings" style="margin-top: 30px;">
+		<table>
+			<tbody>
+				<tr>
+					<td>
+						Current Ad Blocking Status: 
+						{% if adblock_status == "active" %}
+							<span class="status-highlight" style="color: green;"><strong>Active</strong></span>
+						{% elif adblock_status == "deactive" %}
+							<span class="status-highlight" style="color: red;"><strong>Deactive</strong></span>
+							
+							<div class="explain-text" id="countdown-text">Snooze will end in: <span id="countdown-timer"></span></div>
+							<input type="hidden" id="snooze-end-time" value="{{ snooze_end_time }}">
+					        {% else %}
+							<span class="status-highlight" style="color: yellow;"><strong>Unknown</strong></span>
+					        {% endif %}
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>		
+	
+	<br>
+
+        
+	<form id="snooze-activate-form" action="/snooze_activate_deactivate" method="post" style="text-align: center;">
+	    <div class="section">
+        	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+	        <div class="btn-group">
+        	    {% if adblock_status == "active" %}
+			<div align="center">
+	                	<button type="submit" name="adblock_action" value="disable" class="btn-save" style="background-color:red; height:60px; font-size:1.3em;">
+		                    <i class="fa-solid fa-play" style="margin-right:5px;"></i> Activate Snooze <i class="fa-solid fa-spinner"></i>
+        		        </button>
+				<div class="explain-text">
+					<strong>Note:</strong> Activating Snooze will temporarily disable ad blocking for all devices on the network and those connected via VPN.
+				</div>
+			</div>
+	            {% elif adblock_status == "deactive" %}
+        	        <button type="submit" name="adblock_action" value="enable" class="btn-save" style="background-color:green; height:60px; font-size:1.3em;">
+                	    <i class="fa-solid fa-stop" style="margin-right:5px;"></i> End Snooze <i class="fa-solid fa-spinner"></i>
+	                </button>
+        	    {% else %}
+	                <p style="color: red;">Snooze status unknown.</p>
+        	    {% endif %}
+	        </div>
+	    </div>
+	</form>
+
+	<hr class="hrsep" style="margin-top:70px; margin-bottom: 70px;">
+
+	<div class="table-settings">
+		<table>
+			<tbody>
+                                <tr>
+                                        <td>
+                                                Current Snooze Time:
+                                                <span class="status-highlight" id="current-snooze-status">{{snooze_status}} seconds</span>                                                
+                                                <div class="explain-text" id="converted-snooze-status"></div>
+                                        </td>
+                                </tr>
+			</tbody>
+		</table>
+	</div>
+
+
+	<form class="frame" id="snooze-settings-form" action="/snooze_change" method="post">
+
+
+		<div>
+			Set Snooze Time (Seconds):
+		</div>
+			<input type="number" id="snooze-time" name="snooze_time" placeholder="e.g. 300">
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+			<div class="input-hint-text">Only values between 10 and 3600 seconds are accepted.</div>
+			<div class="btn-group">
+				<button type="submit" id="submit-button" class="btn-save button-size">Save Snooze Time <i class="fa-solid fa-spinner"></i></button>
+			</div>
+	</form>       
+        
+    </div>
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentSnoozeStatusElement = document.getElementById('current-snooze-status');
+            const currentSnoozeStatus = parseInt(currentSnoozeStatusElement.textContent, 10);
+            const minutes = Math.floor(currentSnoozeStatus / 60);
+            const seconds = currentSnoozeStatus % 60;
+            currentSnoozeStatusElement.textContent = `${currentSnoozeStatus} seconds`;
+            const convertedSnoozeStatusElement = document.getElementById('converted-snooze-status');
+            convertedSnoozeStatusElement.textContent = `${minutes} minute(s) and ${seconds} second(s)`;
+            
+		const snoozeTimeInput = document.getElementById('snooze-time');
+		const form = document.getElementById('snooze-settings-form');
+		const messageContainer = document.createElement('div');
+		form.appendChild(messageContainer);
+
+		function validateTime(value) {
+			return !isNaN(value) && value >= 10 && value <= 3600;
+		}
+
+		function displayMessage(isValid, value) {
+			const minutes = Math.floor(value / 60);
+			const seconds = value % 60;
+			messageContainer.innerHTML = isValid ?
+				`<p>Snooze time is: ${minutes} minute(s) and ${seconds} second(s).</p>` :
+				'<p style="color: red;">Please enter a number between 10 and 3600.</p>';
+		}
+
+		snoozeTimeInput.addEventListener('input', function() {
+			const value = parseInt(snoozeTimeInput.value, 10);
+			const isValid = validateTime(value);
+			displayMessage(isValid, value);
+		});
+		
+		// Check if new_time_set is true and display success message for 3 seconds
+		const newTimeSet = {{ new_time_set | tojson }};
+		if (newTimeSet) {
+		    const successMessage = document.getElementById('success-message');
+		    successMessage.style.visibility = 'visible';
+		    setTimeout(function () {
+			successMessage.style.visibility = 'hidden';
+		    }, 3000);
+		}
+		
+	    form.addEventListener('submit', function(event) {
+		const value = parseInt(snoozeTimeInput.value, 10);
+		if (!validateTime(value)) {
+		    event.preventDefault(); // Prevent form submission
+		    displayMessage(false, value); // Show error message
+		    alert('Snooze time must be between 10 and 3600 seconds.');
+		    return; // Exit the submit handler
+		}
+		
+		// Spinner for submit button
+		const submitButton = document.getElementById('submit-button');
+		const spinner = submitButton.querySelector('.fa-spinner');
+		// Show spinner and hide Login text
+		spinner.style.display = 'inline-block';
+		submitButton.childNodes[0].nodeValue = ' ';
+		submitButton.disabled = true; // Disable the button
+	    });
+	});
+        
+/* --- SNOOZE TIMER --- */
+
+document.addEventListener('DOMContentLoaded', function () {
+    const countdownText = document.getElementById('countdown-text');
+    const countdownTimer = document.getElementById('countdown-timer');
+    const snoozeEndTime = parseInt(document.getElementById('snooze-end-time').value, 10);
+
+    function updateCountdown() {
+        const now = Math.floor(Date.now() / 1000);
+        const timeLeft = snoozeEndTime - now;
+
+        if (timeLeft > 0) {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            countdownTimer.textContent = `${minutes}m ${seconds}s`;
+            setTimeout(updateCountdown, 1000);
+        } else {
+            countdownText.textContent = "Snooze period has ended. Ad blocking is now active again.";
+        }
+    }
+
+    if (snoozeEndTime > Math.floor(Date.now() / 1000)) {
+        updateCountdown();
+    } else {
+        countdownText.style.display = "none";
+    }
+});
+
+    </script>
+    
+    
+</body>
+</html>

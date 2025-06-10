@@ -1,0 +1,13 @@
+[Unit]
+Description=Script for reset button to set back the pi/setting password and to set back the static ip address to DHCP.
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/hootguard/main/
+ExecStart=/usr/bin/python3 -m scripts.reset_hardware_button
+#ExecStart=/usr/bin/python3 /opt/hootguard/main/scripts/reset_hardware_button.py
+Restart=on-failure
+User=hootguard
+
+[Install]
+WantedBy=multi-user.target

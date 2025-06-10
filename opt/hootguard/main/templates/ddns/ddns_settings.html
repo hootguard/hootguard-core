@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>DDNS Settings</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">
+    <style>
+	.frame{
+	    margin-bottom: -20px;
+	}
+	
+	.checkbox-style {
+	    margin-top: 20px;
+	}
+	.btn-group {
+ 	    display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+            gap: 10px;
+        }    
+        .hootdns-get-button {
+            background-color: yellow;
+            color: black;
+            padding: 6px 14px;
+            font-size: 0.9em;
+            border: none;
+            border-radius: 20px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+    <div id="navigation-placeholder"></div>
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+    
+    <div class="container">
+	
+	<div id="success-message" class="success-message">DDNS settings were successully changed</div>
+	<div id="error-message" class="error-message">An error occurred, the DDNS settings wasn't changed</div>
+	
+        <h1>DDNS Settings</h1>
+        <div class="explain-text">
+            To use the VPN feature on your HootGuard Sentry, you can either use the HootGuard build-in DDNS service or easily set up your own DDNS through Dynu. HootGuard supports IPv4 and IPv6.
+        </div>
+
+	<br>
+
+	<div class="table-settings">
+	    <table>
+		<thead>
+		    <tr>
+			<th colspan="2">Active DDNS Configuration</th>
+		    </tr>
+		</thead>
+		<tbody>
+		    <tr>
+			<td class="status-highlight">
+			    {{ status_message }}
+			</td>
+		    </tr>
+		</tbody>
+	    </table>
+	</div>	
+
+	<div class="frame">
+	    <div class="section">
+		Option 1: <strong>HootDNS</strong>
+		<br><br>
+{% if hootdns == 'yes' %}
+                HootGuard Sentry comes with a built-in, ready-to-use dynamic DNS setup that requires no configuration. By default, it uses IPv6 for DDNS, and we strongly recommend using IPv6. However, you can easily switch to IPv4 if needed by clicking the buttons below.
+		<div class="btn-group">
+			<table>
+				<tr><td>
+					<form id="ip-settings-form-ipv4" action="/ddns_activate_user_hootdns_ipv4" method="post">
+				                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+				                <button type="submit" class="btn-clear">Activate <br> IPv4</button>
+				        </form>
+				</td><td>
+		            		<form id="ip-settings-form-ipv6" action="/ddns_activate_user_hootdns_ipv6" method="post">
+				                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                				<button type="submit" class="btn-save">Activate <br> IPv6</button>
+				        </form>		    
+				</td></tr>
+			</table>
+		</div>
+		<div class="explain-text">
+			Please note that the update may take up to 15 minutes to take effect.
+		</div>
+{% else %}
+<!--
+                <div class="explain-text" style="text-align:left">
+			You don't have access to this feature. To enable it, please purchase the HootGuard Sentry software from <a href="https://hootguard.com" target="_blank">hootguard.com</a> or configure your Dynamic DNS using a free Dynu account at dynu.com (see Option 2 below).
+                </div>
+-->
+			<div class="explain-text" style="text-align: left; margin-left: -15px;">
+			    	Support HootGuard <span style="color: red;"><i class="fa-regular fa-heart"></i></span>
+			</div>
+                    	<div style="margin-top: 8px; text-align: left;">
+                        	HootDNS is the built-in Dynamic DNS service that works seamlessly with your HootGuard Sentry — right out of the box.
+	                        No account creation, no hassle. Just one payment - no subscriptions, no hidden fees.
+        	                <strong>Easy. Secure. Fast.</strong>
+
+	                        <div style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
+        	                    <a href="https://buy.stripe.com/3cI3cv6YwgvW1Wmadx0gw02" target="_blank" title="One-time payment. No account needed." class="hootdns-get-button">
+<!--        	                    <a href="https://buy.stripe.com/test_00wdR22AVfVf6O1eosbZe03" target="_blank" title="One-time payment. No account needed." class="hootdns-get-button">-->
+                	                <i class="fas fa-shield-alt" style="margin-right: 6px; color: black;"></i><span style="color: black;">Get HootDNS</span>
+                        	    </a>
+	                        </div>
+        	        </div>
+	                <div class="explain-text" style="text-align: left;">
+        	            Enter the provided subdomain and API key below, click Save & Next and that's it*.
+                	    <form id="ddns-setup-form-hootdns" action="/ddns_activate_user_hootdns_ipv6" method="post">
+                        	<div class="form-group" style="margin-top: 20px;">
+                                	<label for="hootdns_subdomain">Subdomain:</label>
+	                                <input type="text" id="hootdns_subdomain" name="hootdns_subdomain" placeholder="e.g. qq44928rom" required>
+
+        	                        <label for="hootdns_api_key">API Key:</label>
+                	                <input type="text" id="hootdns_api_key" name="hootdns_api_key" placeholder="e.g. qprlzl3xu47oxh8pzmpfqt9y4khzviwx3r32ko2siexqdgc2" required>
+
+	                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        	        <div style="text-align: right; margin-top: 10px;">
+                                        	<button type="submit" id="submit-button" class="btn-save">Save & Activate (IPv6)</button>
+                                	</div>
+				</div>
+        	                * For now, we’ll use the <strong>IPv6 settings</strong> for Dynamic DNS, as this is the configuration we strongly recommend.
+	                        If you prefer IPv4, you can switch it later with a single click here in the DDNS settings. <br>
+                        	* Please note that the setting may take up to 15 minutes to take effect.
+                  	    </form>
+			</div>
+{% endif %}
+
+	</div>
+	</div> 	
+<!--
+	<div class="frame">
+	    <div class="section">
+		Option 1: <strong>Configure your Own Cloudflare DDNS</strong>
+		<br><br>
+		Cloudflare is an easy to setup an free to use DNS service. Please note that you will need your own domain to fully utilize Cloudflare's services. The Cloudflare DNS service supports both IPv4 and IPv6 DDNS in one convenient setup.
+		<div class="btn-group">
+		    <a href="ddns_settings_user_cloudflare">
+			<button type="submit" class="btn-save">Enter Cloudflare Configuration</button>
+		    </a>
+		</div>
+	    </div>
+	</div>  
+	
+	<div class="frame">
+	    <div class="section">
+		Option 2: <strong>Configure your Own IPv64 DDNS</strong>
+		<br><br>
+		For IPv64 you don't need your own Domain, you can simply create an account and in this account a IPv64 (sub)-domain. IPv64 supports IPv4 and IPv6. The IPv64 service is free to use.
+		<div class="btn-group">
+		    <a href="ddns_settings_user_ipv64">
+			<button type="submit" class="btn-save">Enter IPv64 Configuration</button>
+		    </a>
+		</div>
+	    </div>
+	</div> 
+-->
+	<div class="frame">
+	    <div class="section">
+		Option 2: <strong>Configure your Own Dynu DDNS</strong>
+		<br><br>
+		For Dynu simply create an account and in this account a Dynu domain. Dynu supports IPv4 and IPv6. The Dynu service is free to use.
+		<div class="btn-group">
+		    <a href="ddns_settings_user_dynu">
+			<button type="submit" class="btn-save">Enter Dynu Configuration</button>
+		    </a>
+		</div>
+	    </div>
+	</div> 
+	
+	<div class="frame">
+	    <div class="section">
+		<strong>Deactivate Dynamic DNS</strong>
+		<br><br>
+		If you no longer need your VPN, you can simply deactivate your dynamic DNS by clicking on the button below. This action will disable all DDNS configurations. Note that after deactivation, the VPN function of your HootGuard Sentry will no longer work.
+		<div class="btn-group">
+		    <a href="ddns_deactivate">
+			<button type="submit" class="btn-clear">Deactivate Dynamic DNS</button>
+		    </a>
+		</div>
+	    </div>
+	</div> 
+        
+    </div>
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+    <script>
+	// Check if new_time_set is true and display success message for 3 seconds
+	const newDdnsSet = {{ new_ddns_set | tojson }};
+	if (newDdnsSet) {
+	    const successMessage = document.getElementById('success-message');
+	    successMessage.style.visibility = 'visible';
+	    setTimeout(function () {
+		successMessage.style.visibility = 'hidden';
+	    }, 3000);
+	}
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>VPN Confirm Client Deletion</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">
+    <style>
+	.fa-spinner {
+	    display: none;
+	    animation: spin 1s linear infinite;
+	}
+	@keyframes spin {
+	    from { transform: rotate(0deg); }
+	    to { transform: rotate(360deg); }
+	}        
+    </style>
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+    <div id="navigation-placeholder"></div>
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+    
+    <div class="container">
+        <h1>Confirm Deletion of VPN Client</h1>
+        <div class="explain-text">
+            Are you sure you want to proceed with deleting the VPN client listed below?
+        </div>
+    
+        <br><br>
+        <div class="table-settings">
+	    <table>
+		<tbody>
+                    <tr>
+                        <td id="client-name-cell"> <strong id="client-name">{{ client_name }}</strong> </td>
+                    </tr>
+		</tbody>
+	    </table>
+	</div>		
+        <br><br>
+                
+        <div class="btn-group">
+	    <button class="btn-save">
+		<a href="/vpn_settings"> <i class="fa-solid fa-circle-left"></i> &nbsp;Cancel Deletion</a>
+	    </button>
+	    
+	    <form action="/vpn_delete_client" method="post" style="display: inline;">
+		<input type="hidden" name="username" value="{{ client_name }}">
+		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+		<button type="submit" id="confirm-button" class="btn-clear" title="Confirm Deletion">
+		    <i class="fas fa-trash-alt"></i><i class="fa-solid fa-spinner"></i>&nbsp;Confirm Deletion
+		</button>
+	    </form>
+        </div>
+    </div>
+
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+    <script>
+	        document.addEventListener('DOMContentLoaded', function() {
+            // Function to insert a break after a certain number of characters
+            function insertBreaks(text, interval) {
+                let result = '';
+                for (let i = 0; i < text.length; i++) {
+                    if (i > 0 && i % interval === 0) {
+                        result += '<br>';
+                    }
+                    result += text[i];
+                }
+                return result;
+            }
+
+            // Apply the function to the client name
+            const clientName = "{{ client_name }}";
+            const clientNameElement = document.getElementById('client-name');
+            const formattedClientName = insertBreaks(clientName, 30); // Insert break every 30 characters
+            clientNameElement.innerHTML = formattedClientName;
+        });
+	
+        document.querySelector('form').addEventListener('submit', function() {
+	    document.querySelector('.fa-trash-alt').style.display = 'none'; // Hide plus icon
+	    document.getElementById('confirm-button').disabled = true; // Disable the button
+	    document.querySelector('.fa-spinner').style.display = 'inline-block'; // Display spinner icon
+        });
+    </script>
+    
+</body>
+</html>
+
+
+

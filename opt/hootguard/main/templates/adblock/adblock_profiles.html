@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>HootGuard Adblock Profiles</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">
+    <style>
+
+    input[type="radio"] {
+        display: none;
+    }
+
+    input[type="radio"] + label::before {
+        content: "";
+        display: inline-block;
+        width: 20px; /* Adjust as needed */
+        height: 20px; /* Adjust as needed */
+        border: 2px solid grey; /* Border color */
+        border-radius: 50%; /* Makes it round */
+        margin-right: 10px; /* Adjust spacing */
+    }
+
+    input[type="radio"]:checked + label::before {
+        background-color: yellow;
+        box-shadow: 0 0 10px yellow; /* Yellow shadow for selected radio button */
+    }
+    
+    .text-subheading { 
+        font-size: 1.5em;
+    }
+    
+    input[type="checkbox"] {
+        display: none;
+    }
+
+    input[type="checkbox"] + label::before {
+        content: "";
+        display: inline-block;
+        width: 20px; /* Adjust as needed */
+        height: 20px; /* Adjust as needed */
+        border: 2px solid grey; /* Border color */
+        margin-right: 10px; /* Adjust spacing */
+        /* Square, remove for other shapes */
+        border-radius: 4px; /* Slightly rounded corners for square, adjust as needed */
+    }
+
+    input[type="checkbox"]:checked + label::before {
+        background-color: white; /* Color when checked */
+        box-shadow: 0 0 10px white; /* Yellow shadow for selected checkbox */
+    }    
+    
+    hr {
+        border: none;         /* Removes the default border */
+        height: 1px;          /* Sets the thickness of the line */
+        background-color: grey; /* Sets the color of the line */
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .hr-right {
+        margin-left: 50%;
+    }
+    
+    .hr-left {
+        margin-right: 50%;
+    }
+    
+    .btn-save {
+        width: 180px;
+    }
+    
+    .fa-spinner {
+        display: none;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+
+    </style>
+</head>
+<body>
+    <div id="navigation-placeholder"></div>
+
+    <div class="container">
+        
+      	<div id="success-message" class="success-message">Profiles successfully updated</div>
+
+        
+        <h1>Ad-Block Profiles</h1>
+        <p class="explain-text">Select your desired ad-blocking profile below. Each profile adjusts the intensity of content filtering, affecting how ads and trackers are blocked on your network. Choose a lighter setting for fewer interruptions during browsing, or a stronger setting for maximum privacy and security.</p>
+        <br><br>
+        
+        <form id="adblock-profile-form" action="/adblock_profiles_change" method="post">
+                <input type="radio" id="normal" name="adblock_profile" value="normal" {{ 'checked' if status['normal'] else '' }}>
+                <label for="normal">
+                    <span class="text-subheading">Normal Filter</span> <br>
+                     This profile is perfect for daily browsing, blocking common ads and trackers while maintaining site functionality. Yet, occasional tweaks might be needed as it could block too much or too little.
+                </label>
+            
+            <hr class="hr-left">
+            
+                <input type="radio" id="enhanced" name="adblock_profile" value="enhanced" {{ 'checked' if status['enhanced'] else '' }}>
+                <label for="enhanced">
+                    <span class="text-subheading">Enhanced Protection</span> <br>
+                     This profile adds extra protection by blocking more pages and ad trackers, but users may need to customize it to fit their specific needs.
+                </label>
+                
+            <hr class="hr-left">
+            
+                <input type="radio" id="max" name="adblock_profile" value="max" {{ 'checked' if status['max'] else '' }}>
+                <label for="max">      
+                    <span class="text-subheading">Max Guard</span> <br>
+                     This profile offers thorough protection against ads, trackers, and intrusive elements for a secure and tidy browsing experience, though it might restrict browsing more heavily. Some sites may not load correctly, requiring manual whitelisting for smoother internet usage.
+                </label>
+            
+            
+            
+            <br><br><br>
+            <hr class="hr-right">
+            <br>
+            
+            
+            
+            <h1 style="text-align: left;">Additional blocking profiles</h1>
+                
+            <p class="heading-text" style="text-align: left;"> 
+                You can activate the profiles listed below in addition to the three main profiles. Each of the following profiles is aimed at a specific area. To activate a profile, simply check the box next to the profile. We try to keep the lists as up-to-date as possible.
+            </p>
+            
+            <hr class="hr-left">
+                
+            <input type="checkbox" id="adult" name="adult" {{ 'checked' if status['adult'] else '' }}>
+            <label for="adult">      
+                <span class="text-subheading">Adult Content</span> <br>
+                 Blocks the main websites that contain sexually explicit material. Users will have restricted access to the most recognized and commonly visited adult websites, promoting a safer online environment, particularly suitable for children and in public settings.
+            </label>
+            
+            <hr class="hr-left">
+            
+            <input type="checkbox" id="gambling" name="gambling" {{ 'checked' if status['gambling'] else '' }}>
+            <label for="gambling">      
+                <span class="text-subheading">Online Gambling</span> <br>
+                 Blocks the main websites associated with online gambling and betting. This filter is designed to help users avoid gambling websites, reducing exposure to online betting and potentially harmful gambling content. It is particularly beneficial for users who wish to prevent gambling habits or for settings where children or vulnerable populations access the internet.
+            </label>
+            
+            <hr class="hr-left">
+            
+            <input type="checkbox" id="social" name="social" {{ 'checked' if status['social'] else '' }}>
+            <label for="social">      
+                <span class="text-subheading">Social Media Content</span> <br>
+                Blocks access to major social media platforms, creating a focused and distraction-free online environment. It helps reduce exposure to social media content that can be overwhelming or disruptive, making it particularly beneficial for productivity and mental well-being. This tool is especially useful for parents looking to safeguard their children from the constant engagement demands of social networks.
+            </label>
+
+	    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <br><br>
+            
+			<div class="btn-group">
+				<button type="button" class="btn-clear" id="discard-button">Discard Changes</button>
+				<button type="submit" class="btn-save" id="save-button">Save Changes<i class="fa-solid fa-spinner"></i></button>
+			</div>
+            
+        </form>
+	<br><br>
+	<p class="explain-text"><strong>Note:</strong> To fine-tune Adblocker filters, use the <a href="adblock_manage_whitelist">whitelist</a> to allow specific websites or the <a href="adblock_manage_blacklist">blacklist</a> to block them. This provides greater control over browsing and maintains security across connected devices.</p>
+    </div>
+
+    <div id="footer-placeholder"></div>
+    <script src="/hootguard/components/loadComponents.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if adblock_profile_update_successful is true and display success message for 3 seconds
+			const adblockProfileUpdateSuccessful = {{ adblock_profile_update_successful | tojson }};
+			if (adblockProfileUpdateSuccessful) {
+			    const successMessage = document.getElementById('success-message');
+			    successMessage.style.visibility = 'visible';
+			    setTimeout(function () {
+				successMessage.style.visibility = 'hidden';
+			    }, 3000);
+			}
+		});
+        
+        // Event listener for form submission visual feedback        
+        document.querySelector('form').addEventListener('submit', function() {
+            const saveButton = document.getElementById('save-button');
+            const discardButton = document.getElementById('discard-button');
+            const spinner = saveButton.querySelector('.fa-spinner');
+            // Show spinner and hide Login text
+            spinner.style.display = 'inline-block';
+            saveButton.childNodes[0].nodeValue = ' ';
+            saveButton.disabled = true; // Disable the button
+            discardButton.disabled = true; // Disable the button
+        });
+        
+        // Add event listener to the "Discard Changes" button to reload the page
+        document.getElementById('discard-button').addEventListener('click', function() {
+            window.location.href = '/adblock_profiles';  // Reload the page without the success message!
+        });
+    
+    </script>
+
+</body>
+</html>

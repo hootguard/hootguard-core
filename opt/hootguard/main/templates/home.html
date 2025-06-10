@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>HootGuard Overview</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">
+    <style>
+	.status-inactive {
+	    color: red;
+	}
+
+        .frame-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-content: space-around;
+            width: 100%;
+            max-width: 960px;
+        }
+
+        .frame {
+            flex: 0 0 48%; 
+            position: relative;
+            overflow: hidden;
+            margin: 1%;
+            border: 2px solid #333333;
+            padding: 30px;
+            border-radius: 10px;
+            box-sizing: border-box; /* Includes padding and border in the width */
+        }
+
+        .frame > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .frame-total::before, .frame-blocked::before, .frame-percentage::before, .frame-adlist::before {
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%) scale(10);
+            color: rgba(255, 255, 255, 0.1);
+        }
+
+        .frame-system::before {
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 10%;
+            top: 50%;
+            transform: translate(-50%, -50%) scale(15);
+            color: rgba(255, 255, 255, 0.1);
+        }
+
+        .frame-total::before {
+            content: "\f7a2";
+        }
+
+        .frame-blocked::before {
+            content: "\f05e";
+        }
+
+        .frame-percentage::before {
+            content: "\25";
+        }
+
+        .frame-adlist::before {
+            content: "\f1c0";
+        }
+        
+        .frame-system::before {
+            content: "\f085";
+        }
+
+        .status-highlight-big {
+            font-size: 1.5em;
+            font-weight: 700;
+        }
+        hr {
+            border: none;
+            height: 1px;
+            background-color: #333;
+        }
+        
+        .button {
+            color: white;
+            padding: 10px 20px;
+            border: 0px solid white;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .button:hover {
+            background-color: #222222;
+        } 
+                
+        table {
+            margin: 20px auto; /* Center the table */
+            margin-bottom: -50px;
+        }
+
+        td {
+            padding: 5px; /* Add some padding around the table cells */
+        }
+        
+        @media (max-width: 768px) {
+            .frame {
+                flex: 1 0 100%; /* Each frame takes full width on smaller screens */
+                margin: 10px 0;
+            }
+
+            .status-highlight-big {
+                font-size: 1.2em; /* Smaller font size for smaller screens */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .frame-container {
+                padding: 0 10px; /* Padding on the sides for very small screens */
+            }
+
+            .frame {
+                padding: 20px; /* Less padding to save space */
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div id="navigation-placeholder"></div>
+
+<!--
+    <table align="center">
+        <tr>
+            <td><a href="/adblock_manage_blacklist" class="button">Blacklisting</a></td>
+            <td><a href="/adblock_manage_whitelist" class="button">Whitelisting</a></td>
+        </tr>
+    </table>
+-->    
+
+    <div class="container">
+        <h1>Overview</h1>
+        <p class="explain-text">Get real-time status updates on your system's key components.</p>
+
+        <div class="frame-container">
+            
+            <!-- QUERIES TOTAL -->
+            <span class="frame frame-total">
+                <div id="total-queries-today"></div>
+                    <div class="heading-text">
+                        Total requests 
+                    <div class="status-highlight status-highlight-big">
+                        <span id="total">
+                            {{ data.dns_queries_today }}
+                        </span>
+                    </div>
+                </div>
+            </span>
+            
+            <!-- QUERIES BLOCKED -->
+            <span class="frame frame-blocked">
+                <div id="queries-blocked"></div>
+                <div class="heading-text">
+                    Blocked Requests
+                    <div class="status-highlight status-highlight-big">
+                        <span id="blocked">
+                            {{ data.ads_blocked_today }}
+                        </span>
+                    </div>
+                </div>
+            </span>
+            
+            <!-- PERCENTAGE BLOCKED -->
+            <span class="frame frame-percentage">
+                <div id="percentage-blocked"></div>
+                <div class="heading-text">
+                    Block Rate
+                    <div class="status-highlight status-highlight-big">
+                        <span id="percentage">
+                            {{ data.ads_percentage_today }}
+                        </span>
+                    </div>
+                </div>
+            </span>
+            
+            <!-- ADLIST DOMAINS -->
+            <span class="frame frame-adlist">
+                <div id="adlist-domains"></div>
+                <div class="heading-text">
+                    Blocked Sites List
+                    <div class="status-highlight status-highlight-big">
+                        <span id="adlist">
+                            {{ data.domains_being_blocked }}
+                        </span>
+                    </div>
+                </div>
+            </span>            
+        </div>
+        
+        <div class="frame frame-system">
+            <div id="internet-status"></div>
+            <div class="heading-text">Internet Connection: <span class="status-highlight"><span id="internet-connection-status">Checking...</span></span></div>
+            
+            <hr>
+            
+            <div id="adblocker-status"></div>
+            <div class="heading-text">Adblocker Status: <span class="status-highlight"><span id="adblocker-running-status">Checking...</span></span></div>
+            
+            <hr>
+            
+            <div id="vpn-status"></div>
+            <div class="heading-text">VPN Status: <span class="status-highlight"><span id="vpn-running-status">Checking...</span></span></div>
+            
+            <hr>
+            
+            <div id="ddns-status"></div>
+            <div class="heading-text">DDNS Connection: <span class="status-highlight"><span id="ddns-configuration-status">Checking...</span></span></div>
+        </div>
+
+
+        {% if update_available %}
+B	<!-- Update Button -->
+        <div id="update-notification" style="margin-top: 40px;">
+            <a href="/system_update">
+                <button type="button" class="btn-clear">Update Available! Click to Install</button>
+            </a>
+        </div>
+        {% endif %}
+
+
+    </div>
+
+    <div id="footer-placeholder"></div>
+
+<script src="/hootguard/components/loadComponents.js"></script>
+<script>
+    window.onload = function() {
+        checkInternetStatus();
+        checkAdblockerStatus();
+        checkVpnStatus();
+        checkDdnsStatus();
+    };
+    
+    // --- CHECK INTERNET STATUS ---
+    function checkInternetStatus() {
+        fetch('/status/internet')
+        .then(response => response.json())
+        .then(data => {
+            const statusElement = document.getElementById('internet-connection-status');
+            const indicator = document.getElementById('internet-status');
+            if(data.status === 'OK') {
+                statusElement.innerText = 'Ok';
+                statusElement.classList.remove('status-inactive');
+            } else {
+                statusElement.innerText = 'No internet connection';
+                statusElement.classList.add('status-inactive');
+            }
+        })
+        .catch(() => {
+            document.getElementById('internet-connection-status').innerText = 'Status Check Failed';
+        });
+    }
+    
+    // --- CHECK ADBLOCKER STATUS ---
+    function checkAdblockerStatus() {
+        fetch('/status/adblocker')
+        .then(response => response.json())
+        .then(data => {
+            const statusElement = document.getElementById('adblocker-running-status');
+            const indicator = document.getElementById('adblocker-status');
+            if(data.status === 'Active') {
+                statusElement.innerText = 'Active';
+		statusElement.classList.remove('status-inactive'); // Remove red if active
+            } else {
+                statusElement.innerText = 'Inactive';
+		statusElement.classList.add('status-inactive'); // Add red color
+            }
+        })
+        .catch(() => {
+            document.getElementById('adblocker-running-status').innerText = 'Status Check Failed';
+        });
+    }
+    
+    // --- CHECK VPN STATUS ---
+    function checkVpnStatus() {
+        fetch('/status/vpn')
+        .then(response => response.json())
+        .then(data => {
+            const statusElement = document.getElementById('vpn-running-status');
+            statusElement.classList.remove('status-inactive'); // Reset first - No red color
+            const indicator = document.getElementById('vpn-status');
+            if (data.status === 'Active') {
+                statusElement.innerText = 'Active (wg0 & wg1)';
+            } else if (data.status === 'Active (wg0)') {
+                statusElement.innerText = 'Active (wg0)';
+            } else if (data.status === 'Active (wg1)') {
+                statusElement.innerText = 'Active (wg1)';
+            } else if (data.status === 'Inactive') {
+                statusElement.innerText = 'Inactive';
+                statusElement.classList.add('status-inactive'); // Add red color
+            } else {
+                statusElement.innerText = 'Unknown status';
+            }
+        })
+        .catch(() => {
+            document.getElementById('vpn-running-status').innerText = 'Status Check Failed';
+        });
+    }
+    
+    // --- CHECK DDNS STATUS ---
+    function checkDdnsStatus() {
+        fetch('/status/ddns')
+        .then(response => response.json())
+        .then(data => {
+            const statusElement = document.getElementById('ddns-configuration-status');
+            const indicator = document.getElementById('ddns-status');
+            if(data.status === 'Active') {
+                statusElement.innerText = 'Active';
+                statusElement.classList.remove('status-inactive');
+            } else {
+                statusElement.innerText = 'Inactive';
+                statusElement.classList.add('status-inactive');
+            }
+        })
+        .catch(() => {
+            document.getElementById('ddns-configuration-status').innerText = 'Status Check Failed';
+        });
+    }
+    </script>
+
+
+</body>
+</html>

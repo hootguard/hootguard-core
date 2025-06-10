@@ -1,0 +1,17 @@
+[Unit]
+Description=Deactivate/snooze pi hole for a predefined time
+After=network-online.target  # Ensures the network is fully up before starting
+Wants=network-online.target  # Indicates that this service wants the network-online target to be reached
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/hootguard/display
+ExecStart=/usr/bin/python3 /opt/hootguard/display/snooze_main.py
+Restart=always  # Ensures the service always restarts on failure
+RestartSec=5    # Waits 5 seconds before restarting the service
+StandardOutput=inherit  # Directs standard output to the systemd journal
+StandardError=inherit   # Directs standard error to the systemd journal
+User=hootguard
+
+[Install]
+WantedBy=multi-user.target

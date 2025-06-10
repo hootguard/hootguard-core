@@ -1,0 +1,88 @@
+# Script Name: reset_gpio_button.py
+# Version: 0.7
+# Author: HootGuard
+# Date: 12. November 2024
+
+# Description:
+# This script is triggered when the reset button connected to GPIO 5 is pressed. It resets the static IP address
+# back to DHCP, replaces the current web and Pi-hole passwords with the default passwords, and reboots the system.
+# The script uses GPIO event detection to monitor the button press and execute the reset actions.
+
+import RPi.GPIO as GPIO
+import subprocess
+import shutil
+import os
+import time
+import logging
+from cryptography.fernet import Fernet
+from global_config_loader import load_config
+
+# Configure logging
+logging.basicConfig(filename='/var/log/hootguard_system.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(filename)s - %(message)s')
+
+# Load the global config
+config = load_config()
+
+# Access configuration values
+NW_DHCPCD_PATH = config['dhcp']['dhcpcd_path']
+NW_DHCPCD_BACKUP_PATH = config['dhcp']['dhcpcd_backup_path']
+NW_DHCPCD_ORIGINAL_PATH = config['dhcp']['dhcpcd_original_path']
+PW_HASHED_PASSWORD_PATH = config['passwords']['hashed_password_path']
+PW_HASHED_DEFAULT_PASSWORD_PATH = config['passwords']['hashed_default_password_path']
+PW_ENCRYPTED_PASSWORD_PATH = config['passwords']['encrypted_password_path']
+PW_SECRET_KEY_PATH = config['passwords']['secret_key_path']
+
+
+# Pin Setup
+RESET_BUTTON_PIN = 5 # GPIO 5
+GPIO.setmode(GPIO.BCM) # BCM = GPIO numbering (BOARD = pin numbering)
+GPIO.setup(RESET_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+def reset_ip_address():
+    try:
+        subprocess.run(['cp', NW_DHCPCD_ORIGINAL_PATH, NW_DHCPCD_PATH], check=True)
+        logging.info("SUCCESS - IP address reset to DHCP successfully.")
+    except subprocess.CalledProcessError as e:
+        logging.info(f"ERROR - Failed to reset IP address: {e}")
+
+def reset_passwords():
+    try:
+        # Reset web password
+        shutil.copy(PW_HASHED_DEFAULT_PASSWORD_PATH, PW_HASHED_PASSWORD_PATH)
+        logging.info("INFO - Web password reset successfully.")
+
+        # Reset Pi-hole password
+        with open(PW_ENCRYPTED_PASSWORD_PATH, 'rb') as file:
+            encrypted_password = file.read()
+        with open(PW_SECRET_KEY_PATH, 'rb') as file:
+            secret = file.read()
+        fernet = Fernet(secret)
+        decrypted_password = fernet.decrypt(encrypted_password).decode()
+
+        subprocess.run(['pihole', '-a', '-p', decrypted_password], check=True)
+        logging.info("SUCCESS - Pi-hole password reset successfully.")
+    except Exception as e:
+        logging.info(f"ERROR - Failed to reset passwords: {e}")
+
+def on_reset_button_pressed(channel):
+    """Handle reset button press event to reset IP and passwords, then reboot the system."""
+    print("Reset button was pressed!")
+    logging.info("INFO - Reset button pressed, resetting IP address and passwords...")
+    reset_ip_address()
+    reset_passwords()
+    try:
+        #subprocess.run(['sudo', '/bin/systemctl', 'reboot'], check=True)
+        subprocess.run(['/bin/systemctl', 'reboot'], check=True)
+        logging.info("INFO - System reboot initiated successfully.")
+    except subprocess.CalledProcessError as e:
+        logging.info(f"ERROR - Failed to reboot the system: {e}")
+
+# Add event detection
+GPIO.add_event_detect(RESET_BUTTON_PIN, GPIO.FALLING, callback=on_reset_button_pressed, bouncetime=2000)
+
+try:
+    while True:
+        time.sleep(10)  # Sleep for 10 seconds
+finally:
+    GPIO.cleanup()
+    logging.info("INFO - GPIO cleanup completed.")

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>Step2: Initial Setup - Dynamic DNS</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">
+    <style>
+        .hrsep {
+                border: none;
+                height: 1px;
+                background-color: #333333;
+                margin-top: 30px;
+                margin-bottom: 30px;
+                width: 100%;
+        }
+        .section-text {
+                text-align: left;
+                margin-top: 15px;
+                margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+<!--    <div id="navigation-placeholder"></div> -->
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+
+    <div class="container">
+
+        <h1>
+                <span style="font-size: 1.4em;">Initial Setup</span>
+                <br>
+                <span style="font-size: 1.1m;">Steps 2: Dynamic DNS</span>
+        </h1>
+
+        <p>Follow the steps below to easily set up your HootGuard Sentry.</p>
+
+	<div class="frame">
+                <div class="explain-text section-text">
+			To use HootGuard Sentry's VPN features, you need a Dynamic DNS (DDNS).
+			If you bought your Sentry from <a href="https://hootguard.com" target="_blank">hootguard.com</a>, you can activate the built-in HootDNS with one click below.
+			If you downloaded the software, you can use a free service like Dynu (dynu.com).
+			This step is optional and can be configured later.
+                </div>
+		
+		<hr class="hrsep">
+{% if hootdns == 'yes' %}
+		<div class="explain-text section-text">
+			Choose the IP version you want to use below. We <strong>highly recommend IPv6</strong>, as it helps bypass technologies like CGNAT, which many internet service providers use today.
+			Don’t worry, you can always change this setting later if you feel you made the wrong choice.
+			<form id="ip-settings-form" action="/initial_setup_handler" method="post">
+			    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+			    <input type="hidden" name="step" value="ddns">
+			    <input type="hidden" id="ipversion" name="ipversion" value="">
+	
+			     <div style="display: flex; justify-content: flex-end; gap: 20px; flex-wrap: wrap; width: 100%; margin-top: 20px;">
+			        <button type="submit" class="btn-clear" onclick="setIPVersion('ipv4')">Activate<br>IPv4</button>
+			        <button type="submit" class="btn-clear" onclick="setIPVersion('ipv6')">Activate<br>IPv6</button>
+			        <button type="submit" class="btn-clear" onclick="setIPVersion('skip')">Skip<br>for now</button>
+			    </div>
+			</form>
+		</div>
+{% else %}
+		<div class="explain-text section-text">
+			You don't have access to this feature. Please configure your Dynamic DNS later in the settings using a free Dynu account (dynu.com).
+			<form id="ip-settings-form" action="/initial_setup_handler" method="post">
+			    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+			    <input type="hidden" name="step" value="ddns">
+			    <input type="hidden" id="ipversion" name="ipversion" value="">
+
+			    <div style="display: flex; justify-content: flex-end; gap: 20px; flex-wrap: wrap; width: 100%; margin-top: 20px;">
+			        <button type="submit" class="btn-save" onclick="setIPVersion('skip')">Next Step</button>
+			    </div>
+			</form>
+		</div>
+{% endif %}
+	</div>
+
+
+    </div>
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+
+    <script>
+	function setIPVersion(version) {
+	    document.getElementById('ipversion').value = version;
+	}
+    </script>
+
+</body>
+</html>

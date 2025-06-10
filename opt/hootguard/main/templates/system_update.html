@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>System Update</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">	
+<style>
+
+        .fa-spinner {
+            display: none;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .instructions {
+            text-align: left;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        .btn-disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+    }
+</style>
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+    <div id="navigation-placeholder"></div>
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+    
+    <div class="container">
+        <h1>
+		<span style="font-size: 2em;">System Update</span> 
+	</h1>
+	
+	<div style="magrin-top: 30px; margin-bottom: 30px;">
+		To update the system, click the button below. Please note that the update will require two restarts and may take up to 5 minutes to complete.
+	</div>
+
+	<button id="start-update-button" class="btn-save" onclick="startUpdate()">
+		<i id="spinner" class="fa-solid fa-spinner"></i> 
+		Start Update
+	</button>
+
+	<div class="instructions">
+            <p>After clicking the button, the following tasks will be performed:</p>
+            <ul>
+		<li>Backup the current system</li>
+                <li>Download the update</li>
+                <li>Install the update</li>
+                <li>Restart the system</li>
+            </ul>
+        </div>
+
+        <div> After completing the update you can reconnect to your HootGuard Sentry using its local IP address. </div>
+
+    </div>
+
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+
+    <script>
+        function startUpdate() {
+            // Redirect to the same page with the create_backup argument
+            window.location.href = "/system_update?status=start_update";
+        }
+
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        function handleUpdateStatus() {
+            const status = getQueryParam('status');
+            const spinner = document.getElementById('spinner');
+            const button = document.getElementById('start-update-button');
+
+            if (status === 'start_update') {
+                // Show spinner
+                spinner.style.display = 'inline-block';
+
+                // Disable button
+                button.classList.add('btn-disabled');
+                button.disabled = true;
+            }
+        }
+
+        // Execute the function on page load
+        handleUpdateStatus();
+    </script>
+</body>
+</html>

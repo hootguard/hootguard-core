@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>Snooze Settings</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">	
+    <style>
+        .fa-spinner {
+            display: none;
+            animation: spin 1s linear infinite;
+        }
+        
+	@keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+	
+	.button-size {
+	     width: 200px;
+	}
+	.error-message {
+           display: none;
+           background-color: rgba(255, 255, 255, .2);
+           color: red;
+           padding: 10px;
+           border-radius: 5px;
+           margin-top: -45px;
+        }
+    </style>
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+    <div id="navigation-placeholder"></div>
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+    
+    <div class="container">
+
+	<div id="success-message" class="success-message">SSH status successfully updated</div>
+	<div id="error-message" class="error-message">Error: Failed to update SSH status</div>
+
+        <h1>Remote Access Management</h1>
+        <div class="explain-text">
+	    	SSH (Secure Shell) allows you to securely access and control your HootGuard device remotely. For security reasons, SSH is disabled by default. However, you can easily activate or deactivate SSH from this page when needed.
+		<p>For the best security practices, we recommend only activating SSH when necessary and deactivating it afterward.</p>
+        </div>
+
+	<br>
+
+        <br>
+
+        <div class="table-settings">
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="2">Remote Access Status (SSH)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="status-highlight">
+                            {{ ssh_status_message }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+	<br>
+
+        <!-- Buttons to enable or disable SSH -->
+        <form method="POST" id="ssh-form">
+	    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% if ssh_status_message == 'Active' %}
+                <button class="btn-save" type="submit" name="disable" id="submit-button">
+                    <i class="fa-solid fa-spinner"></i> Deactivate SSH
+                </button>
+            {% else %}
+                <button class="btn-save" type="submit" name="enable" id="submit-button">
+                    <i class="fa-solid fa-spinner"></i> Activate SSH
+                </button>
+            {% endif %}
+        </form>
+		
+	<div class="explain-text">
+		To change your SSH password, click <a href="{{ url_for('ssh.ssh_set_password') }}">here</a>.
+	</div>
+
+    </div>
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+    <script>
+        // Check if remote access success is true and display success message for 3 seconds
+    	const newRemAccSet = {{ new_rem_acc_set | tojson }};
+        if (newRemAccSet === true) {
+        	const successMessage = document.getElementById('success-message');
+                successMessage.style.visibility = 'visible';
+                setTimeout(function () {
+                	successMessage.style.visibility = 'hidden';
+                }, 3000);
+        } else if (newRemAccSet === false) {
+                const errorMessage = document.getElementById('error-message');
+                errorMessage.style.display = 'inline';
+                setTimeout(function () {
+                    errorMessage.style.display = 'none';
+                }, 3000);
+       }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const submitButton = document.getElementById('submit-button');
+    submitButton.addEventListener('click', function () {
+        const spinner = this.querySelector('.fa-spinner');
+        spinner.style.display = 'inline-block'; // Show the spinner
+        this.childNodes[0].nodeValue = ''; // Clear the button text
+    });
+});
+    </script>
+</body>
+</html>

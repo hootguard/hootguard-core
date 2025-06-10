@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>Step2: Initial Setup - Dynamic DNS</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">
+    <style>
+        .hrsep {
+                border: none;
+                height: 1px;
+                background-color: #333333;
+                margin-top: 30px;
+                margin-bottom: 30px;
+                width: 100%;
+        }
+        .section-text {
+                text-align: left;
+                margin-top: 15px;
+                margin-bottom: 15px;
+        }
+	.hootdns-get-button {
+            background-color: yellow;
+	    color: black;
+            padding: 6px 14px;
+            font-size: 0.9em;
+            border: none;
+            border-radius: 20px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+	}
+    </style>
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+<!--    <div id="navigation-placeholder"></div> -->
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+
+    <div class="container">
+
+        <h1>
+                <span style="font-size: 1.4em;">Initial Setup</span>
+                <br>
+                <span style="font-size: 1.1m;">Steps 2: Dynamic DNS</span>
+        </h1>
+
+        <p>Follow the steps below to easily set up your HootGuard Sentry.</p>
+
+	<div class="frame">
+                <div class="explain-text section-text">
+			To use HootGuard Sentry's VPN features, you’ll need a Dynamic DNS (DDNS).
+			You can purchase <strong> HootDNS </strong> credentials (domain + key) below to activate the easy, built-in Dynamic DNS service — no account creation required and no recurring fees.
+			Alternatively, you can skip this step for now and use a Dynu account later in the DDNS Settings.
+                </div>
+		
+		<hr class="hrsep">
+{% if hootdns == 'yes' %}
+		<div class="explain-text section-text">
+			Choose the IP version you want to use below. We <strong>highly recommend IPv6</strong>, as it helps bypass technologies like CGNAT, which many internet service providers use today.
+			Don’t worry, you can always change this setting later if you feel you made the wrong choice.
+			<form id="ip-settings-form" action="/initial_setup_handler" method="post">
+			    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+			    <input type="hidden" name="step" value="ddns">
+			    <input type="hidden" id="ipversion" name="ipversion" value="">
+	
+			     <div style="display: flex; justify-content: flex-end; gap: 20px; flex-wrap: wrap; width: 100%; margin-top: 20px;">
+			        <button type="submit" class="btn-clear" onclick="setIPVersion('ipv4')">Activate<br>IPv4</button>
+			        <button type="submit" class="btn-clear" onclick="setIPVersion('ipv6')">Activate<br>IPv6</button>
+			        <button type="submit" class="btn-clear" onclick="setIPVersion('skip')">Skip<br>for now</button>
+			    </div>
+			</form>
+		</div>
+{% else %}
+
+                <details id="details-hootdns" open>
+		<summary>
+		    HootDNS <span class="explain-text" style="margin-left: -15px;">Support HootGuard <span style="color: red;"><i class="fa-regular fa-heart"></i></span></span>
+		    <div class="explain-text section-text" style="margin-top: 8px;">
+		        HootDNS is the built-in Dynamic DNS service that works seamlessly with your HootGuard Sentry — right out of the box.
+		        No account creation, no hassle. Just one payment - no subscriptions, no hidden fees.
+		        <strong>Easy. Secure. Fast.</strong>
+
+		        <div style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
+		            <a href="https://buy.stripe.com/3cI3cv6YwgvW1Wmadx0gw02" target="_blank" title="One-time payment. No account needed." class="hootdns-get-button">
+<!--		            <a href="https://buy.stripe.com/test_00wdR22AVfVf6O1eosbZe03" target="_blank" title="One-time payment. No account needed." class="hootdns-get-button">-->
+		                <i class="fas fa-shield-alt" style="margin-right: 6px; color: black;"></i><span style="color: black;">Get HootDNS</span>
+		            </a>
+		        </div>
+		    </div>
+		</summary>
+		<div class="explain-text section-text">
+	            Enter the provided subdomain and API key below, click Save & Next and that's it*.
+                    <form id="initial-setup-form-network" action="/initial_setup_handler" method="post">
+                        <div class="form-group" style="margin-top: 20px;">
+                                <label for="hootdns_subdomain">Subdomain:</label>
+                                <input type="text" id="hootdns_subdomain" name="hootdns_subdomain" placeholder="e.g. qq44928rom" required>
+
+                                <label for="hootdns_api_key">API Key:</label>
+                                <input type="text" id="hootdns_api_key" name="hootdns_api_key" placeholder="e.g. qprlzl3xu47oxh8pzmpfqt9y4khzviwx3r32ko2siexqdgc2" required>
+
+	                        <input type="hidden" id="ipversion" name="ipversion" value="ipv6">
+
+				<input type="hidden" name="step" value="ddns">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <!-- For main.py so that the route initial_setup_handler can assign the data suaber -->
+                                <input type="hidden" name="step" value="network">
+                                <div style="text-align: right; margin-top: 10px;">
+                                        <button type="submit" id="submit-button" class="btn-save">Save & Next</button>
+                                </div>
+                        </div>
+			* For now, we’ll use the <strong>IPv6 settings</strong> for Dynamic DNS, as this is the configuration we strongly recommend.
+			If you prefer IPv4, you can switch it later with a single click in the DDNS settings. <br>
+			* Please note that the setting may take up to 15 minutes to take effect.
+                  </form>
+                 </details>
+
+		<hr class="hrsep">
+
+		<details id="details-skip">
+                <summary>
+                    Skip this step
+                    <div class="explain-text section-text"> As an alternative, HootGuard Sentry also supports free Dynu accounts. If you choose this option, you’ll need to create an account and configure it at dynu.com and enter your credentials under the DDNS Settings in your HootGuard system. </div>
+                </summary>
+			<form id="ip-settings-form" action="/initial_setup_handler" method="post">
+			    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+			    <input type="hidden" name="step" value="ddns">
+			    <input type="hidden" id="ipversion" name="ipversion" value="skip">
+
+			    <div style="display: flex; justify-content: flex-end; gap: 20px; flex-wrap: wrap; width: 100%; margin-top: 20px;">
+			        <button type="submit" class="btn-save" onclick="setIPVersion('skip')">Skip</button>
+			    </div>
+			</form>
+		</details>
+		</div>
+{% endif %}
+	</div>
+
+
+    </div>
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+
+    <script>
+	function setIPVersion(version) {
+	    document.getElementById('ipversion').value = version;
+	}
+
+        // Get all the details elements
+        const detailsElements = document.querySelectorAll('details');
+
+        detailsElements.forEach((detail) => {
+            detail.addEventListener('toggle', function() {
+                // Close all other details except the one that was just toggled open
+                if (this.open) {
+                    detailsElements.forEach((otherDetail) => {
+                        if (otherDetail !== this) {
+                            otherDetail.removeAttribute('open');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

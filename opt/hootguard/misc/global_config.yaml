@@ -1,0 +1,97 @@
+adblock:
+  blocklist_urls:
+    adult: https://raw.githubusercontent.com/hootguard/blocking-lists/main/adult-blocklist.txt
+    enhanced: https://raw.githubusercontent.com/hootguard/blocking-lists/main/enhanced-blocklist.txt
+    gambling: https://raw.githubusercontent.com/hootguard/blocking-lists/main/gambling-blocklist.txt
+    max: https://raw.githubusercontent.com/hootguard/blocking-lists/main/max-blocklist.txt
+    normal: https://raw.githubusercontent.com/hootguard/blocking-lists/main/normal-blocklist.txt
+    social: https://raw.githubusercontent.com/hootguard/blocking-lists/main/social-blocklist.txt
+  cache_path: /opt/hootguard/adblock/adblock_cache
+  conversion_profiles:
+  - normal
+  - enhanced
+  - gambling
+  - max
+  db_path: /etc/pihole/gravity.db
+  snooze_end_time_path: /opt/hootguard/adblock/adblock-snooze-end-time.txt
+  snooze_status_path: /opt/hootguard/adblock/adblock-status.txt
+  status_path: /opt/hootguard/adblock/adblock-active-profile.txt
+ddns:
+  consent_file: /opt/hootguard/ddns/ddns-consent.txt
+  hootguard_cloudflare_command: /bin/bash /opt/hootguard/ddns/hootguard-cloudflare.sh
+  status_file: /opt/hootguard/ddns/ddns-status.txt
+  user_dynu_command: /bin/bash /opt/hootguard/ddns/user-dynu.sh
+  user_dynu_script: /opt/hootguard/ddns/user-dynu.sh
+  user_dynu_v6_command: /bin/bash /opt/hootguard/ddns/user-dynuv6.sh
+  user_dynu_v6_script: /opt/hootguard/ddns/user-dynuv6.sh
+  user_hootdns_api_key: null
+  user_hootdns_command: /bin/bash /opt/hootguard/ddns/user-hootdns.sh
+  user_hootdns_domain: hootdns.com
+  user_hootdns_script: /opt/hootguard/ddns/user-hootdns.sh
+  user_hootdns_subdomain: null
+  user_hootdns_v6_command: /bin/bash /opt/hootguard/ddns/user-hootdnsv6.sh
+  user_hootdns_v6_script: /opt/hootguard/ddns/user-hootdnsv6.sh
+dhcp:
+  dhcpcd_backup_path: /etc/dhcpcd.conf.bkp
+  dhcpcd_original_path: /etc/dhcpcd.conf.original
+  dhcpcd_path: /etc/dhcpcd.conf
+logging:
+  global_logging_file_path: /var/log/hootguard_system.log
+  level: INFO
+misc:
+  env_file_path: /opt/hootguard/.env
+  global_config_file: /opt/hootguard/misc/global_config.yaml
+  init_flag: /opt/hootguard/misc/init_flag
+  iptables_factory_reset_file: /opt/hootguard/misc/iptables_factory_reset_rules.sh
+  secure_run_file: /usr/local/bin/hootguard
+  snooze_status_file: /opt/hootguard/snooze/snooze-status.txt
+  snooze_time_file: /opt/hootguard/snooze/snooze-time.txt
+  version_file: /opt/hootguard/misc/version.txt
+network:
+  interface_1: eth0
+  interface_1_v4_ip_address: 192.168.0.250/24
+  interface_1_v4_network: 192.168.0.0/24
+  interface_1_v6_ip_address: 2a02:abcd:1337:c001:d00d:face:b00c:1234/64
+  primary_dns: 192.168.0.250
+  secondary_dns: 1.1.1.1
+ntp:
+  servers:
+  - 129.6.15.30
+  - 129.6.15.29
+  - 216.239.35.0
+  - 216.239.35.1
+  - 51.255.39.10
+  - 138.236.128.36
+passwords:
+  encrypted_password_path: /opt/hootguard/password/encrypted_password.txt
+  hashed_default_password_path: /opt/hootguard/password/hashed_password.txt.default
+  hashed_password_path: /opt/hootguard/password/hashed_password.txt
+  secret_key_path: /opt/hootguard/password/secret.key
+pihole:
+  setup_vars_path: /etc/pihole/setupVars.conf
+ssh:
+  first_time_flag_path: /opt/hootguard/misc/ssh_first_time_flag
+update:
+  local_repo_path: /tmp/hootguard_update
+  repo_url: https://github.com/hootguard/hootguard-core.git
+  repo_version_url: https://raw.githubusercontent.com/hootguard/hootguard-core/main/opt/hootguard/misc/version.txt
+  update_available_flag: /opt/hootguard/misc/update_available
+  update_pending_flag: /opt/hootguard/misc/update_pending
+vpn:
+  client_configs_path: /opt/hootguard/vpn/configs
+  client_db_path: /opt/hootguard/vpn/vpn_clients.db
+  client_keys_path: /etc/wireguard/client_keys
+  client_qrcode_path: /opt/hootguard/main/static
+  endpoint: dummy.yourdns.com
+  iptables_settings_file: /opt/hootguard/vpn/vpn_iptables_rules.sh
+  wireguard_interface_1: wg0
+  wireguard_interface_1_v4_ip_addresse: 10.0.0.0/24
+  wireguard_interface_1_v6_ip_addresse: fd00:::/64
+  wireguard_interface_2: wg1
+  wireguard_interface_2_v4_ip_addresse: 10.0.1.0/24
+  wireguard_interface_2_v6_ip_addresse: fd01::/64
+  wireguard_main_path: /etc/wireguard
+  wireguard_wg0_privatekey_path: /etc/wireguard/privatekey_wg0
+  wireguard_wg0_publickey_path: /etc/wireguard/publickey_wg0
+  wireguard_wg1_privatekey_path: /etc/wireguard/privatekey_wg1
+  wireguard_wg1_publickey_path: /etc/wireguard/publickey_wg1

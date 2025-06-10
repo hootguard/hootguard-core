@@ -1,0 +1,11 @@
+[Unit]
+Description=Display recognizes when the info button was pushed and based on the times the button was pushed, the display shows the info.
+
+[Service]
+WorkingDirectory=/opt/hootguard/display
+ExecStart=/usr/bin/python3 /opt/hootguard/display/info_main.py
+Restart=on-failure
+User=hootguard
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>VPN Settings</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">
+    <style>
+        input[type="text"] {
+            margin-right: 10px; /* Space between input and button */
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .btn-save {
+            padding: 10px 12px;
+            height: 45px;
+            width: 45px;
+        }
+        .btn-clear {
+            padding: 10px 12px;
+            height: 45px;
+            width: 45px;
+        }
+        .button-icon {
+            display: inline-block;
+            font-size: 14px;
+        }
+        .client {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0px;
+        }
+        .client-info {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+        .client-username {
+            font-size: 16px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .client-details {
+            font-size: 12px;
+            color: grey;
+        }
+        .client-buttons {
+            display: flex;
+            align-items: center;
+        }
+        .client-buttons button {
+            margin-left: 10px;
+        }
+        .avatar-icon {
+            font-size: 50px;
+            color: white;
+            padding: 10px;
+        }
+        hr {
+            background-color: #333333;
+            border: none;
+            height: 1px;
+            margin-bottom: 20px;
+        }
+	.vl {
+	  border-left: 1px solid #333333;
+	  height: 50px;
+	  margin-left: 10px;
+	  margin-right: 10px;
+	}
+	.avatar-time {
+	    size: 8px;
+	    position: relative;
+	    right: 4px;
+	    top: 12px;
+	    color: yellow;
+	    margin-left: -16px;
+	}
+        .fa-spinner {
+            display: none;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+.error-message {
+    display: block;
+    background-color: rgba(255, 255, 255, .2);
+    color: red;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: -45px;
+}
+    </style>
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+    <div id="navigation-placeholder"></div>
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+
+    <div class="container">
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flashes">
+        {% for category, message in messages %}
+            {% if category == 'error' %}
+                <div class="error-message">{{ message }}</div>
+            {% endif %}
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+        <h1>VPN User Management</h1>
+        <div class="explain-text">
+	    Add a VPN user or temporary client by entering a username and clicking "Add" (+). A QR code for setup in the WireGuard app will be generated. View or delete users by clicking the QR or "Delete" button next to their name.
+        </div>
+
+        <div class="frame">
+            <form id="addVpnClientForm" action="/vpn_add_client" class="form-group">
+                <input type="text" name="client_name" placeholder="VPN Client Name (Max. 50 characters)" required maxlength="50">
+                    <button type="submit" id="add-button" class="btn-save" title="Add VPN Client" onclick="document.getElementById('form_submitted_by').value=client_name;">
+                        <i class="fas fa-plus button-icon"></i>
+                        <i class="fa-solid fa-spinner"></i>
+                    </button>
+		    <span class="vl"></span>
+                    <!-- Form for displaying the QR code of the client -->
+                    <button type="submit" formaction="/vpn_add_temp_client" id="add-temp-button" class="btn-clear" title="Add Temporary Client" onclick="document.getElementById('form_submitted_by').value=client_name;">
+                        <i class="fa-solid fa-clock button-icon"></i>
+                        <i class="fa-solid fa-spinner"></i>
+                    </button>
+	    </form>
+            <hr>
+
+            <h2>Active Clients</h2>
+            {% for client in clients.active_clients %}
+            <div class="client">
+                <div class="client-info">
+                    <span><i class="fa-solid fa-circle-user avatar-icon"></i></span>
+		    {% if client.name in clients.temp_clients_names %}
+                        <span class="avatar-time"><i class="fa-solid fa-clock"></i></span>
+                    {% endif %}
+                    <div>
+                        <span class="client-username">{{ client.name }}</span>
+                        <div class="client-details">
+                            <span>Received: <strong>{{ client.bytes_received }}</strong></span>
+                            |
+                            <span>Sent: <strong>{{ client.bytes_sent }}</strong></span>
+                            <br>
+                            <span>Last Seen: <strong>{{ client.last_seen }}</strong></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="client-buttons">
+                    <!-- Form for displaying the QR code of the client -->
+                    <form action="/vpn_show_qrcode" method="post" style="display: inline;">
+                        <input type="hidden" name="username" value="{{ client.name }}">
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn-clear" title="Show QR code of {{ client.name }}">
+                            <i class="fas fa-qrcode"></i>
+                        </button>
+                    </form>
+                    <!-- Form for deactivating the client -->
+                    <form action="/vpn_disable_client" method="post" style="display: inline;">
+                        <input type="hidden" name="username" value="{{ client.name }}">
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn-clear" title="Deactivate {{ client.name }}">
+                            <i class="fa-solid fa-user-xmark"></i>
+                        </button>
+                    </form>
+                    <!-- Form for deleting the client -->
+                    <form action="/vpn_confirm_client_deletion" method="post" style="display: inline;">
+                        <input type="hidden" name="username" value="{{ client.name }}">
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn-clear" title="Delete {{ client.name }}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+
+            <hr style="margin-top: 50px; margin-bottom: 50px;">
+
+            <h2>Disabled Clients</h2>
+            {% for client in clients.disabled_clients %}
+            <div class="client">
+                <div class="client-info">
+                    <span><i class="fa-solid fa-circle-user avatar-icon"></i></span>
+		    {% if client.name in clients.temp_clients_names %}
+                        <span class="avatar-time"><i class="fa-solid fa-clock"></i></span>
+                    {% endif %}
+                    <div>
+                        <span class="client-username">{{ client.name }}</span>
+                        <div class="client-details">
+                            <span>Received: <strong>N/A</strong></span>
+                            |
+                            <span>Sent: <strong>N/A</strong></span>
+                            <br>
+			    <em>Usage information not available for disabled clients</em>
+
+<!--
+                            <span>Received: <strong>{{ client.bytes_received }}</strong></span>
+                            |
+                            <span>Sent: <strong>{{ client.bytes_sent }}</strong></span>
+                            <br>
+                            <span>Last Seen: {{ client.last_seen }}</span>
+-->
+                        </div>
+                    </div>
+                </div>
+                <div class="client-buttons">
+                    <!-- Form for displaying the QR code of the client -->
+                    <form action="/vpn_show_qrcode" method="post" style="display: inline;">
+                        <input type="hidden" name="username" value="{{ client.name }}">
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn-clear" title="Show QR code of {{ client.name}}">
+                            <i class="fas fa-qrcode"></i>
+                        </button>
+                    </form>
+                    <!-- Form for enabling the client -->
+                    <form action="/vpn_enable_client" method="post" style="display: inline;">
+                        <input type="hidden" name="username" value="{{ client.name }}">
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn-clear" title="Activate {{ client.name }}">
+                            <i class="fas fa-user-check"></i>
+                        </button>
+                    </form>
+                    <!-- Form for deleting the client -->
+                    <form action="/vpn_confirm_client_deletion" method="post" style="display: inline;">
+                        <input type="hidden" name="username" value="{{ client.name }}">
+			<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn-clear" title="Delete {{ client.name }}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+		    </form>
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+
+        <div class="note">
+            <strong>Please note:</strong> For the VPN to function correctly, it is essential to have the proper DNS settings configured on your HootGuard Sentry. If this is your first time using our VPN, we strongly advise you to verify that your DNS settings are both activated and correctly set up. Incorrect DNS settings can prevent the VPN from working as intended.
+        </div>
+
+    </div>
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+    <script>
+    document.getElementById('addVpnClientForm').onsubmit = function(event) {
+        var clientName = document.forms["addVpnClientForm"]["client_name"].value;
+        // Regular expression to validate client name
+        var re = /^[a-zA-Z][a-zA-Z0-9_-]*$/;
+        if (!re.test(clientName)) {
+            alert("Invalid client name. Must start with a letter and only contain letters, numbers, hyphens, and underscores.");
+            event.preventDefault(); // Prevent form from submitting
+            return false;
+        }
+
+        document.querySelector('.fa-plus').style.display = 'none'; // Hide plus icon
+        //document.querySelector('.fa-clock').style.display = 'none'; // Hide clock icon
+        document.getElementById('add-button').disabled = true; // Disable the add-button
+        document.getElementById('add-temp-button').disabled = true; // Disable the add-temp-button
+        document.querySelector('.fa-spinner').style.display = 'inline-block'; // Display spinner icon
+
+        return true; // Proceed with form submission
+    };
+    </script>
+
+</body>
+</html>

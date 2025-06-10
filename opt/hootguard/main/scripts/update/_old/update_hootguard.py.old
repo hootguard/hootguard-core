@@ -1,0 +1,112 @@
+import os
+import subprocess
+import sys
+import logging
+
+# Add the project root directory to the module search path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../")))
+
+from main.scripts.global_config_loader import load_config
+
+# Load the global config
+config = load_config()
+
+# Configure logging
+logging.basicConfig(filename='/var/log/hootguard_system.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(filename)s - %(message)s')
+
+# Define the remote version file URL and local version file path
+REPO_URL = config['update']['update_flag']
+LOCAL_REPO_PATH = config['update']['local_repo_path']
+UPDATE_FLAG_FILE = config['update']['update_flag']
+CURRENT_PATHS = {
+    "etc": "/etc",
+    "opt_hootguard": "/opt/hootguard",
+    "var_www_html": "/var/www/html",
+    "usr_local_bin": "/usr/local/bin",
+    "boot": "/boot"
+}
+
+def run_command(command):
+    """Execute a shell command and handle errors."""
+    try:
+        subprocess.run(command, check=True, shell=True)
+        logging.info(f"Successfully executed: {command}")
+        return True
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Error executing {command}: {e}")
+        return False
+
+def update_repository():
+    """Clone or pull the latest changes from the repository."""
+    if os.path.exists(LOCAL_REPO_PATH):
+        logging.info("Pulling latest changes from repository...")
+        return run_command(f"git -C {LOCAL_REPO_PATH} pull")
+    else:
+        logging.info("Cloning repository for the first time...")
+        return run_command(f"git clone {REPO_URL} {LOCAL_REPO_PATH}")
+
+def copy_files():
+    """Synchronize updated files to their respective locations."""
+    for folder, dest in CURRENT_PATHS.items():
+        source_path = os.path.join(LOCAL_REPO_PATH, folder)
+        if os.path.exists(source_path):
+            logging.info(f"Updating {dest} from {source_path}...")
+            if not run_command(f"rsync -a {source_path}/ {dest}/"):
+                logging.error(f"Failed to copy files from {source_path} to {dest}")
+                return False
+    return True
+
+def restart_services():
+    """Restart services to apply updates."""
+    logging.info("Restarting Flask application...")
+    return run_command("sudo systemctl restart hg-main.service")
+
+def clean_update_flag():
+    """Remove the update flag file if it exists."""
+    if os.path.exists(UPDATE_FLAG_FILE):
+        try:
+            os.remove(UPDATE_FLAG_FILE)
+            logging.info(f"Removed update flag file: {UPDATE_FLAG_FILE}")
+        except Exception as e:
+            logging.error(f"Failed to remove update flag file: {e}")
+            return False
+    return True
+
+def validate_update():
+    """Optional: Validate the update by checking service status."""
+    logging.info("Validating update by checking service status...")
+    result = run_command("sudo systemctl is-active hg-main.service")
+    if result:
+        logging.info("Service is running successfully.")
+    else:
+        logging.error("Service validation failed.")
+    return result
+
+def main():
+    """Main update process."""
+    logging.info("Starting HootGuard update process...")
+    #print("Starting HootGuard update process...")
+
+    if not update_repository():
+        logging.error("Failed to update the repository.")
+        sys.exit(1)
+
+    if not copy_files():
+        logging.error("Failed to copy updated files.")
+        sys.exit(1)
+
+    if not restart_services():
+        logging.error("Failed to restart services.")
+        sys.exit(1)
+
+    if not clean_update_flag():
+        logging.warning("Failed to clean update flag. Update process will continue.")
+
+    if not validate_update():
+        logging.warning("Post-update validation failed. Check service manually.")
+
+    logging.info("HootGuard update completed successfully!")
+    #print("HootGuard update completed successfully!")
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>VPN Add Client</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+    <div id="navigation-placeholder"></div>
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+    
+    <div class="container">
+        <h1>VPN Client Added Successfully</h1>
+        <div class="explain-text">
+            Congratulations, you've successfully added your client! To ensure a secure and encrypted connection, please scan the QR code below. This will create a secure tunnel for all your communications.
+        </div>
+    
+        <div style="margin-top: 20px;"></div>
+        <div class="table-settings">
+			<table>
+				<thead>
+					<tr>
+						<td id="client-name-cell">Client Name: <strong id="client-name">{{ client_name }}</strong></td>
+					</tr>
+				</thead>
+				<tbody>
+                    <tr>
+                        <td>
+                            <img src="{{ url_for('static', filename=qr_code) }}" alt="QR Code" height="250">
+                            <!-- Download QR Code Button -->
+                            <button class="btn-clear" id="download-btn">
+                                <a id="download-link" href="{{ url_for('static', filename=qr_code) }}">
+                                    <i class="fa-solid fa-download"></i> &nbsp;Download QR Code
+                                </a>
+                            </button>
+                            <div style="margin-bottom: -20px;"></div>
+                            <!-- Download Config File Button -->
+                            <form action="/vpn_download_client_config" method="POST" style="display:inline;">
+                                <input type="hidden" name="client_name" value="{{ client_name }}">
+				<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn-clear">
+                                    <i class="fa-solid fa-download"></i> &nbsp;Download Config File
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+				</tbody>
+			</table>
+		</div>		
+        <br><br>
+                
+        <button class="btn-clear">
+            <a href="/vpn_settings"> <i class="fa-solid fa-circle-left"></i> &nbsp;Back to VPN Settings</a>
+        </button>
+        
+    </div>
+
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const clientName = "{{ client_name }}";
+            const downloadLink = document.getElementById('download-link');
+            const qrCodeUrl = downloadLink.href;
+            downloadLink.setAttribute('download', `${clientName}-HootGuard-QRCode.png`);
+            
+            // Function to insert a break after a certain number of characters
+            function insertBreaks(text, interval) {
+                let result = '';
+                for (let i = 0; i < text.length; i++) {
+                    if (i > 0 && i % interval === 0) {
+                        result += '<br>';
+                    }
+                    result += text[i];
+                }
+                return result;
+            }
+
+            // Apply the function to the client name
+            const clientNameElement = document.getElementById('client-name');
+            const formattedClientName = insertBreaks(clientName, 30); // Insert break every 30 characters
+            clientNameElement.innerHTML = formattedClientName;
+        });
+    </script>
+    
+</body>
+</html>
+
+
+

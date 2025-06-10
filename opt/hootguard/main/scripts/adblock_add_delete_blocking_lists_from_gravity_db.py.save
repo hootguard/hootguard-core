@@ -1,0 +1,67 @@
+# Script Name: adblock_add_delete_blocking_lists_from_gravity_db.py
+# Version: 0.2
+# Author: HootGuard
+# Date: 3. December 2024
+
+# Description:
+# This script adds or removes blocking lists from the Pi-hole gravity database used by the HootGuard system.
+# It performs several key steps, including clearing existing entries from the `adlist` table in the Pi-hole
+# database, adding new blocking lists based on specified profiles, and updating gravity afterward. It uses
+# the global configuration for database paths and blocklist URLs.  
+
+import sqlite3
+from .adblock_update_gravity_db import update_gravity_db
+from .global_logger import logger
+from .global_config_loader import load_config
+from .adblock_blocking_lists_cache_handler import fetch_with_cache
+
+# Load the global config
+config = load_config()
+
+# Access configuration values
+ADBLOCK_DB_PATH = config['adblock']['db_path']
+ADBLOCK_BLOCKLIST_URLS = config['adblock']['blocklist_urls']
+ADBLOCK_CACHE_PATH = config['adblock']['cache_path']
+
+def adblock_add_blocking_list(profiles):
+    """Add cached blocking lists to the Pi-hole database and update gravity."""
+    success = True
+    logger.debug(f"INFO - Adding blocking lists for profiles: {profiles}")
+
+    try:
+        with sqlite3.connect(ADBLOCK_DB_PATH) as conn:
+            cur = conn.cursor()
+            # Clear all existing entries from adlist before adding new ones
+            logger.debug("INFO - Deleting all existing entries from adlist table.")
+            cur.execute("DELETE FROM adlist;")
+
+            for profile in profiles:
+                url = ADBLOCK_BLOCKLIST_URLS.get(profile)
+                if url:
+                    # Fetch the blocklist content and cache it
+                    blocklist_content = fetch_with_cache(profile, url)
+                    if blocklist_content is None:
+                        logger.debug(f"ERROR - Skipping profile '{profile}' due to fetch error.")
+                        continue
+                    
+                    # Construct the local cache file path
+                    cache_file = f"{ADBLOCK_CACHE_PATH}/{profile}.txt"
+
+                    # Insert the local cache file path into the adlist table
+                    cur.execute("INSERT OR IGNORE INTO adlist (address) VALUES (?);", (cache_file,))
+                else:
+                    logger.debug(f"ERROR - No URL defined for '{profile}'. Skipping.")
+                    continue
+
+            conn.commit()
+    except sqlite3.DatabaseError as e:
+        logger.debug(f"ERROR - Database error while updating blocking lists: {str(e)}")
+        success = False
+    except Exception as e:
+        logger.debug(f"ERROR - Unexpected error: {str(e)}")
+        success = False
+
+    if success:
+        success = update_gravity_db()
+
+    return success

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/hootguard/hg-favicon.ico" type="image/x-icon">
+    <title>Step4: Initial Setup - Summary & Reboot</title>
+    <link rel="stylesheet" href="hootguard/css/hg-styles.css">
+    <link rel="stylesheet" href="hootguard/css/hg-footer-nav.css">
+    <link rel="stylesheet" href="hootguard/css/hg-fonts.css">
+    <link rel="stylesheet" href="hootguard/css/all.css">
+    <style>
+            .fa-spinner {
+                display: none;
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+        }
+        .hrsep {
+                border: none;
+                height: 1px;
+                background-color: #333333;
+                margin-top: 30px;
+                margin-bottom: 30px;
+                width: 100%;
+        }
+        .section-text {
+                text-align: left;
+                margin-top: 15px;
+                margin-bottom: 15px;
+        }
+        .form-group {
+            margin-bottom: 1.0em;
+        }
+        .checkbox-style {
+                margin-top: -1.8em;
+        }
+        input[type="checkbox"] {
+                display: inline-block !important;
+        }
+        .btn-accept {
+            padding: 5px 14px;
+            margin: 15px 0;
+            background-color: #FFFF00;
+            color: #000000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .btn-accept:hover {
+            background-color: #FDD835;
+        }
+        .btn-accept:active {
+            background-color: #F9A825;
+        }
+    </style>
+</head>
+<body>
+<!-- NAVIGATION PLACEHOLDER - START -->
+<!--    <div id="navigation-placeholder"></div> -->
+<!-- NAVIGATION PLACEHOLDER - END -->
+
+<!-- MAIN CONTENT - START -->
+
+    <div class="container">
+
+        <h1>
+                <span style="font-size: 1.4em;">Initial Setup</span>
+                <br>
+                <span style="font-size: 1.1m;">Step 4: Summary and Reboot</span>
+        </h1>
+
+        <p></p>
+
+	<div class="frame">
+	                <div class="explain-text section-text">
+        	                <strong>Please review the settings below.</strong><br>
+				If everything looks correct, click the Confirm & Reboot button to apply the changes.
+				If you need to make changes, click the Start Over button to repeat the initial setup.
+                	</div>
+		<form id="initial-setup-form-summary" action="/initial_setup_run" method="post">
+	                <div class="form-group" style="margin-bottom: 20px;">
+
+				<hr class="hrsep">
+
+        	                <span style="margin-left: 15px;"><strong>Network settings:</strong></span> <br>
+				<span class="explain-text section-text" style="margin-left: 20px;">IP Address:</span> {{ ip_addr }} <br>
+				<input type="hidden" id="ip-address" name="ip_address" value="{{ ip_addr }}">
+				<span class="explain-text section-text" style="margin-left: 20px;">Subnet Mask:</span> {{ subnet }} <br>
+				<input type="hidden" id="subnet-mask" name="subnet_mask" value="{{ subnet }}">
+				<span class="explain-text section-text" style="margin-left: 20px;">Standard Gateway:</span>{{ gateway }}
+				<input type="hidden" id="standard-gateway" name="standard_gateway" value="{{ gateway }}">
+				<hr class="hrsep">
+
+        	                <span style="margin-left: 15px;"><strong>Dynamic DNS:</strong></span> <br>
+{% if ddns == 'skip' %}
+				<span class="explain-text section-text">Status:</span> Not configured (step skipped)
+				<input type="hidden" id="ddns-status" name="ddns_status" value="{{ ddns }}">
+{% else %}
+				<span class="explain-text section-text" style="margin-left: 20px;">Status:</span> {{ ddns }}
+{% endif %}
+
+{% if hootdns_subdomain %}
+    				<input type="hidden" id="ddns_hootdns_subdomain" name="ddns_hootdns_subdomain" value="{{ hootdns_subdomain }}">
+				<span class="explain-text section-text" style="margin-left: 20px;">Subdomain:</span> {{ hootdns_subdomain }} 
+{% endif %}				
+
+{% if hootdns_api_key %}
+    				<input type="hidden" id="ddns_hootdns_api_key" name="ddns_hootdns_api_key" value="{{ hootdns_api_key }}">
+				<span class="explain-text section-text" style="margin-left: 20px;">API Key:</span> {{ hootdns_api_key }}  <br>
+{% endif %}				
+				<hr class="hrsep">
+				
+				<span style="margin-left: 15px;"><strong>Password:</strong> <br>			
+				<span class="explain-text section-text" style="margin-left: 20px;">Password:</span> {{ '*' * password|length }}
+				<input type="hidden" id="new-password" name="new_password" value="{{ password }}">
+
+				<hr class="hrsep">
+
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <!-- For main.py so that the route initial_setup_handler can assign the data suaber -->
+                            <input type="hidden" name="step" value="password">
+                            <div style="text-align: right; margin-top: 10px;">
+				    <a href="/initial_setup_intro" class="btn-clear">Start Over</a>
+	                            <button type="submit" id="submit-button" class="btn-save">Confirm and Reboot</button>
+                            </div>
+
+                        <div class="explain-text" style="text-align: right;">
+                                <strong>Confirm and Reboot</strong><br>
+				After you click the Confirm and Reboot button, your settings will be applied and the system will automatically reboot.
+				This process typically takes less than two minutes. Once the reboot is complete, you can reconnect as usual via hootguard.local or directly using your IP address: {{ ip_addr }}.
+				Use your new password to log in.
+                        </div>
+	        </form>
+	</div>
+    </div>
+</div>
+
+<!-- FOOTER PLACEHOLDER - START -->
+    <div id="footer-placeholder"></div>
+<!-- FOOTER PLACEHOLDER - END -->
+
+
+    <script src="/hootguard/components/loadComponents.js"></script>
+<script src="/hootguard/components/loadComponents.js"></script>
+<script>
+    // Function to check if both passwords match
+    function validateAndConfirmPasswords() {
+        const newPassword = document.getElementById("new-password");
+        const confirmPassword = document.getElementById("confirm-password");
+
+        if (newPassword.value !== confirmPassword.value) {
+            confirmPassword.setCustomValidity("Passwords do not match.");
+            return false;
+        } else {
+            confirmPassword.setCustomValidity(""); // Clear previous message
+            return true;
+        }
+    }
+
+    // Attach validation to form submit
+    document.getElementById("initial-setup-form-password").addEventListener("submit", function (event) {
+        console.log("🔐 Submit triggered");
+        if (!validateAndConfirmPasswords()) {
+            console.log("❌ Passwords do not match");
+            event.preventDefault(); // Stop form from submitting
+        }
+    });
+
+    // Live feedback while typing
+    document.getElementById("new-password").addEventListener("input", validateAndConfirmPasswords);
+    document.getElementById("confirm-password").addEventListener("input", validateAndConfirmPasswords);
+
+    // Toggle password visibility
+    function togglePasswords() {
+        const newPassword = document.getElementById("new-password");
+        const confirmPassword = document.getElementById("confirm-password");
+        const isChecked = document.getElementById("show-passwords").checked;
+
+        newPassword.type = isChecked ? "text" : "password";
+        confirmPassword.type = isChecked ? "text" : "password";
+    }
+</script>
+
+</body>
+</html>
